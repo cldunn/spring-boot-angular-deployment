@@ -3,7 +3,7 @@ package com.devglan.userportal;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "USER_PROFILE")
 public class User {
 
     @Id

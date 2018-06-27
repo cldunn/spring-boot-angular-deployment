@@ -38,7 +38,13 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.6</version>
 		</dependency>
-
+		<dependency>
+		    <groupId>com.microsoft.sqlserver</groupId>
+    		<artifactId>sqljdbc4</artifactId>
+    		<version>4-1.5</version>
+    		<scope>runtime</scope>
+		</dependency>
+    
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -52,6 +58,13 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+        		<groupId>org.codehaus.mojo</groupId>
+        		<artifactId>exec-maven-plugin</artifactId>
+        		<configuration>
+             		<mainClass>com.devglan.userportal.UserPortalApplication</mainClass>
+        		</configuration>
+        	</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.2.0</version>
