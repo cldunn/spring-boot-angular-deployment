@@ -1,7 +1,10 @@
-package com.cldbiz.userportal;
+package com.cldbiz.userportal.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.service.UserService;
 
 import java.util.List;
 

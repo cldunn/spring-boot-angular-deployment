@@ -1,6 +1,8 @@
-package com.cldbiz.userportal;
+package com.cldbiz.userportal.service;
 
 import java.util.List;
+
+import com.cldbiz.userportal.domain.User;
 
 public interface UserService {
 

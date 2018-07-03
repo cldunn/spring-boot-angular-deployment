@@ -1,6 +1,8 @@
-package com.cldbiz.userportal;
+package com.cldbiz.userportal.repository;
 
 import org.springframework.data.repository.Repository;
+
+import com.cldbiz.userportal.domain.User;
 
 import java.util.List;
 

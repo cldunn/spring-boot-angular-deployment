@@ -1,4 +1,4 @@
-package com.cldbiz.userportal;
+package com.cldbiz.userportal.controller;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

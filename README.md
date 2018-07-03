@@ -10,7 +10,7 @@ Run the following in order:
 		2. run server with "mvn exec:java" from user-portal directory
 
 	Run client from windows command line
-		1. build & run client with "ng serve --proxy-config proxy.config.json" from portal-app directory
+		1. build & run client with "npm start" from portal-app directory
 
 	Run application from browser
 		1. http://4200
