@@ -1,4 +1,4 @@
-package com.devglan.userportal;
+package com.cldbiz.userportal;
 
 import org.springframework.data.repository.Repository;
 

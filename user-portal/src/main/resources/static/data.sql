@@ -1,1 +1,0 @@
-create table USER_PROFILE (id integer not null identity, email varchar(255), first_name varchar(255), last_name varchar(255), primary key (id))
