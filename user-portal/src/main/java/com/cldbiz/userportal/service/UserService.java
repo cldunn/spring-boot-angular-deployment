@@ -8,11 +8,11 @@ public interface UserService {
 
     User create(User user);
 
-    User delete(int id);
+    User delete(Long id);
 
     List<User> findAll();
 
-    User findById(int id);
+    User findById(Long id);
 
     User update(User user);
 }

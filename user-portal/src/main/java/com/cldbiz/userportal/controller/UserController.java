@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @GetMapping(path = {"/{id}"})
-    public User findOne(@PathVariable("id") int id){
+    public User findOne(@PathVariable("id") Long id){
         return userService.findById(id);
     }
 
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @DeleteMapping(path ={"/{id}"})
-    public User delete(@PathVariable("id") int id) {
+    public User delete(@PathVariable("id") Long id) {
         return userService.delete(id);
     }
 

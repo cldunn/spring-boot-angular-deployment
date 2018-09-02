@@ -1,18 +1,15 @@
 package com.cldbiz.userportal.repository;
 
-import org.springframework.data.repository.Repository;
-
 import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.repository.base.BaseRepository;
 
-import java.util.List;
+public interface UserRepository extends BaseRepository<User, Long>, UserRepositoryExt {
 
-public interface UserRepository extends Repository<User, Integer> {
+    User findOne(Long id);
 
-    void delete(User user);
-
-    List<User> findAll();
-
-    User findOne(int id);
-
+    User deleteById(Long id);
+    
     User save(User user);
+    
+    
 }

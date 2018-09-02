@@ -1,0 +1,12 @@
+package com.cldbiz.userportal.repository;
+
+import java.util.List;
+
+import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.dto.UserDto;
+
+public interface UserRepositoryExt {
+
+	List<User> findByDto(UserDto userDto);
+	
+}
