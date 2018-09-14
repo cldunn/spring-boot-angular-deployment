@@ -1,4 +1,4 @@
-package com.cldbiz.userportal.repository.base;
+package com.cldbiz.userportal.repository;
 
 import java.io.Serializable;
 
@@ -11,34 +11,34 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 
-public class BaseRepositoryFactoryBean<R extends JpaRepository<T, ID>, T, ID extends Serializable> extends JpaRepositoryFactoryBean<R, T, ID> {
+public class AbstractRepositoryFactoryBean<R extends JpaRepository<T, ID>, T, ID extends Serializable> extends JpaRepositoryFactoryBean<R, T, ID> {
 
-	public BaseRepositoryFactoryBean(Class<? extends R> repositoryInterface) {
+	public AbstractRepositoryFactoryBean(Class<? extends R> repositoryInterface) {
 		super(repositoryInterface);
 	}
 
 	@Override
     protected RepositoryFactorySupport createRepositoryFactory(EntityManager entityManager) {
-        return new BaseRepositoryFactory(entityManager);
+        return new AbstractRepositoryFactory(entityManager);
     }
 
-	private static class BaseRepositoryFactory<T, ID extends Serializable> extends JpaRepositoryFactory {
+	private static class AbstractRepositoryFactory<T, ID extends Serializable> extends JpaRepositoryFactory {
 
         private EntityManager entityManager;
 
-        public BaseRepositoryFactory(EntityManager entityManager) {
+        public AbstractRepositoryFactory(EntityManager entityManager) {
             super(entityManager);
             this.entityManager = entityManager;
         }
 
         @Override
         protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
-            return BaseRepositoryImpl.class;
+            return AbstractRepositoryImpl.class;
         }
 
         @SuppressWarnings({ "unused", "unchecked" })
 		protected Object getTargetRepository(RepositoryMetadata metadata) {
-            return new BaseRepositoryImpl<T, ID>((JpaEntityInformation<T,ID>) getEntityInformation(metadata.getDomainType()), entityManager);
+            return new AbstractRepositoryImpl<T, ID>((JpaEntityInformation<T,ID>) getEntityInformation(metadata.getDomainType()), entityManager);
         }
         
     }

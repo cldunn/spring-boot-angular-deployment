@@ -1,4 +1,4 @@
-package com.cldbiz.userportal.repository;
+package com.cldbiz.userportal.repository.user;
 
 import java.util.List;
 

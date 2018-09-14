@@ -1,4 +1,4 @@
-package com.cldbiz.userportal.repository.base;
+package com.cldbiz.userportal.repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,8 +13,8 @@ import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation;
 import org.springframework.data.jpa.repository.support.QueryDslJpaRepository;
 
-public class BaseRepositoryImpl<T, ID extends Serializable> extends QueryDslJpaRepository<T, ID> implements BaseRepository<T, ID> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseRepositoryImpl.class);
+public class AbstractRepositoryImpl<T, ID extends Serializable> extends QueryDslJpaRepository<T, ID> implements AbstractRepository<T, ID> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRepositoryImpl.class);
 
     protected final Class<T> tClass;
     
@@ -23,7 +23,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends QueryDslJpaR
 	
 	protected QueryDslJpaRepository<T, ID> repository;
 	
-    public BaseRepositoryImpl(JpaEntityInformation<T, ID> entityMetadata, EntityManager entityManager) {
+    public AbstractRepositoryImpl(JpaEntityInformation<T, ID> entityMetadata, EntityManager entityManager) {
         super(entityMetadata, entityManager);
     	this.tClass = entityMetadata.getJavaType();
     }

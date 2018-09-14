@@ -18,17 +18,16 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.cldbiz.userportal.dto.UserDto;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "USER_PROFILE")
-public @Data class User  {
+@EqualsAndHashCode(callSuper=true)
+public @Data class User extends AbstractDomain {
 
-    @Id
-    @Column
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
     @Column
     private String firstName;
     

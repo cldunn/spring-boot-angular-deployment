@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+	<springProperty scope="context" name="logFile" source="log.file" defaultValue="${logging.app.root}/spring-boot-angular-deployment.log"/>
+	<springProperty scope="context" name="rootLogLevel" source="root.log.level" defaultValue="ERROR"/>
+	<springProperty scope="context" name="appLogLevel" source="app.log.level" defaultValue="DEBUG"/>
+	<springProperty scope="context" name="logFileSize" source="log.file.size" defaultValue="1MB"/>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<Pattern>%-30(%d{yyyy-MM-dd HH:mm:ss} %-5level) --- [%thread] %logger{35} : %msg%n</Pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>%-30(%d{yyyy-MM-dd HH:mm:ss} %-5level) --- [%thread] %logger{35} : %msg%n</Pattern>
+		</encoder>
+		
+		<file>${logFile}</file>
+		
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${logFile}.%i</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>5</maxIndex>
+		</rollingPolicy>
+		
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>${logFileSize}</maxFileSize>
+		</triggeringPolicy>
+		
+		<!-- filter goes here -->
+	</appender>
+	
+	<root level="${rootLogLevel}">
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="FILE"/>
+	</root>
+
+	<logger name="com.cldbiz" level="${appLogLevel}">
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="FILE"/>
+	</logger>
+</configuration>

@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cldbiz.userportal.domain.User;
 import com.cldbiz.userportal.dto.UserDto;
-import com.cldbiz.userportal.repository.UserRepository;
+import com.cldbiz.userportal.repository.user.UserRepository;
 
 @Service
 @Transactional
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     	userDto.setVarLong(9223372036854775807L);
     	userDto.setVarBigInteger(new BigInteger("2147483647"));
     	
-    	userDto.setVarFloat(22.22F);
+    	// userDto.setVarFloat(22.22F);
     	userDto.setVarDouble(9999999999999999.99);
     	userDto.setVarBigDecimal(new BigDecimal("9999999999999999.9999"));
     	

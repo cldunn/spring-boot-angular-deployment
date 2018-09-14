@@ -22,11 +22,11 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.core.types.dsl.TimePath;
 
-public class QdslBooleanBuilder<E, D> {
+public class DynBooleanBuilder<E, D> {
 
 	BooleanBuilder builder;
 	
-	public QdslBooleanBuilder(BooleanBuilder builder) {
+	public DynBooleanBuilder(BooleanBuilder builder) {
 		this.builder = builder;
 	}
 
@@ -61,25 +61,6 @@ public class QdslBooleanBuilder<E, D> {
 			}
 		}
 		
-		private Method getMethod(T entPath, String name, Class<?>... params) throws NoSuchMethodException {
-			Method method = null;
-			for (Class<?> c = entPath.getClass(); c != null; c = c.getSuperclass()) {
-				try {
-					// method = c.getDeclaredMethod(name, params[0]);
-					method = c.getMethod(name, params[0]);
-					break;
-				}
-				catch (NoSuchMethodException nsfe) {}
-		    }
-
-			if (method != null) {
-				return method;
-			}
-			else {
-				throw new NoSuchMethodException();
-			}
-		}
-
 		@SuppressWarnings("unchecked")
 		public void addPredicate(E entity, Field entFld, D dto) {
 			try {
@@ -93,17 +74,12 @@ public class QdslBooleanBuilder<E, D> {
 					Object value = dtoFld.get(dto);
 					
 					if (value != null) {
-						// Method method = getMethod(entPath, this.op, dtoFld.getType());
-						// Method method = StringPath.class.getMethod(this.op, Object.class);
 						Method method = entPath.getClass().getMethod(this.op, this.types);
-						Predicate result = (Predicate) method.invoke(entPath, value);
-						
-						QdslBooleanBuilder.this.builder.and((Predicate) method.invoke(entPath, value));
+						DynBooleanBuilder.this.builder.and((Predicate) method.invoke(entPath, value));
 					}
 				}
 			}
 			catch(NoSuchMethodException | NoSuchFieldException | IllegalAccessException | IllegalArgumentException | InvocationTargetException nsfe) {
-			// catch(NoSuchFieldException | IllegalAccessException | IllegalArgumentException nsfe) {
 				nsfe.printStackTrace();
 			} 
 		}
@@ -126,10 +102,10 @@ public class QdslBooleanBuilder<E, D> {
 		for(Field entFld: entFields) {
 			entFld.setAccessible(true);
 			
-			String entFldName = entFld.getName();
+			String name = entFld.getName();
 			Predicate entFldPred = predicateLst.stream().filter(p -> {
 				Object pathName = ((Path) ((Operation) p).getArg(0)).getMetadata().getElement();
-				return entFldName.equals(pathName.toString());
+				return name.equals(pathName.toString());
 			}).findFirst().orElse(null);
 			
 			if (entFldPred != null) {
@@ -161,55 +137,4 @@ public class QdslBooleanBuilder<E, D> {
 		return builder;
 	}
 	
-	/*
-	private void asStringPath(E entity, Field entFld, D dto) {
-		String name = entFld.getName();
-		try {
-			Field dtoFld = dto.getClass().getDeclaredField(name);
-			if(dtoFld.getType().equals(String.class)){
-				dtoFld.setAccessible(true);
-				String strValue = (String) dtoFld.get(dto);
-				StringPath entStrPath = (StringPath) entFld.get(entity);
-				if (strValue != null) {
-					this.builder.and(entStrPath.equalsIgnoreCase(strValue));
-				}
-			}
-		}
-		catch(NoSuchFieldException | IllegalAccessException nsfe) {}
-	}
-	
-	private void asNumberPath(E entity, Field entFld, D dto) {
-		try {
-			String name = entFld.getName();
-			NumberPath entNbrPath = (NumberPath) entFld.get(entity);
-			
-			Field dtoFld = dto.getClass().getDeclaredField(name);
-			if(dtoFld.getType().equals(entNbrPath.getType())){
-				dtoFld.setAccessible(true);
-				Object value = dtoFld.get(dto);
-				if (value != null) {
-					this.builder.and(entNbrPath.eq(value));
-				}
-			}
-		}
-		catch(NoSuchFieldException | IllegalAccessException nsfe) {}
-	}
-
-	private void asComparablePath(E entity, Field entFld, D dto) {
-		try {
-			String name = entFld.getName();
-			ComparablePath entCmpPath = (ComparablePath) entFld.get(entity);
-			
-			Field dtoFld = dto.getClass().getDeclaredField(name);
-			if(dtoFld.getType().equals(entCmpPath.getType())){
-				dtoFld.setAccessible(true);
-				Object value = dtoFld.get(dto);
-				if (value != null) {
-					this.builder.and(entCmpPath.eq(value));
-				}
-			}
-		}
-		catch(NoSuchFieldException | IllegalAccessException nsfe) {}
-	}
-	*/
 }

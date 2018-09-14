@@ -1,4 +1,4 @@
-package com.cldbiz.userportal.repository.base;
+package com.cldbiz.userportal.repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

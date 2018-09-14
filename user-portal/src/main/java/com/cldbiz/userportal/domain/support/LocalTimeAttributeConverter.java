@@ -1,4 +1,4 @@
-package com.cldbiz.userportal.data.support;
+package com.cldbiz.userportal.domain.support;
 
 import java.sql.Time;
 import java.time.LocalTime;

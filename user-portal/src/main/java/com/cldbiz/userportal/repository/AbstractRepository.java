@@ -1,4 +1,4 @@
-package com.cldbiz.userportal.repository.base;
+package com.cldbiz.userportal.repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface BaseRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QueryDslPredicateExecutor<T> {
+public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QueryDslPredicateExecutor<T> {
 
 	public Long deleteByIds(List<ID> ids);
 }
