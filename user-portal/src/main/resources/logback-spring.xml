@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
 
-	<springProperty scope="context" name="logFile" source="log.file" defaultValue="${logging.app.root}/spring-boot-angular-deployment.log"/>
+	<springProperty scope="context" name="loggingFile" source="logging.file" defaultValue="logs/spring-boot-angular-deployment.log"/>
 	<springProperty scope="context" name="rootLogLevel" source="root.log.level" defaultValue="ERROR"/>
 	<springProperty scope="context" name="appLogLevel" source="app.log.level" defaultValue="DEBUG"/>
 	<springProperty scope="context" name="logFileSize" source="log.file.size" defaultValue="1MB"/>
@@ -18,10 +18,10 @@
 			<Pattern>%-30(%d{yyyy-MM-dd HH:mm:ss} %-5level) --- [%thread] %logger{35} : %msg%n</Pattern>
 		</encoder>
 		
-		<file>${logFile}</file>
+		<file>${loggingFile}</file>
 		
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<fileNamePattern>${logFile}.%i</fileNamePattern>
+			<fileNamePattern>${loggingFile}.%i</fileNamePattern>
 			<minIndex>1</minIndex>
 			<maxIndex>5</maxIndex>
 		</rollingPolicy>
