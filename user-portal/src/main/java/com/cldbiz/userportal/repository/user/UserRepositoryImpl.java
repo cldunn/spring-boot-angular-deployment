@@ -14,17 +14,17 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
-public class UserRepositoryExtImpl extends BaseRepositoryExtImpl<User> implements UserRepositoryExt {
+public class UserRepositoryImpl extends BaseRepositoryExtImpl<User> implements UserRepositoryExt {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryExtImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
 	
 	@Override
-	public List<User> findByDto(UserDto userDto) {
+	public List<User> xyz(UserDto userDto) {
 		LOGGER.debug("Inside findByDto()");
 		QUser user = QUser.user;
 		
 		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>(new BooleanBuilder());
-		BooleanExpression b1 = user.firstName.equalsIgnoreCase(userDto.getFirstName());
+		BooleanExpression b1 = user.firstName.equalsIgnoreCase("ASDF");
 		// BooleanExpression b2 = user.varInt.eq(userDto.getVarInt());
 		Predicate predicate = builder.findPredicate(user, userDto);
 

@@ -2,12 +2,9 @@ package com.cldbiz.userportal.service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +64,7 @@ public class UserServiceImpl implements UserService {
     	// userDto.setVarInstant(OffsetDateTime.parse("2010-01-01 10:00:00+01").toInstant());
     	 
     	 
-    	return repository.findByDto(userDto);
+    	return repository.xyz(userDto);
     }
 
     @Override

@@ -12,8 +12,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 
-import com.cldbiz.userportal.dto.UserDto;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
