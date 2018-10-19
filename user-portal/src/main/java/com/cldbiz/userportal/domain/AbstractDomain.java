@@ -1,7 +1,7 @@
 package com.cldbiz.userportal.domain;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -19,6 +19,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public abstract @Data class AbstractDomain implements Serializable {
     
+	/* still needs uid (transient), (LOMBOCK) equals, hashcode. toString */
+	/* tenant id if multiple tenants per db,  alt db per tenant */
+	
 	@Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,13 +35,13 @@ public abstract @Data class AbstractDomain implements Serializable {
 	private String createdBy;
 	
 	@Column
-	private LocalDate createdDate;
+	private LocalDateTime createdDate;
 	
 	@Column
 	private String maintainedBy;
 	
 	@Column
-	private LocalDate maintainedDate;
+	private LocalDateTime maintainedDate;
 	
 	protected void setVersion(Long version) {
 		this.version = version;
@@ -46,11 +49,11 @@ public abstract @Data class AbstractDomain implements Serializable {
 	
 	@PrePersist
     public void onPrePersist() {
-       this.setCreatedDate(LocalDate.now());
+       this.setCreatedDate(LocalDateTime.now());
     }
       
     @PreUpdate
     public void onPreUpdate() {
-    	this.setMaintainedDate(LocalDate.now());
+    	this.setMaintainedDate(LocalDateTime.now());
     }
 }

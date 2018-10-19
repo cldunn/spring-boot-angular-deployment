@@ -19,15 +19,15 @@ public class UserRepositoryImpl extends BaseRepositoryExtImpl<User> implements U
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
 	
 	@Override
-	public List<User> xyz(UserDto userDto) {
+	public List<User> findByDto(UserDto userDto) {
 		LOGGER.debug("Inside findByDto()");
 		QUser user = QUser.user;
 		
 		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>(new BooleanBuilder());
-		BooleanExpression b1 = user.firstName.equalsIgnoreCase("ASDF");
+		// BooleanExpression b1 = user.firstName.equalsIgnoreCase("ASDF");
 		// BooleanExpression b2 = user.varInt.eq(userDto.getVarInt());
 		Predicate predicate = builder.findPredicate(user, userDto);
-
+		
 		return jpaQueryFactory.selectFrom(user).where(predicate).fetch();
 	}
 

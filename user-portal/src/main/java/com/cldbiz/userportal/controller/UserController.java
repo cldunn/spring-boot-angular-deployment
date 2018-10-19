@@ -46,7 +46,8 @@ public class UserController {
         return userService.delete(id);
     }
 
-    @GetMapping
+    // @GetMapping
+    @RequestMapping("/users")
     public List<User> findAll() {
     	LOGGER.debug("INSIDE findAll()");
     	

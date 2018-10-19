@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User user) {
-        return repository.save(user);
+    	return repository.save(user);
     }
 
     @Override
@@ -63,13 +64,13 @@ public class UserServiceImpl implements UserService {
     	 
     	// userDto.setVarInstant(OffsetDateTime.parse("2010-01-01 10:00:00+01").toInstant());
     	 
-    	 
-    	return repository.xyz(userDto);
+    	return repository.findByDto(userDto);
     }
 
     @Override
     public User findById(Long id) {
-        return repository.findOne(id);
+    	Optional<User> optUser = repository.findById(id);
+    	return optUser.orElse(null);
     }
 
     @Override

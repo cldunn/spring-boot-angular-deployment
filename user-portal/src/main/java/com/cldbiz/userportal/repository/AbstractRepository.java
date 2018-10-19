@@ -2,13 +2,30 @@ package com.cldbiz.userportal.repository;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
-@NoRepositoryBean
-public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QueryDslPredicateExecutor<T> {
+/* Interface appears in all descendants */
 
-	public Long deleteByIds(List<ID> ids);
+@NoRepositoryBean
+public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QuerydslPredicateExecutor<T> {
+
+	public void deleteById(ID id);
+	public void deleteByIds(Iterable<ID> ids);  // custom
+	 
+	public void delete(T entity);
+	public void deleteAll(Iterable<? extends T> entities);
+	 
+	public <S extends T> S save(S entity);
+	public <S extends T> S saveAndFlush(S entity);
+	public <S extends T> List<S> saveAll(Iterable<S> entities);
+
+	public Optional<T> findById(ID id);
+	
+	public boolean existsById(ID id);
+	
+	public void flush();
 }

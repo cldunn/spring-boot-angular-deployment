@@ -17,7 +17,7 @@ export class UserService {
   private userUrl = '/api';
 
   public getUsers() {
-    return this.http.get<User[]>(this.userUrl);
+    return this.http.get<User[]>(this.userUrl + "/users");
   }
 
   public deleteUser(user) {

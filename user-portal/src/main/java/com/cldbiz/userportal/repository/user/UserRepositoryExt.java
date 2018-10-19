@@ -7,6 +7,6 @@ import com.cldbiz.userportal.dto.UserDto;
 
 public interface UserRepositoryExt {
 
-	List<User> xyz(UserDto userDto);
+	List<User> findByDto(UserDto userDto);
 	
 }

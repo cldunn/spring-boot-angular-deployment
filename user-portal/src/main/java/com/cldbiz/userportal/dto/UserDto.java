@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Locale;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,6 +21,8 @@ public @Data class UserDto extends AbstractDto {
     
     private String email;
 
+    private Locale locale;
+    
     private Byte varByte;
     
     private Character varCh;
