@@ -23,9 +23,12 @@ public interface AbstractRepository<T, ID extends Serializable> extends JpaRepos
 	public <S extends T> S saveAndFlush(S entity);
 	public <S extends T> List<S> saveAll(Iterable<S> entities);
 
-	public Optional<T> findById(ID id);
-	
-	public boolean existsById(ID id);
-	
 	public void flush();
+
+	public boolean existsById(ID id);
+	public Optional<T> findById(ID id);
+	List<T> findAllById(Iterable<ID> ids);
+	 
+	long count();
+	List<T> findAll();
 }

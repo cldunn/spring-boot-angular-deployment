@@ -1,6 +1,6 @@
-package com.cldbiz.userportal.repository;
+package com.cldbiz.userportal.unit.repository;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Optional;
 
@@ -9,28 +9,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.cldbiz.userportal.BaseTest;
 import com.cldbiz.userportal.domain.User;
 import com.cldbiz.userportal.repository.user.UserRepository;
+import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
 
 
 @DatabaseSetup("/userData.xml")
-public class UserRepositoryTest extends BaseTest {
+public class UserRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryTest.class);
 
 	@Autowired
 	UserRepository userRepository;
 	
 	@Test
-	public void testGetEmployee() {
-		LOGGER.debug("THIS IS TEST");
-		
-		// User user = userRepository.findOne(2L);
-		// assertNotNull(user);
+	public void whenFindById_thenReturnUser() {
 		Optional<User> user = userRepository.findById(2L);
-		assertNotNull(user.orElse(null));
+		assertThat(user.orElse(null)).isNotNull(); 
 	}
 
 }

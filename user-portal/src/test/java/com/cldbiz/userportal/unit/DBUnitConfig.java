@@ -1,4 +1,4 @@
-package com.cldbiz.userportal;
+package com.cldbiz.userportal.unit;
 
 import javax.sql.DataSource;
 

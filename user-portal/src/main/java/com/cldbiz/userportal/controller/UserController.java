@@ -49,8 +49,6 @@ public class UserController {
     // @GetMapping
     @RequestMapping("/users")
     public List<User> findAll() {
-    	LOGGER.debug("INSIDE findAll()");
-    	
         return userService.findAll();
     }
 }

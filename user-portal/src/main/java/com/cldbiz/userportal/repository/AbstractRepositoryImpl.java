@@ -26,15 +26,17 @@ import org.springframework.data.jpa.repository.support.QuerydslJpaRepository;
  void deleteAll(Iterable<? extends T> entities)
  
  <S extends T> S save(S entity)
+ <S extends T> S saveAndFlush(S entity)
  <S extends T> Iterable<S> saveAll(Iterable<S> entities)
 
- long count()
+ void flush()
+
  boolean existsById(ID id)
-  
- Iterable<T> findAll()
- 
  Optional<T> findById(ID id)
  Iterable<T> findAllById(Iterable<ID> ids)
+ 
+ long count()
+ Iterable<T> findAll()
  */
 
 public class AbstractRepositoryImpl<T, ID extends Serializable> extends QuerydslJpaRepository<T, ID> implements AbstractRepository<T, ID> {
@@ -93,8 +95,8 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
     }
 
 	@Override
-	public Optional<T> findById(ID id) {
-		return repository.findById(id);
+	public void flush() {
+		repository.flush();
 	}
 
 	@Override
@@ -102,8 +104,23 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
 		return repository.existsById(id);
 	}
 	
+    @Override
+	public Optional<T> findById(ID id) {
+		return repository.findById(id);
+	}
+
+    @Override
+	public List<T> findAllById(Iterable<ID> ids) {
+    	return repository.findAllById(ids);
+    }
+    
 	@Override
-	public void flush() {
-		repository.flush();
+    public  long count() {
+    	return repository.count();
+    }
+
+	@Override
+	public List<T> findAll() {
+		return repository.findAll();
 	}
 }

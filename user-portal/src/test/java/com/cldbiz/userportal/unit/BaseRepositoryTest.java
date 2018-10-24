@@ -1,4 +1,4 @@
-package com.cldbiz.userportal;
+package com.cldbiz.userportal.unit;
 
 import java.util.Locale;
 
@@ -6,13 +6,13 @@ import javax.annotation.PostConstruct;
 
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 import com.cldbiz.userportal.config.AppExecutionContext;
@@ -20,8 +20,8 @@ import com.cldbiz.userportal.dto.UserDto;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 
 
-@SpringBootTest
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
+@DataJpaTest
 @TestExecutionListeners({ 
 	DependencyInjectionTestExecutionListener.class, 
 	DbUnitTestExecutionListener.class })
@@ -29,7 +29,7 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 	@ContextConfiguration(classes = DBUnitConfig.class)
 })
 @TestPropertySource("classpath:application-test.properties")
-public abstract class BaseTest {
+public abstract class BaseRepositoryTest {
 	@Autowired
 	Environment env;
 	
