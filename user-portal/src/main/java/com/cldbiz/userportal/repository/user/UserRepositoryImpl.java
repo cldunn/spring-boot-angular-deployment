@@ -24,8 +24,6 @@ public class UserRepositoryImpl extends BaseRepositoryExtImpl<User> implements U
 		QUser user = QUser.user;
 		
 		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>(new BooleanBuilder());
-		// BooleanExpression b1 = user.firstName.equalsIgnoreCase("ASDF");
-		// BooleanExpression b2 = user.varInt.eq(userDto.getVarInt());
 		Predicate predicate = builder.findPredicate(user, userDto);
 		
 		return jpaQueryFactory.selectFrom(user).where(predicate).fetch();

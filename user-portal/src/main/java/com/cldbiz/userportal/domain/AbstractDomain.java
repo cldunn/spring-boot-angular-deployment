@@ -12,6 +12,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 
+import com.cldbiz.userportal.dto.AbstractDto;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -43,6 +45,13 @@ public abstract @Data class AbstractDomain implements Serializable {
 	@Column
 	private LocalDateTime maintainedDate;
 	
+	protected AbstractDomain() {}
+	
+	protected AbstractDomain(AbstractDto dto) {
+		this.id = dto.getId();
+	}
+	
+	/* set to protected */
 	protected void setVersion(Long version) {
 		this.version = version;
 	}

@@ -2,17 +2,14 @@ package com.cldbiz.userportal.service;
 
 import java.util.List;
 
-import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.dto.UserDto;
 
 public interface UserService {
+	public UserDto findById(Long id);
+	public List<UserDto> findByDto(UserDto userDto);
+	
+	public UserDto save(UserDto userDto);
 
-    User create(User user);
-
-    User delete(Long id);
-
-    List<User> findAll();
-
-    User findById(Long id);
-
-    User update(User user);
+	public void deleteById(Long id);
+	public void deleteByIds(List<Long> ids); 
 }

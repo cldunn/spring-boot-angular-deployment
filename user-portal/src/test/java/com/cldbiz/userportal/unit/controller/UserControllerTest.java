@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.cldbiz.userportal.controller.UserController;
 import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.service.UserService;
 
 @RunWith(SpringRunner.class)
@@ -32,12 +33,12 @@ public class UserControllerTest {
     
     @Before
     public void setUp() {
-        User user = new User();
-    	user.setFirstName("Cliff");
-    	user.setLastName("Dunn");
-    	user.setEmail("cliffdunntx@yahoo.com");
+        UserDto userDto = new UserDto();
+        userDto.setFirstName("Cliff");
+        userDto.setLastName("Dunn");
+        userDto.setEmail("cliffdunntx@yahoo.com");
     			
-        Mockito.when(userService.findById(1L)).thenReturn(user);
+        Mockito.when(userService.findById(1L)).thenReturn(userDto);
     }
 
     @Test

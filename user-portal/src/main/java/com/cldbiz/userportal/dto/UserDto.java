@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Locale;
 
+import com.cldbiz.userportal.domain.User;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,33 +21,19 @@ public @Data class UserDto extends AbstractDto {
     
     private String lastName;
     
-    private String email;
-
     private Locale locale;
     
-    private Byte varByte;
-    
-    private Character varCh;
-    
-    private Short varShort;
-    
-    private Integer varInt;
-    
-    private Long varLong;
-    
-    private BigInteger varBigInteger;
-    
-    private Float varFloat;
+    private String email;
 
-    private Double varDouble;
+    public UserDto() {
+    	super();
+    }
     
-    private BigDecimal varBigDecimal;
-    
-    private Boolean varBool;
-    
-    private LocalDate varDate;
-    
-    private LocalTime varTime;
-    
-    private LocalDateTime varDttm;
+    public UserDto(User user) {
+    	super(user);
+    	
+    	this.setFirstName(user.getFirstName());
+    	this.setLastName(user.getLastName());
+    	this.setEmail(user.getEmail());
+    }
 }

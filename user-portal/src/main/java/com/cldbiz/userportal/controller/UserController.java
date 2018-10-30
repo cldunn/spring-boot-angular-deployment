@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.service.UserService;
 
 //@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
@@ -27,28 +28,30 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public User create(@RequestBody User user){
-        return userService.create(user);
+    public UserDto create(@RequestBody UserDto userDto){
+        return userService.save(userDto);
     }
 
     @GetMapping(path = {"/{id}"})
-    public User findOne(@PathVariable("id") Long id){
+    public UserDto findOne(@PathVariable("id") Long id){
         return userService.findById(id);
     }
 
     @PutMapping
-    public User update(@RequestBody User user){
-        return userService.update(user);
+    public UserDto update(@RequestBody UserDto userDto){
+        return userService.save(userDto);
     }
 
     @DeleteMapping(path ={"/{id}"})
-    public User delete(@PathVariable("id") Long id) {
-        return userService.delete(id);
+    public UserDto delete(@PathVariable("id") Long id) {
+    	UserDto userDto = userService.findById(id);
+        userService.deleteById(id);
+        return userDto;
     }
 
     // @GetMapping
     @RequestMapping("/users")
-    public List<User> findAll() {
-        return userService.findAll();
+    public List<UserDto> findAll() {
+        return userService.findByDto(new UserDto());
     }
 }

@@ -2,6 +2,8 @@ package com.cldbiz.userportal.dto;
 
 import java.io.Serializable;
 
+import com.cldbiz.userportal.domain.AbstractDomain;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -17,4 +19,10 @@ public abstract @Data class AbstractDto implements Serializable {
 	
 	@EqualsAndHashCode.Exclude
 	private Integer limit = 100;
+	
+	protected AbstractDto() {}
+	
+	protected AbstractDto(AbstractDomain domain) {
+		this.id = domain.getId();
+	}
 }
