@@ -9,6 +9,39 @@ import com.cldbiz.userportal.dto.UserDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/************************************************
+ * 
+ * @author cliff
+ *
+ * loginId
+ * password
+ *   
+ * active 
+ * locked
+ * attempts
+ * lastLogin
+ *   
+ * Title
+ * First Name
+ * Last Name
+ * Designatory Letters
+ *   
+ * DOB
+ * Gender
+ *
+ * Address lines
+ * City
+ * County
+ * Zip
+ *   
+ * Home Phone
+ * Mobile Phone
+ *   
+ * Personal email
+ * 
+ * TODO: Rename UserProfile
+*************************************************/
+
 @Entity
 @Table(name = "USER_PROFILE")
 @EqualsAndHashCode(callSuper=true)

@@ -25,7 +25,7 @@ public abstract @Data class AbstractDomain implements Serializable {
 	/* tenant id if multiple tenants per db,  alt db per tenant */
 	
 	@Id
-    @Column
+    @Column(nullable=false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -33,10 +33,10 @@ public abstract @Data class AbstractDomain implements Serializable {
 	@EqualsAndHashCode.Exclude
 	private Long version;
 	
-	@Column
+	@Column(nullable=false)
 	private String createdBy;
 	
-	@Column
+	@Column(nullable=false)
 	private LocalDateTime createdDate;
 	
 	@Column

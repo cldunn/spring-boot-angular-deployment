@@ -100,11 +100,7 @@ public class DynBooleanBuilder<E, D> {
     private DynPredicate<TimePath> timePathEq = new DynPredicate<TimePath>("eq");
     private DynPredicate<DateTimePath> dateTimePathEq = new DynPredicate<DateTimePath>("eq");
     
-    public DynBooleanBuilder(BooleanBuilder builder) {
-        this.builder = builder;
-    }
-
-    public Predicate findPredicate(E entity, D dto, Predicate... predicates) {
+    private DynBooleanBuilder buildPredicate(boolean exactMatch, E entity, D dto, Predicate... predicates) {
         Map<String, Predicate> predicateMap = new HashMap<String, Predicate>();
         for(Predicate predicate: predicates) {
             Object pathName = ((Path) ((Operation) predicate).getArg(0)).getMetadata().getElement();
@@ -130,7 +126,12 @@ public class DynBooleanBuilder<E, D> {
             else if (dtoFldMap.containsKey(name)) {
                 DtoFld dtoFld =  dtoFldMap.get(name);
                 if (entFld.getType().equals(StringPath.class)) {
-                    stringPathEqualsIgnoreCase.addPredicate(entity, entFld, dtoFld);
+                	if (exactMatch) {
+                		stringPathEqualsIgnoreCase.addPredicate(entity, entFld, dtoFld);
+                	}
+                	else {
+                		stringPathContainsIgnoreCase.addPredicate(entity, entFld, dtoFld);
+                	}
                 }
                 else if (entFld.getType().equals(NumberPath.class)) {
                     numberPathEq.addPredicate(entity, entFld, dtoFld);
@@ -153,6 +154,22 @@ public class DynBooleanBuilder<E, D> {
             }
         }
         
-        return builder;
+        return DynBooleanBuilder.this;
+    }
+    
+    public DynBooleanBuilder() {
+        this.builder = new BooleanBuilder();
+    }
+
+    public DynBooleanBuilder findPredicate(E entity, D dto, Predicate... predicates) {
+    	return buildPredicate(true, entity, dto, predicates);
+    }
+    
+    public DynBooleanBuilder searchPredicate(E entity, D dto, Predicate... predicates) {
+    	return buildPredicate(false, entity, dto, predicates);
+    }
+    
+    public Predicate asPredicate() {
+    	return this.builder;
     }
 }

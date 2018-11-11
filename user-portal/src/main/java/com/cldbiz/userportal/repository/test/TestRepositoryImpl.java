@@ -22,8 +22,8 @@ public class TestRepositoryImpl extends BaseRepositoryExtImpl<Test> implements T
 		LOGGER.debug("Inside findByDto()");
 		QTest test = QTest.test;
 		
-		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>(new BooleanBuilder());
-		Predicate predicate = builder.findPredicate(test, testDto);
+		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
+		Predicate predicate = builder.findPredicate(test, testDto).asPredicate();
 		
 		return jpaQueryFactory.selectFrom(test).where(predicate).fetch();
 	}

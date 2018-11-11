@@ -23,8 +23,8 @@ public class UserRepositoryImpl extends BaseRepositoryExtImpl<User> implements U
 		LOGGER.debug("Inside findByDto()");
 		QUser user = QUser.user;
 		
-		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>(new BooleanBuilder());
-		Predicate predicate = builder.findPredicate(user, userDto);
+		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
+		Predicate predicate = builder.findPredicate(user, userDto).asPredicate();
 		
 		return jpaQueryFactory.selectFrom(user).where(predicate).fetch();
 	}
