@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -28,7 +29,7 @@ public @Data class Invoice extends AbstractDomain {
 	private String status;
 
 	@ManyToOne(optional=false)
-	@JoinColumn(name="ACCOUNT_ID")
+	@JoinColumn(name="ACCOUNT_ID", foreignKey=@ForeignKey(name = "FK_INVOICE_ACCOUNT"))
 	private Account account;
 	
 	public Invoice() {

@@ -7,11 +7,11 @@ import javax.validation.constraints.Max;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.LineItem;
-import com.cldbiz.userportal.domain.Order;
+import com.cldbiz.userportal.domain.PurchaseOrder;
 
 import lombok.Data;
 
-public @Data class OrderDto extends AbstractDto {
+public @Data class PurchaseOrderDto extends AbstractDto {
 	
 	@Max(255)
 	private String orderIdentifier;
@@ -29,17 +29,17 @@ public @Data class OrderDto extends AbstractDto {
 	
 	private List<LineItemDto> lineItemDtos;
 	
-	public OrderDto() {
+	public PurchaseOrderDto() {
 		super();
 	}
 	
-	public OrderDto(Order order) {
-		super(order);
+	public PurchaseOrderDto(PurchaseOrder purchaseOrder) {
+		super(purchaseOrder);
 		
-		this.setOrderIdentifier(order.getOrderIdentifier());
-		this.setPurchaseDttm(order.getPurchaseDttm());
-		this.setInvoiced(order.getInvoiced());
-		this.setStatus(order.getStatus());
+		this.setOrderIdentifier(purchaseOrder.getOrderIdentifier());
+		this.setPurchaseDttm(purchaseOrder.getPurchaseDttm());
+		this.setInvoiced(purchaseOrder.getInvoiced());
+		this.setStatus(purchaseOrder.getStatus());
 	}
 
 }

@@ -40,9 +40,9 @@ public @Data class AccountDto extends AbstractDto {
 
 	private CustomerDto customerDto;
 	
-	private OrderDto orderDto;
+	private PurchaseOrderDto orderDto;
 
-	private List<OrderDto> orderDtos;
+	private List<PurchaseOrderDto> orderDtos;
 	
 	private InvoiceDto invoiceDto;
 	

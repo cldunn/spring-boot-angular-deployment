@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -25,8 +26,8 @@ public @Data class Category extends AbstractDomain {
 	
 	@ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "CATEGORY_PRODUCT", 
-         joinColumns = {@JoinColumn(name = "CATEGORY_ID")}, 
-         inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID")})
+         joinColumns = {@JoinColumn(name = "CATEGORY_ID", foreignKey=@ForeignKey(name = "FK_PRODUCT_CATEGORY"))}, 
+         inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_CATEGORY_PRODUCT"))})
 	private List<Product> products;
 	
 	public Category() {

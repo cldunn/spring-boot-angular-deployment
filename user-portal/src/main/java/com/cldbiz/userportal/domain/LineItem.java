@@ -2,6 +2,7 @@ package com.cldbiz.userportal.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -20,7 +21,7 @@ public @Data class LineItem extends AbstractDomain {
 	private Long quantity;
 	
 	@ManyToOne
-	@JoinColumn(name="PRODUCT_ID")
+	@JoinColumn(name="PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_LINE_ITEM_PRODUCT"))
 	private Product product;
 	
 	public LineItem() {

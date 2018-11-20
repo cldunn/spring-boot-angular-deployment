@@ -6,10 +6,12 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.cldbiz.userportal.dto.CustomerDto;
 
@@ -18,7 +20,7 @@ import lombok.EqualsAndHashCode;
 
 /* TODO: extends User[Profile] */
 @Entity
-@Table(name = "CUSTOMER")
+@Table(name = "CUSTOMER", uniqueConstraints = {@UniqueConstraint(columnNames = {"account_id"}, name="UQ_CUSTOMER_ACCOUNT_ID")})
 @EqualsAndHashCode(callSuper=true)
 public @Data class Customer extends AbstractDomain {
 
@@ -56,7 +58,7 @@ public @Data class Customer extends AbstractDomain {
 	private Boolean canCommunicate;
     
 	@OneToOne(cascade= {CascadeType.ALL}, optional=false, orphanRemoval=true)
-	@JoinColumn(name="ACCOUNT_ID")
+	@JoinColumn(name="ACCOUNT_ID", foreignKey=@ForeignKey(name = "FK_CUSTOMER_ACCOUNT"))
 	private Account account;
 
     public Customer() {

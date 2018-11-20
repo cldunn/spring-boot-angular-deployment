@@ -19,7 +19,8 @@ import lombok.EqualsAndHashCode;
 @Table(name = "TEST")
 @EqualsAndHashCode(callSuper=true)
 public @Data class Test extends AbstractDomain {
-    @Column
+    
+	@Column
     private Byte varByte;
     
     @Column

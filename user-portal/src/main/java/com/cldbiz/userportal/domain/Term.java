@@ -25,7 +25,7 @@ import lombok.EqualsAndHashCode;
  * 21 MFI	                      21st of the month following invoice date
  * 1% 10 Net 30	                  1% discount if payment received within ten days otherwise payment 30 days after invoice date
  * COD	                          Cash on delivery
- * Cash account	                  Account conducted on a cash basis, no credit
+ * Cash account	(CA)              Account conducted on a cash basis, no credit
  * Letter of credit	              A documentary credit confirmed by a bank, often used for export
  * Bill of exchange	              A promise to pay at a later date, usually supported by a bank
  * CND	                          Cash next delivery

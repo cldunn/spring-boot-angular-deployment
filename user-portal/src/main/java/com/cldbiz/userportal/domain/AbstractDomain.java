@@ -58,6 +58,7 @@ public abstract @Data class AbstractDomain implements Serializable {
 	
 	@PrePersist
     public void onPrePersist() {
+	   this.setCreatedBy("sysgen");
        this.setCreatedDate(LocalDateTime.now());
     }
       

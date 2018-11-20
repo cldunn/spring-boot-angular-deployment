@@ -20,7 +20,6 @@ public class UserRepositoryImpl extends BaseRepositoryExtImpl<User> implements U
 	
 	@Override
 	public List<User> findByDto(UserDto userDto) {
-		LOGGER.debug("Inside findByDto()");
 		QUser user = QUser.user;
 		
 		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();

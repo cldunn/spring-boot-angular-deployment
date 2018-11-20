@@ -43,8 +43,8 @@ public class DBUnitConfig {
 			"TABLE", "VIEW"
 		});
 		dbCfg.setQualifiedTableNames(true);
-		dbCfg.setDatatypeFactory(getDataTypeFactory(env.getProperty("spring.jpa.properties.hibernate.dialect")));
-		
+		// dbCfg.setDatatypeFactory(getDataTypeFactory(env.getProperty("spring.jpa.properties.hibernate.dialect")));
+		dbCfg.setDatatypeFactory(getDataTypeFactory(env.getProperty("spring.jpa.database-platform")));
 		return dbCfg;
 	}
 	
