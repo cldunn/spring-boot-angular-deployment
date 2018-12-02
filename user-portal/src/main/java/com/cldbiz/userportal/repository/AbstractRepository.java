@@ -27,8 +27,6 @@ public interface AbstractRepository<T, ID extends Serializable> extends JpaRepos
 
 	public boolean existsById(ID id);
 	public Optional<T> findById(ID id);
-	List<T> findAllById(Iterable<ID> ids);
 	 
 	long count();
-	List<T> findAll();
 }

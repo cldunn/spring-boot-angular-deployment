@@ -26,8 +26,8 @@ import lombok.EqualsAndHashCode;
  * 1% 10 Net 30	                  1% discount if payment received within ten days otherwise payment 30 days after invoice date
  * COD	                          Cash on delivery
  * Cash account	(CA)              Account conducted on a cash basis, no credit
- * Letter of credit	              A documentary credit confirmed by a bank, often used for export
- * Bill of exchange	              A promise to pay at a later date, usually supported by a bank
+ * Letter of credit	(LC)          A documentary credit confirmed by a bank, often used for export
+ * Bill of exchange	(BE)          A promise to pay at a later date, usually supported by a bank
  * CND	                          Cash next delivery
  * CBS	                          Cash before shipment
  * CIA	                          Cash in advance

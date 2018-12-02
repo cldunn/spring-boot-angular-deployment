@@ -14,6 +14,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import com.cldbiz.userportal.config.AppExecutionContext;
 import com.cldbiz.userportal.dto.UserDto;
@@ -24,6 +25,7 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener;
 @DataJpaTest
 @TestExecutionListeners({ 
 	DependencyInjectionTestExecutionListener.class, 
+	TransactionalTestExecutionListener.class,
 	DbUnitTestExecutionListener.class })
 @ContextHierarchy({
 	@ContextConfiguration(classes = DBUnitConfig.class)

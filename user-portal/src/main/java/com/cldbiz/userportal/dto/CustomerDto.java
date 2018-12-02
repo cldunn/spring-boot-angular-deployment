@@ -43,7 +43,7 @@ public @Data class CustomerDto extends AbstractDto {
 	@Max(255)
 	private String linkedinIdentifier;
     
-	private Boolean canCommunicate;
+	private Boolean canContact;
     
 	private AccountDto accountDto;
 	
@@ -64,6 +64,6 @@ public @Data class CustomerDto extends AbstractDto {
     	this.setFacebookIdentifier(customer.getFacebookIdentifier());
     	this.setTwitterIdentifier(customer.getTwitterIdentifier());
     	this.setLinkedinIdentifier(customer.getLinkedinIdentifier());
-    	this.setCanCommunicate(customer.getCanCommunicate());
+    	this.setCanContact(customer.getCanContact());
     }
 }

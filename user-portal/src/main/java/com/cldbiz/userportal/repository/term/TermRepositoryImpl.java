@@ -8,14 +8,30 @@ import org.slf4j.LoggerFactory;
 import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.dto.TermDto;
-import com.cldbiz.userportal.repository.BaseRepositoryExtImpl;
+import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.PathBuilder;
 
-public class TermRepositoryImpl extends BaseRepositoryExtImpl<Term> implements TermRepositoryExt {
+public class TermRepositoryImpl extends BaseRepositoryImpl<Term, Long> implements TermRepositoryExt {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TermRepositoryImpl.class);
 	
+	@Override
+	public List<Term> findAll() {
+		return jpaQueryFactory.selectFrom(QTerm.term).fetch();
+	}
+	
+	@Override
+	public List<Term> findAllById(List<Long> termIds) {
+		QTerm term = QTerm.term;
+		
+		return jpaQueryFactory.selectFrom(term)
+				.where(term.id.in(termIds))
+				.fetch();
+	}
+
 	@Override
 	public List<Term> findByDto(TermDto termDto) {
 		QTerm term = QTerm.term;
@@ -34,6 +50,39 @@ public class TermRepositoryImpl extends BaseRepositoryExtImpl<Term> implements T
 		Predicate predicate = builder.searchPredicate(term, termDto).asPredicate();
 		
 		return jpaQueryFactory.selectFrom(term).where(predicate).fetch();
+	}
+
+	@Override
+	public List<Term> findPageByDto(TermDto termDto) {
+		QTerm term = QTerm.term;
+		
+		DynBooleanBuilder<QTerm, TermDto> builder = new DynBooleanBuilder<QTerm, TermDto>();
+		Predicate predicate = builder.findPredicate(term, termDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(term).where(predicate)
+				.orderBy(sortBy(termDto))
+				.offset(termDto.getStart().intValue())
+				.limit(termDto.getLimit().intValue())
+				.fetch();
+	}
+
+	@Override
+	public List<Term> searchPageByDto(TermDto termDto) {
+		QTerm term = QTerm.term;
+		
+		DynBooleanBuilder<QTerm, TermDto> builder = new DynBooleanBuilder<QTerm, TermDto>();
+		Predicate predicate = builder.searchPredicate(term, termDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(term).where(predicate)
+				.orderBy(sortBy(termDto))
+				.offset(termDto.getStart().intValue())
+				.limit(termDto.getLimit().intValue())
+				.fetch();
+	}
+	
+	private OrderSpecifier[] sortBy(TermDto termDto) {
+		PathBuilder pb = new PathBuilder<QTerm>(QTerm.class, "term");
+		return sortOrderOf(pb, termDto);
 	}
 
 }

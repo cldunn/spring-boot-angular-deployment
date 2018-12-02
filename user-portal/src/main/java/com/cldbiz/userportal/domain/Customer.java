@@ -8,10 +8,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import com.cldbiz.userportal.dto.CustomerDto;
 
@@ -55,8 +60,10 @@ public @Data class Customer extends AbstractDomain {
 	private String linkedinIdentifier;
     
 	@Column
-	private Boolean canCommunicate;
+	private Boolean canContact;
     
+	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
+	@EqualsAndHashCode.Exclude
 	@OneToOne(cascade= {CascadeType.ALL}, optional=false, orphanRemoval=true)
 	@JoinColumn(name="ACCOUNT_ID", foreignKey=@ForeignKey(name = "FK_CUSTOMER_ACCOUNT"))
 	private Account account;
@@ -78,7 +85,7 @@ public @Data class Customer extends AbstractDomain {
     	this.setFacebookIdentifier(customerDto.getFacebookIdentifier());
     	this.setTwitterIdentifier(customerDto.getTwitterIdentifier());
     	this.setLinkedinIdentifier(customerDto.getLinkedinIdentifier());
-    	this.setCanCommunicate(customerDto.getCanCommunicate());
+    	this.setCanContact(customerDto.getCanContact());
     }
 
 }

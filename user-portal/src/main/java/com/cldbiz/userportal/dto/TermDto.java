@@ -1,7 +1,11 @@
 package com.cldbiz.userportal.dto;
 
+import java.util.Arrays;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.Term;
 
@@ -23,6 +27,8 @@ public @Data class TermDto extends AbstractDto {
 	
 	public TermDto() {
 		super();
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "code")));
 	}
 	
 	public TermDto(Term term) {
@@ -30,6 +36,8 @@ public @Data class TermDto extends AbstractDto {
 		
 		this.setCode(term.getCode());
 		this.setDescription(term.getDescription());
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "code")));
 	}
 
 }

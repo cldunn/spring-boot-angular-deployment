@@ -2,6 +2,7 @@ package com.cldbiz.userportal.domain;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -10,7 +11,10 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.dto.AbstractDto;
 
@@ -18,7 +22,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @MappedSuperclass
-@EqualsAndHashCode
+// @EqualsAndHashCode
 public abstract @Data class AbstractDomain implements Serializable {
     
 	/* still needs uid (transient), (LOMBOCK) equals, hashcode. toString */
@@ -34,15 +38,19 @@ public abstract @Data class AbstractDomain implements Serializable {
 	private Long version;
 	
 	@Column(nullable=false)
+	@EqualsAndHashCode.Exclude
 	private String createdBy;
 	
 	@Column(nullable=false)
+	@EqualsAndHashCode.Exclude
 	private LocalDateTime createdDate;
 	
 	@Column
+	@EqualsAndHashCode.Exclude
 	private String maintainedBy;
 	
 	@Column
+	@EqualsAndHashCode.Exclude
 	private LocalDateTime maintainedDate;
 	
 	protected AbstractDomain() {}

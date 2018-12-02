@@ -1,11 +1,13 @@
 package com.cldbiz.userportal.dto;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.CreditCardNumber;
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Customer;
@@ -50,6 +52,8 @@ public @Data class AccountDto extends AbstractDto {
 	
 	public AccountDto() {
 		super();
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "accountName"))); 
 	}
 	
 	public AccountDto(Account account) {
@@ -59,5 +63,7 @@ public @Data class AccountDto extends AbstractDto {
 		this.setCreditCard(account.getCreditCard());
 		this.setBillingAddress(account.getBillingAddress());
 		this.setShippingAddress(account.getShippingAddress());
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "accountName"))); 
 	}
 }

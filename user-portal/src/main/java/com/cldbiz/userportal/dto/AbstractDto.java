@@ -1,6 +1,11 @@
 package com.cldbiz.userportal.dto;
 
 import java.io.Serializable;
+import java.util.List;
+
+import javax.persistence.Transient;
+
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.AbstractDomain;
 
@@ -19,6 +24,9 @@ public abstract @Data class AbstractDto implements Serializable {
 	
 	@EqualsAndHashCode.Exclude
 	private Integer limit = 100;
+	
+	@EqualsAndHashCode.Exclude
+	private List<Sort.Order> sortOrders;
 	
 	protected AbstractDto() {}
 	

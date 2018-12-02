@@ -12,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.repository.term.TermRepository;
@@ -121,10 +123,7 @@ public class TermRepositoryTest extends BaseRepositoryTest {
 
 	@Test
 	public void whenSave_thenReturnSavedTerm() {
-		Term anotherTerm = new Term();
-		anotherTerm.setCode("EOM");
-		anotherTerm.setDescription("End of month");
-		
+		Term anotherTerm = getAnotherTerm();
 		
 		Term savedTerm = termRepository.save(anotherTerm);
 		assertThat(savedTerm.equals(anotherTerm)).isTrue();
@@ -135,13 +134,9 @@ public class TermRepositoryTest extends BaseRepositoryTest {
 
 	@Test
 	public void whenSaveAll_thenReturnSavedTerms() {
-		Term anotherTerm = new Term();
-		anotherTerm.setCode("EOM");
-		anotherTerm.setDescription("End of month");
+		Term anotherTerm = getAnotherTerm();
 		
-		Term extraTerm = new Term();
-		extraTerm.setCode("CND");
-		extraTerm.setDescription("Cash next delivery");
+		Term extraTerm = getExtraTerm();
 		
 		List<Term> terms = new ArrayList<Term>();
 		terms.add(anotherTerm);
@@ -186,6 +181,18 @@ public class TermRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
+	public void whenFindPageByDto_thenReturnTerms() {
+		TermDto termDto = new TermDto();
+		termDto.setCode("PIA");
+		termDto.setStart(0);
+		termDto.setLimit(2);
+		
+		List<Term> terms = termRepository.findPageByDto(termDto);
+		
+		assertThat(terms.size()).isLessThanOrEqualTo(2);
+	}
+
+	@Test
 	public void whenSearchByDto_thenReturnTerms() {
 		TermDto termDto = new TermDto();
 		termDto.setDescription("in advance");
@@ -195,4 +202,31 @@ public class TermRepositoryTest extends BaseRepositoryTest {
 		assertThat(terms).isNotEmpty();
 	}
 
+	@Test
+	public void whenSearchPageByDto_thenReturnTerms() {
+		TermDto termDto = new TermDto();
+		termDto.setDescription("Payment");
+		termDto.setStart(0);
+		termDto.setLimit(2);
+		
+		List<Term> terms = termRepository.searchPageByDto(termDto);
+		
+		assertThat(terms.size()).isLessThanOrEqualTo(2);
+	}
+
+	private Term getAnotherTerm() {
+		Term anotherTerm = new Term();
+		anotherTerm.setCode("EOM");
+		anotherTerm.setDescription("End of month");
+
+		return anotherTerm;
+	}
+	
+	private Term getExtraTerm() {
+		Term extraTerm = new Term();
+		extraTerm.setCode("CND");
+		extraTerm.setDescription("Cash next delivery");
+
+		return extraTerm;
+	}
 }

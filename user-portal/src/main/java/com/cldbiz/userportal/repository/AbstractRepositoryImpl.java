@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -13,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation;
 import org.springframework.data.jpa.repository.support.QuerydslJpaRepository;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /*
  * Exposes JpaRepository - PagingAndSortingRepository - CrudRepository - QueryByExampleExecutor
@@ -47,15 +48,20 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
 	@PersistenceContext
 	protected EntityManager entityManager;
 	
+	protected JPAQueryFactory jpaQueryFactory;
+	
 	protected QuerydslJpaRepository<T, ID> repository;
 	
     public AbstractRepositoryImpl(JpaEntityInformation<T, ID> entityMetadata, EntityManager entityManager) {
         super(entityMetadata, entityManager);
         
-        this.tClass = entityMetadata.getJavaType();
-    	
-        JpaEntityInformation<T, ID> entityInfo = new JpaMetamodelEntityInformation<T, ID>(this.tClass, entityManager.getMetamodel());
+    	this.entityManager = entityManager;
+    	this.tClass = entityMetadata.getJavaType();
+
+    	JpaEntityInformation<T, ID> entityInfo = new JpaMetamodelEntityInformation<T, ID>(this.tClass, entityManager.getMetamodel());
 		repository = new QuerydslJpaRepository<T, ID>(entityInfo, entityManager);
+		
+		jpaQueryFactory = new JPAQueryFactory(entityManager);
     }
 
     @Override
@@ -65,8 +71,12 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
     
     @Override
     public void deleteByIds(Iterable<ID> ids) {
-    	List<T> entities = repository.findAllById(ids);
-    	repository.deleteInBatch(entities);
+    	// Avoid "where id in ids", causes FK violation when entity has child relationships as deletes are in order (parent, then children)
+    	// Single delete apply cascadeTypes
+    	for(ID id: ids) {
+    		repository.deleteById(id);
+    	}
+    	repository.flush();
     }
     
     @Override
@@ -109,18 +119,8 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
 		return repository.findById(id);
 	}
 
-    @Override
-	public List<T> findAllById(Iterable<ID> ids) {
-    	return repository.findAllById(ids);
-    }
-    
 	@Override
     public  long count() {
     	return repository.count();
     }
-
-	@Override
-	public List<T> findAll() {
-		return repository.findAll();
-	}
 }
