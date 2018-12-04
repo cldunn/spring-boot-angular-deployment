@@ -80,7 +80,7 @@ public @Data class Account extends AbstractDomain {
 		this.setShippingAddress(accountDto.getShippingAddress());
 	}
 
-	// for @OneToMany, make the relationship when assigning
+	// for bi-directional, make the relationship when assigning
 	public void setInvoices(List<Invoice> invoices) {
 		invoices.forEach(i-> {
 			i.setAccount(this);
@@ -89,7 +89,7 @@ public @Data class Account extends AbstractDomain {
 		this.invoices = invoices;
 	}
 	
-	// for @OneToMany, make the relationship when assigning
+	// for bi-directional, make the relationship when assigning
 	public void setPurchaseOrders(List<PurchaseOrder> purchaseOrders) {
 		purchaseOrders.forEach(p-> {
 			p.setAccount(this);

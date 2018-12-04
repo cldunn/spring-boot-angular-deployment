@@ -4,16 +4,8 @@ import java.util.List;
 
 import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.dto.TermDto;
+import com.cldbiz.userportal.repository.BaseRepository;
 
-public interface TermRepositoryExt {
-	
-	public List<Term> findAll();
-	
-	public List<Term> findByDto(TermDto termDto);
-	
-	public List<Term> searchByDto(TermDto termDto);
-	
-	public List<Term> findPageByDto(TermDto termDto);
-	
-	public List<Term> searchPageByDto(TermDto termDto);
+public interface TermRepositoryExt extends BaseRepository<Term, TermDto, Long> {
+
 }

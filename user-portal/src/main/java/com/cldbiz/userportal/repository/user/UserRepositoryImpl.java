@@ -7,16 +7,22 @@ import org.slf4j.LoggerFactory;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.QAccount;
+import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.domain.QUser;
+import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.domain.User;
+import com.cldbiz.userportal.dto.AccountDto;
+import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 
-public class UserRepositoryImpl extends BaseRepositoryImpl<User, Long> implements UserRepositoryExt {
+public class UserRepositoryImpl extends BaseRepositoryImpl<User, UserDto, Long> implements UserRepositoryExt {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
 	
@@ -45,6 +51,20 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<User, Long> implement
 	}
 
 	@Override
+	public List<User> findPageByDto(UserDto userDto) {
+		QUser user = QUser.user;
+		
+		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
+		Predicate predicate = builder.findPredicate(user, userDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(user).where(predicate)
+				.orderBy(sortBy(userDto))
+				.offset(userDto.getStart().intValue())
+				.limit(userDto.getLimit().intValue())
+				.fetch();
+	}
+
+	@Override
 	public List<User> searchByDto(UserDto userDto) {
 		QUser user = QUser.user;
 		
@@ -53,4 +73,24 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<User, Long> implement
 		
 		return jpaQueryFactory.selectFrom(user).where(predicate).fetch();
 	}
+	
+	@Override
+	public List<User> searchPageByDto(UserDto userDto) {
+		QUser user = QUser.user;
+		
+		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
+		Predicate predicate = builder.searchPredicate(user, userDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(user).where(predicate)
+				.orderBy(sortBy(userDto))
+				.offset(userDto.getStart().intValue())
+				.limit(userDto.getLimit().intValue())
+				.fetch();
+	}
+
+	public OrderSpecifier[] sortBy(UserDto userDto) {
+		PathBuilder pb = new PathBuilder<QUser>(QUser.class, "user");
+		return sortOrderOf(pb, userDto);
+	}
+
 }

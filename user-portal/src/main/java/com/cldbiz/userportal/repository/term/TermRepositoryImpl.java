@@ -14,7 +14,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class TermRepositoryImpl extends BaseRepositoryImpl<Term, Long> implements TermRepositoryExt {
+public class TermRepositoryImpl extends BaseRepositoryImpl<Term, TermDto, Long> implements TermRepositoryExt {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TermRepositoryImpl.class);
 	
@@ -43,16 +43,6 @@ public class TermRepositoryImpl extends BaseRepositoryImpl<Term, Long> implement
 	}
 	
 	@Override
-	public List<Term> searchByDto(TermDto termDto) {
-		QTerm term = QTerm.term;
-		
-		DynBooleanBuilder<QTerm, TermDto> builder = new DynBooleanBuilder<QTerm, TermDto>();
-		Predicate predicate = builder.searchPredicate(term, termDto).asPredicate();
-		
-		return jpaQueryFactory.selectFrom(term).where(predicate).fetch();
-	}
-
-	@Override
 	public List<Term> findPageByDto(TermDto termDto) {
 		QTerm term = QTerm.term;
 		
@@ -64,6 +54,16 @@ public class TermRepositoryImpl extends BaseRepositoryImpl<Term, Long> implement
 				.offset(termDto.getStart().intValue())
 				.limit(termDto.getLimit().intValue())
 				.fetch();
+	}
+
+	@Override
+	public List<Term> searchByDto(TermDto termDto) {
+		QTerm term = QTerm.term;
+		
+		DynBooleanBuilder<QTerm, TermDto> builder = new DynBooleanBuilder<QTerm, TermDto>();
+		Predicate predicate = builder.searchPredicate(term, termDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(term).where(predicate).fetch();
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class TermRepositoryImpl extends BaseRepositoryImpl<Term, Long> implement
 				.fetch();
 	}
 	
-	private OrderSpecifier[] sortBy(TermDto termDto) {
+	public OrderSpecifier[] sortBy(TermDto termDto) {
 		PathBuilder pb = new PathBuilder<QTerm>(QTerm.class, "term");
 		return sortOrderOf(pb, termDto);
 	}

@@ -25,6 +25,7 @@ import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.repository.account.AccountRepository;
+import com.cldbiz.userportal.repository.customer.CustomerRepository;
 import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -37,6 +38,9 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	
 	@Autowired
 	TermRepository termRepository;
+
+	@Autowired
+	CustomerRepository customerRepository;
 
 	@Autowired
 	AccountRepository accountRepository;
@@ -58,7 +62,12 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 		assertThat(accounts.contains(account)).isFalse();
 
-		// TODO check associated customer deleted too
+		Optional<Term> term = termRepository.findById(account.getTerm().getId());
+		assertThat(term.orElse(null)).isNotNull();
+
+		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+		assertThat(customer.orElse(null)).isNull();
+		
 		// TODO check associated invoice deleted too
 		// TODO check associated purchaseOrder too
 	}
@@ -73,7 +82,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 		assertThat(accountCnt).isZero();
 		
-		// TODO check associated customer deleted too
+		accounts.forEach(account -> {
+			Optional<Term> term = termRepository.findById(account.getTerm().getId());
+			assertThat(term.orElse(null)).isNotNull();
+
+			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+			assertThat(customer.orElse(null)).isNull();
+		});
+		
 		// TODO check associated invoice deleted too
 		// TODO check associated purchaseOrder too
 
@@ -90,7 +106,12 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 		assertThat(accounts.contains(account)).isFalse();
 		
-		// TODO check associated customer deleted too
+		Optional<Term> term = termRepository.findById(account.getTerm().getId());
+		assertThat(term.orElse(null)).isNotNull();
+
+		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+		assertThat(customer.orElse(null)).isNull();
+
 		// TODO check associated invoice deleted too
 		// TODO check associated purchaseOrder too
 	}
@@ -108,7 +129,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 		assertThat(accountCnt).isZero();
 
-		// TODO check associated customer deleted too
+		accounts.forEach(account -> {
+			Optional<Term> term = termRepository.findById(account.getTerm().getId());
+			assertThat(term.orElse(null)).isNotNull();
+
+			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+			assertThat(customer.orElse(null)).isNull();
+		});
+
 		// TODO check associated invoice deleted too
 		// TODO check associated purchaseOrder too
 	}
@@ -341,7 +369,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	@Test
 	public void whenFindByDto_thenReturnAccounts() {
 		AccountDto accountDto = new AccountDto();
-		accountDto.setAccountName("Superior Dry CLeaners");
+		accountDto.setAccountName("Superior Dry Cleaners");
 		
 		List<Account> accounts = accountRepository.findByDto(accountDto);
 		
@@ -439,7 +467,6 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		extraAccount.setActive(true);
 		
 		 return extraAccount;
-	
 	}
 	
 	private Term getAnotherTerm() {

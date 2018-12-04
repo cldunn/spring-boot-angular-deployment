@@ -11,7 +11,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, Long> implements AccountRepositoryExt {
+public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, AccountDto, Long> implements AccountRepositoryExt {
 
 	@Override
 	public List<Account> findAll() {
@@ -55,22 +55,6 @@ public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, Long> imp
 	}
 
 	@Override
-	public List<Account> searchByDto(AccountDto accountDto) {
-		QAccount account = QAccount.account;
-		
-		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
-		Predicate predicate = builder.searchPredicate(account, accountDto).asPredicate();
-		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		return jpaQueryFactory.selectFrom(account)
-				.innerJoin(account.term).fetchJoin()
-				.innerJoin(account.customer).fetchJoin()
-				.where(predicate)
-				.fetch();
-	}
-
-	@Override
 	public List<Account> findPageByDto(AccountDto accountDto) {
 		QAccount account = QAccount.account;
 		
@@ -86,6 +70,22 @@ public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, Long> imp
 				.orderBy(sortBy(accountDto))
 				.offset(accountDto.getStart().intValue())
 				.limit(accountDto.getLimit().intValue())
+				.fetch();
+	}
+
+	@Override
+	public List<Account> searchByDto(AccountDto accountDto) {
+		QAccount account = QAccount.account;
+		
+		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
+		Predicate predicate = builder.searchPredicate(account, accountDto).asPredicate();
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		return jpaQueryFactory.selectFrom(account)
+				.innerJoin(account.term).fetchJoin()
+				.innerJoin(account.customer).fetchJoin()
+				.where(predicate)
 				.fetch();
 	}
 
@@ -108,7 +108,7 @@ public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, Long> imp
 				.fetch();
 	}
 	
-	private OrderSpecifier[] sortBy(AccountDto accountDto) {
+	public OrderSpecifier[] sortBy(AccountDto accountDto) {
 		PathBuilder pb = new PathBuilder<QAccount>(QAccount.class, "account");
 		return sortOrderOf(pb, accountDto);
 	}

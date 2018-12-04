@@ -9,14 +9,16 @@ import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.domain.Sort;
 
+import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.dto.AbstractDto;
+import com.cldbiz.userportal.dto.AccountDto;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-public abstract class BaseRepositoryImpl<T, ID> implements BaseRepository<T, ID>, InitializingBean {
+public abstract class BaseRepositoryImpl<T, D, ID> implements BaseRepository<T, D, ID>, InitializingBean {
 
 	private Class<T> type;
 	
@@ -30,6 +32,21 @@ public abstract class BaseRepositoryImpl<T, ID> implements BaseRepository<T, ID>
 	
 	@Override
 	public abstract List<T> findAllById(List<ID> ids);
+	
+	@Override
+	public abstract List<T> findByDto(D dto);
+	
+	@Override
+	public abstract List<T> findPageByDto(D dto);
+	
+	@Override
+	public abstract List<T> searchByDto(D dto);
+	
+	@Override
+	public abstract List<T> searchPageByDto(D dto);
+	
+	@Override
+	public abstract OrderSpecifier[] sortBy(D dto);
 
 	// @Override
 	public OrderSpecifier[] sortOrderOf(PathBuilder pb, AbstractDto dto) {

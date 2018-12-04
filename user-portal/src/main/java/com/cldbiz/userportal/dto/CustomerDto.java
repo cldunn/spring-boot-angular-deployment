@@ -1,7 +1,11 @@
 package com.cldbiz.userportal.dto;
 
+import java.util.Arrays;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Customer;
@@ -49,6 +53,8 @@ public @Data class CustomerDto extends AbstractDto {
 	
     public CustomerDto() {
     	super();
+
+    	this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "firstName"), new Sort.Order(Sort.Direction.ASC, "lastName"))); 
     }
     
     public CustomerDto(Customer customer) {
@@ -65,5 +71,7 @@ public @Data class CustomerDto extends AbstractDto {
     	this.setTwitterIdentifier(customer.getTwitterIdentifier());
     	this.setLinkedinIdentifier(customer.getLinkedinIdentifier());
     	this.setCanContact(customer.getCanContact());
+    	
+    	this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "firstName"), new Sort.Order(Sort.Direction.ASC, "lastName"))); 
     }
 }

@@ -12,12 +12,15 @@ import com.cldbiz.userportal.domain.QUser;
 import com.cldbiz.userportal.domain.Test;
 import com.cldbiz.userportal.domain.User;
 import com.cldbiz.userportal.dto.TestDto;
+import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.PathBuilder;
 
-public class TestRepositoryImpl extends BaseRepositoryImpl<Test, Long> implements TestRepositoryExt {
+public class TestRepositoryImpl extends BaseRepositoryImpl<Test, TestDto, Long> implements TestRepositoryExt {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestRepositoryImpl.class);
 	
@@ -47,6 +50,20 @@ public class TestRepositoryImpl extends BaseRepositoryImpl<Test, Long> implement
 	}
 
 	@Override
+	public List<Test> findPageByDto(TestDto testDto) {
+		QTest test = QTest.test;
+		
+		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
+		Predicate predicate = builder.findPredicate(test, testDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(test).where(predicate)
+				.orderBy(sortBy(testDto))
+				.offset(testDto.getStart().intValue())
+				.limit(testDto.getLimit().intValue())
+				.fetch();
+	}
+
+	@Override
 	public List<Test> searchByDto(TestDto testDto) {
 		LOGGER.debug("Inside findByDto()");
 		QTest test = QTest.test;
@@ -56,4 +73,24 @@ public class TestRepositoryImpl extends BaseRepositoryImpl<Test, Long> implement
 		
 		return jpaQueryFactory.selectFrom(test).where(predicate).fetch();
 	}
+	
+	@Override
+	public List<Test> searchPageByDto(TestDto testDto) {
+		QTest test = QTest.test;
+		
+		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
+		Predicate predicate = builder.searchPredicate(test, testDto).asPredicate();
+		
+		return jpaQueryFactory.selectFrom(test).where(predicate)
+				.orderBy(sortBy(testDto))
+				.offset(testDto.getStart().intValue())
+				.limit(testDto.getLimit().intValue())
+				.fetch();
+	}
+	
+	public OrderSpecifier[] sortBy(TestDto testDto) {
+		PathBuilder pb = new PathBuilder<QTest>(QTest.class, "test");
+		return sortOrderOf(pb, testDto);
+	}
+
 }
