@@ -3,6 +3,7 @@ package com.cldbiz.userportal.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -13,7 +14,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "LINE_ITEM")
+@Table(name = "LINE_ITEM",
+	indexes = { @Index(name = "IDX_LINE_ITEM_PURCHASE_ORDER_ID_FK", columnList = "PURCHASE_ORDER_ID") }
+)
 @EqualsAndHashCode(callSuper=true)
 public @Data class LineItem extends AbstractDomain {
 	
@@ -21,7 +24,7 @@ public @Data class LineItem extends AbstractDomain {
 	private Long quantity;
 	
 	@ManyToOne
-	@JoinColumn(name="PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_LINE_ITEM_PRODUCT"))
+	@JoinColumn(name="PRODUCT_ID", nullable=true, foreignKey=@ForeignKey(name = "FK_LINE_ITEM_PRODUCT")) // TODO: nullable = false
 	private Product product;
 	
 	public LineItem() {

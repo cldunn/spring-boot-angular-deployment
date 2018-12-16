@@ -29,4 +29,6 @@ public interface AbstractRepository<T, ID extends Serializable> extends JpaRepos
 	public Optional<T> findById(ID id);
 	 
 	long count();
+	
+	public void doSql(String sqlStr, Object... parameters);
 }

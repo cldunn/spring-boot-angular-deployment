@@ -5,5 +5,5 @@ import com.cldbiz.userportal.repository.AbstractRepository;
 import com.cldbiz.userportal.repository.term.TermRepositoryExt;
 
 public interface AccountRepository extends AbstractRepository<Account, Long>, AccountRepositoryExt {
-
+	
 }

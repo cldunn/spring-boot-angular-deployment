@@ -48,18 +48,21 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	@Test
 	public void whenCount_thenReturnCount() {
 		long accountCnt = accountRepository.count();
+		accountRepository.flush();
+		
 		assertThat(accountCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
 	public void whenDelete_thenRemoveAccount() {
 		List<Account> accounts = accountRepository.findAll();
-		Account account = accounts.get(0);
+		Account account = accounts.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
 		
 		accountRepository.delete(account);
+		accountRepository.flush();
 		
 		accounts = accountRepository.findAll();
-
+		
 		assertThat(accounts.contains(account)).isFalse();
 
 		Optional<Term> term = termRepository.findById(account.getTerm().getId());
@@ -77,6 +80,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		List<Account> accounts = accountRepository.findAll();
 		
 		accountRepository.deleteAll(accounts);
+		accountRepository.flush();
 		
 		long accountCnt = accountRepository.count();
 
@@ -101,6 +105,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Account account = accounts.get(0);
 		
 		accountRepository.deleteById(account.getId());
+		accountRepository.flush();
 		
 		accounts = accountRepository.findAll();
 
@@ -124,6 +129,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
 		
 		accountRepository.deleteByIds(accountIds);
+		accountRepository.flush();
 		
 		long accountCnt = accountRepository.count();
 
@@ -146,12 +152,16 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		List<Account> accounts = accountRepository.findAll();
 		Account account = accounts.get(0);
 		
-		assertThat(accountRepository.existsById(account.getId())).isTrue();
+		Boolean exists = accountRepository.existsById(account.getId());
+		accountRepository.flush();
+		
+		assertThat(exists).isTrue();
 	}
 
 	@Test
 	public void whenFindAll_thenReturnAllAccounts() {
 		List<Account> accounts = accountRepository.findAll();
+		accountRepository.flush();
 		
 		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
 		assertThat(accounts.get(0).getTerm()).isNotNull();
@@ -196,19 +206,10 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 	@Test
 	public void whenFindById_thenReturnAccount() {
-		List<Account> accounts = accountRepository.findAll();
-		
-		Optional<Account> account = accounts.stream()
-				.filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty()))
-				.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
-				.findFirst();
-		
-		assertThat(account.orElse(null)).isNotNull();
-		
-		Optional<Account> sameAccount = accountRepository.findById(account.get().getId());
+		Optional<Account> sameAccount = accountRepository.findById(3L);
+		accountRepository.flush();
 		
 		assertThat(sameAccount.orElse(null)).isNotNull();
-		assertThat(account.get().equals(sameAccount.get())).isTrue();
 		
 		assertThat(sameAccount.get().getTerm()).isNotNull();
 		assertThat(sameAccount.get().getCustomer()).isNotNull();
@@ -224,15 +225,20 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		anotherAccount.setTerm(anotherTerm);
 		
 		Customer anotherCustomer = getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
 		List<Invoice> someInvoices = getSomeInvoices();
+		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
 		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
+		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
 		
 		Account savedAccount = accountRepository.save(anotherAccount);
+		accountRepository.flush();
+		
 		assertThat(savedAccount.equals(anotherAccount)).isTrue();
 		
 		long accountCnt = accountRepository.count();
@@ -255,6 +261,23 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	}
 	
 	@Test
+	public void whenModified_thenAccountUpdated() {
+		Optional<Account> originalAccount = accountRepository.findById(3L);
+		originalAccount.get().setBillingAddress("UPDATED - " + originalAccount.get().getBillingAddress());
+		originalAccount.get().getTerm().setDescription("UPDATED - " + originalAccount.get().getTerm().getDescription());
+		originalAccount.get().getCustomer().setFirstName("UPDATED - " + originalAccount.get().getCustomer().getFirstName());
+		originalAccount.get().getInvoices().get(0).setInvoiceNbr("UPDATED - " + originalAccount.get().getInvoices().get(0).getInvoiceNbr());
+		originalAccount.get().getPurchaseOrders().get(0).setOrderIdentifier("UPDATED - " + originalAccount.get().getPurchaseOrders().get(0).getOrderIdentifier());
+		
+		Optional<Account> rtrvdAccount = accountRepository.findById(3L);
+		assertThat(originalAccount.get().getBillingAddress().equals((rtrvdAccount.get().getBillingAddress())));
+		assertThat(originalAccount.get().getTerm().getDescription().equals((rtrvdAccount.get().getTerm().getDescription())));
+		assertThat(originalAccount.get().getCustomer().getFirstName().equals((rtrvdAccount.get().getCustomer().getFirstName())));
+		assertThat(originalAccount.get().getInvoices().get(0).getInvoiceNbr().equals((rtrvdAccount.get().getInvoices().get(0).getInvoiceNbr())));
+		assertThat(originalAccount.get().getPurchaseOrders().get(0).getOrderIdentifier().equals((rtrvdAccount.get().getPurchaseOrders().get(0).getOrderIdentifier())));
+	}
+
+	@Test
 	public void whenSaveAll_thenReturnSavedAccounts() {
 		Account anotherAccount = getAnotherAccount();
 		
@@ -262,12 +285,15 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		anotherAccount.setTerm(anotherTerm);
 		
 		Customer anotherCustomer = getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
-
+		
 		List<Invoice> someInvoices = getSomeInvoices();
+		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
 		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
+		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
 		
 		Account extraAccount = getExtraAccount();
@@ -276,12 +302,15 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		extraAccount.setTerm(extraTerm);
 		
 		Customer extraCustomer = getExtraCustomer();
+		extraCustomer.setAccount(extraAccount);
 		extraAccount.setCustomer(extraCustomer);
-
+		
 		List<Invoice> moreInvoices = getMoreInvoices();
+		moreInvoices.forEach(i -> i.setAccount(extraAccount));
 		extraAccount.setInvoices(moreInvoices);
 		
 		List<PurchaseOrder> morePurchaseOrders = getMorePurchaseOrders();
+		morePurchaseOrders.forEach(po -> po.setAccount(extraAccount));
 		extraAccount.setPurchaseOrders(morePurchaseOrders);
 		
 		List<Account> accounts = new ArrayList<Account>();
@@ -289,6 +318,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accounts.add(extraAccount);
 		
 		List<Account> savedAccounts = accountRepository.saveAll(accounts);
+		accountRepository.flush();
 		
 		assertThat(savedAccounts.size() == 2).isTrue();
 		
@@ -335,16 +365,23 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Term anotherTerm = getAnotherTerm();
 		anotherAccount.setTerm(anotherTerm);
 		
+		// Manually resolve bi-directional references
 		Customer anotherCustomer = getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
+		// Manually resolve bi-directional references
 		List<Invoice> someInvoices = getSomeInvoices();
+		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
+		// Manually resolve bi-directional references
 		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
+		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
 		
 		Account savedAccount = accountRepository.saveAndFlush(anotherAccount);
+		
 		assertThat(savedAccount.equals(anotherAccount)).isTrue();
 		
 		long accountCnt = accountRepository.count();
@@ -372,6 +409,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountDto.setAccountName("Superior Dry Cleaners");
 		
 		List<Account> accounts = accountRepository.findByDto(accountDto);
+		accountRepository.flush();
 		
 		assertThat(accounts).isNotEmpty();
 		
@@ -383,6 +421,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(account.orElse(null)).isNotNull();
+		assertThat(account.get().getAccountName().equals(accountDto.getAccountName())).isTrue();
 	}
 
 	@Test
@@ -393,6 +432,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountDto.setLimit(2);
 		
 		List<Account> accounts = accountRepository.findPageByDto(accountDto);
+		accountRepository.flush();
 		
 		assertThat(accounts.size()).isEqualTo(2);
 		
@@ -412,6 +452,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountDto.setAccountName("Superior");
 		
 		List<Account> accounts = accountRepository.searchByDto(accountDto);
+		accountRepository.flush();
 		
 		assertThat(accounts).isNotEmpty();
 		
@@ -433,6 +474,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountDto.setLimit(2);
 		
 		List<Account> accounts = accountRepository.searchPageByDto(accountDto);
+		accountRepository.flush();
 		
 		assertThat(accounts.size()).isEqualTo(2);
 		
@@ -489,7 +531,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		anotherCustomer.setWorkPhone("(555) 777-7654");
 		anotherCustomer.setCanContact(true);
 		
-		 return anotherCustomer;
+		return anotherCustomer;
 	}
 
 	private Customer getExtraCustomer() {
@@ -500,7 +542,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		extraCustomer.setWorkPhone("(555) 222-3333");
 		extraCustomer.setCanContact(true);
 		
-		 return extraCustomer;
+		return extraCustomer;
 	}
 	
 	private List<Invoice> getSomeInvoices() {

@@ -1,12 +1,13 @@
 package com.cldbiz.userportal.dto;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.constraints.Max;
 
-import com.cldbiz.userportal.domain.Account;
-import com.cldbiz.userportal.domain.LineItem;
+import org.springframework.data.domain.Sort;
+
 import com.cldbiz.userportal.domain.PurchaseOrder;
 
 import lombok.Data;
@@ -31,6 +32,8 @@ public @Data class PurchaseOrderDto extends AbstractDto {
 	
 	public PurchaseOrderDto() {
 		super();
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.DESC, "purchaseDttm")));
 	}
 	
 	public PurchaseOrderDto(PurchaseOrder purchaseOrder) {
@@ -40,6 +43,8 @@ public @Data class PurchaseOrderDto extends AbstractDto {
 		this.setPurchaseDttm(purchaseOrder.getPurchaseDttm());
 		this.setInvoiced(purchaseOrder.getInvoiced());
 		this.setStatus(purchaseOrder.getStatus());
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.DESC, "purchaseDttm")));
 	}
 
 }

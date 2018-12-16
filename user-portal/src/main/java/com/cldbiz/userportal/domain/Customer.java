@@ -87,10 +87,4 @@ public @Data class Customer extends AbstractDomain {
     	this.setLinkedinIdentifier(customerDto.getLinkedinIdentifier());
     	this.setCanContact(customerDto.getCanContact());
     }
-
-    // for bi-directional, make the relationship when assigning
-	public void setAccount(Account account) {
-    	account.setCustomer(this);
-    	this.account = account;
-    }
 }

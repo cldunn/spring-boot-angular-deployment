@@ -14,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Customer;
+import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
+import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
@@ -32,19 +34,25 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 	
 	@Autowired
 	AccountRepository accountRepository;
+	
+	@Autowired
+	TermRepository termRepository;
 
 	@Test
 	public void whenCount_thenReturnCount() {
 		long customerCnt = customerRepository.count();
+		customerRepository.flush();
+		
 		assertThat(customerCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
 	public void whenDelete_thenRemoveCustomer() {
 		List<Customer> customers = customerRepository.findAll();
-		Customer customer = customers.get(0);
+		Customer customer = customers.stream().filter(c -> c.getId().equals(3L)).findFirst().get();
 		
 		customerRepository.delete(customer);
+		customerRepository.flush();
 		
 		customers = customerRepository.findAll();
 
@@ -52,6 +60,9 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 
 		Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 		assertThat(account.orElse(null)).isNull();
+		
+		// TODO check associated invoice deleted too
+		// TODO check associated purchaseOrder too
 	}
 
 	@Test
@@ -59,6 +70,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		List<Customer> customers = customerRepository.findAll();
 		
 		customerRepository.deleteAll(customers);
+		customerRepository.flush();
 		
 		long customerCnt = customerRepository.count();
 
@@ -68,6 +80,9 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 			assertThat(account.orElse(null)).isNull();
 		});
+		
+		// TODO check associated invoice deleted too
+		// TODO check associated purchaseOrder too
 	}
 	
 	@Test
@@ -76,6 +91,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		Customer customer = customers.get(0);
 		
 		customerRepository.deleteById(customer.getId());
+		customerRepository.flush();
 		
 		customers = customerRepository.findAll();
 
@@ -83,6 +99,9 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		
 		Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 		assertThat(account.orElse(null)).isNull();
+		
+		// TODO check associated invoice deleted too
+		// TODO check associated purchaseOrder too
 	}
 
 	@Test
@@ -92,6 +111,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		List<Long> customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
 		
 		customerRepository.deleteByIds(customerIds);
+		customerRepository.flush();
 		
 		long customerCnt = customerRepository.count();
 
@@ -101,6 +121,10 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 			assertThat(account.orElse(null)).isNull();
 		});
+		
+		// TODO check associated invoice deleted too
+		// TODO check associated purchaseOrder too
+
 	}
 
 	@Test
@@ -108,12 +132,16 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		List<Customer> customers = customerRepository.findAll();
 		Customer customer = customers.get(0);
 		
-		assertThat(customerRepository.existsById(customer.getId())).isTrue();
+		Boolean exists = customerRepository.existsById(customer.getId());
+		customerRepository.flush();
+		
+		assertThat(exists).isTrue();
 	}
 
 	@Test
 	public void whenFindAll_thenReturnAllCustomers() {
 		List<Customer> customers = customerRepository.findAll();
+		customerRepository.flush();
 		
 		assertThat(customers.size()).isEqualTo(TOTAL_ROWS.intValue());
 		assertThat(customers.get(0).getAccount()).isNotNull();
@@ -125,6 +153,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		List<Long> customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
 		
 		customers = customerRepository.findAllById(customerIds);
+		customerRepository.flush();
 		
 		assertThat(customers.size()).isEqualTo(TOTAL_ROWS.intValue());
 		assertThat(customers.get(0).getAccount()).isNotNull();
@@ -132,18 +161,10 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 
 	@Test
 	public void whenFindById_thenReturnCustomer() {
-		List<Customer> customers = customerRepository.findAll();
-		
-		Optional<Customer> customer = customers.stream()
-				.filter(c -> c.getAccount() != null)
-				.findFirst();
-		
-		assertThat(customer.orElse(null)).isNotNull();
-		
-		Optional<Customer> sameCustomer = customerRepository.findById(customer.get().getId());
+		Optional<Customer> sameCustomer = customerRepository.findById(3L);
+		customerRepository.flush();
 		
 		assertThat(sameCustomer.orElse(null)).isNotNull();
-		assertThat(customer.get().equals(sameCustomer.get())).isTrue();
 		
 		assertThat(sameCustomer.get().getAccount()).isNotNull();
 	}
@@ -153,9 +174,15 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		Customer anotherCustomer = getAnotherCustomer();
 		
 		Account anotherAccount = getAnotherAccount();
+		Term anotherTerm = getAnotherTerm();
+		anotherAccount.setTerm(anotherTerm);
+		
 		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
 		
 		Customer savedCustomer = customerRepository.save(anotherCustomer);
+		customerRepository.flush();
+		
 		assertThat(savedCustomer.equals(anotherCustomer)).isTrue();
 		
 		long customerCnt = customerRepository.count();
@@ -166,25 +193,48 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvCustomer.get().equals(anotherCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().equals(savedCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().getAccount().equals(anotherAccount)).isTrue();
+		assertThat(rtrvCustomer.get().getAccount().getTerm().equals(anotherTerm)).isTrue();
+	    assertThat(rtrvCustomer.get().getAccount().getCustomer().equals(anotherCustomer)).isTrue();
 	}
 	
+	@Test
+	public void whenModified_thenCustomertUpdated() {
+		Optional<Customer> originalCustomer = customerRepository.findById(3L);
+		originalCustomer.get().setFirstName("UPDATED - " + originalCustomer.get().getFirstName());
+		originalCustomer.get().getAccount().setBillingAddress("UPDATED - " + originalCustomer.get().getAccount().getBillingAddress());
+		
+		Optional<Customer> rtrvdCustomer = customerRepository.findById(3L);
+		assertThat(originalCustomer.get().getFirstName().equals((originalCustomer.get().getFirstName())));
+		assertThat(originalCustomer.get().getAccount().getBillingAddress().equals((rtrvdCustomer.get().getAccount().getBillingAddress())));
+	}
+
+
 	@Test
 	public void whenSaveAll_thenReturnSavedCustomers() {
 		Customer anotherCustomer = getAnotherCustomer();
 		
 		Account anotherAccount = getAnotherAccount();
+		Term anotherTerm = getAnotherTerm();
+		anotherAccount.setTerm(anotherTerm);
+
 		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
 		
 		Customer extraCustomer = getExtraCustomer();
 		
 		Account extraAccount = getExtraAccount();
+		Term extraTerm = getExtraTerm();
+		extraAccount.setTerm(extraTerm);
+
 		extraCustomer.setAccount(extraAccount);
+		extraAccount.setCustomer(extraCustomer);
 		
 		List<Customer> customers = new ArrayList<Customer>();
 		customers.add(anotherCustomer);
 		customers.add(extraCustomer);
 		
 		List<Customer> savedCustomers = customerRepository.saveAll(customers);
+		customerRepository.flush();
 		
 		assertThat(savedCustomers.size() == 2).isTrue();
 		
@@ -198,11 +248,15 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvAnotherCustomer.orElse(null)).isNotNull();
 		assertThat(rtrvAnotherCustomer.get().equals(anotherCustomer)).isTrue();
 		assertThat(rtrvAnotherCustomer.get().getAccount().equals(anotherAccount)).isTrue();
+		assertThat(rtrvAnotherCustomer.get().getAccount().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvAnotherCustomer.get().getAccount().getCustomer().equals(anotherCustomer)).isTrue();
 		
 		Optional<Customer> rtrvExtaCustomer = customerRepository.findById(extraCustomer.getId());
 		assertThat(rtrvExtaCustomer.orElse(null)).isNotNull();
 		assertThat(rtrvExtaCustomer.get().equals(extraCustomer)).isTrue();
 		assertThat(rtrvExtaCustomer.get().getAccount().equals(extraAccount)).isTrue();
+		assertThat(rtrvExtaCustomer.get().getAccount().getTerm().equals(extraTerm)).isTrue();
+		assertThat(rtrvExtaCustomer.get().getAccount().getCustomer().equals(extraCustomer)).isTrue();
 	}
 	
 	@Test
@@ -210,9 +264,14 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		Customer anotherCustomer = getAnotherCustomer();
 		
 		Account anotherAccount = getAnotherAccount();
+		Term anotherTerm = getAnotherTerm();
+		anotherAccount.setTerm(anotherTerm);
+		
 		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
 		
 		Customer savedCustomer = customerRepository.saveAndFlush(anotherCustomer);
+		
 		assertThat(savedCustomer.equals(anotherCustomer)).isTrue();
 		
 		long customerCnt = customerRepository.count();
@@ -223,6 +282,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvCustomer.get().equals(anotherCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().equals(savedCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().getAccount().equals(anotherAccount)).isTrue();
+		assertThat(rtrvCustomer.get().getAccount().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvCustomer.get().getAccount().getCustomer().equals(anotherCustomer)).isTrue();
 	}
 
 	@Test
@@ -231,6 +292,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		customerDto.setCompany("Superior Dry Cleaners");
 		
 		List<Customer> customers = customerRepository.findByDto(customerDto);
+		customerRepository.flush();
 		
 		assertThat(customers).isNotEmpty();
 		
@@ -239,6 +301,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(customer.orElse(null)).isNotNull();
+		assertThat(customer.get().getCompany().equals(customerDto.getCompany())).isTrue();
 	}
 
 	@Test
@@ -249,6 +312,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		customerDto.setLimit(2);
 		
 		List<Customer> customers = customerRepository.findPageByDto(customerDto);
+		customerRepository.flush();
 		
 		assertThat(customers.size()).isEqualTo(2);
 		
@@ -257,6 +321,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(customer.orElse(null)).isNotNull();
+		assertThat(customer.get().getCanContact().equals(customerDto.getCanContact())).isTrue();
 	}
 
 	@Test
@@ -265,6 +330,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		customerDto.setCompany("Cleaners");
 		
 		List<Customer> customers = customerRepository.searchByDto(customerDto);
+		customerRepository.flush();
 		
 		assertThat(customers).isNotEmpty();
 		
@@ -273,6 +339,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(customer.orElse(null)).isNotNull();
+		assertThat(customer.get().getCompany().contains(customerDto.getCompany())).isTrue();
 	}
 
 	@Test
@@ -283,6 +350,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		customerDto.setLimit(2);
 		
 		List<Customer> customers = customerRepository.searchPageByDto(customerDto);
+		customerRepository.flush();
 		
 		assertThat(customers.size()).isEqualTo(2);
 		
@@ -291,6 +359,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(customer.orElse(null)).isNotNull();
+		assertThat(customer.get().getWorkEmail().contains(customerDto.getWorkEmail())).isTrue();
 	}
 
 	private Customer getAnotherCustomer() {
@@ -337,4 +406,18 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		 return extraAccount;
 	
 	}
+	
+	private Term getAnotherTerm() {
+		Optional<Term> term = termRepository.findById(1L);
+
+		return term.orElse(null);
+	}
+
+	private Term getExtraTerm() {
+		Optional<Term> term = termRepository.findById(2L);
+
+		return term.orElse(null);
+	}
+
+
 }

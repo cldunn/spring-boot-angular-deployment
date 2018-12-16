@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,11 +73,10 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
     @Override
     public void deleteByIds(Iterable<ID> ids) {
     	// Avoid "where id in ids", causes FK violation when entity has child relationships as deletes are in order (parent, then children)
-    	// Single delete apply cascadeTypes
+    	// Single delete will apply cascadeTypes
     	for(ID id: ids) {
     		repository.deleteById(id);
     	}
-    	repository.flush();
     }
     
     @Override
@@ -123,4 +123,17 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
     public  long count() {
     	return repository.count();
     }
+	
+	@Override
+	public void doSql(String sqlStr, Object... parameters) {
+		entityManager.flush();
+		entityManager.clear();
+		
+		Query query = entityManager.createQuery(sqlStr);
+		for(int i = 1; i <= parameters.length; i++) {
+			query.setParameter(i, parameters[i-1]);
+		}
+
+		query.executeUpdate();
+	}
 }

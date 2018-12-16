@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -15,7 +16,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "INVOICE")
+@Table(name = "INVOICE",
+	indexes = { @Index(name = "IDX_INVOICE_ACCOUNT_ID_FK", columnList = "ACCOUNT_ID") }
+)
 @EqualsAndHashCode(callSuper=true)
 public @Data class Invoice extends AbstractDomain {
 	

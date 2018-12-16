@@ -1,6 +1,6 @@
 package com.cldbiz.userportal.domain;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -13,8 +13,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.dto.AccountDto;
 
@@ -45,7 +43,7 @@ public @Data class Account extends AbstractDomain {
 	
 	
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
-	@OneToOne
+	@OneToOne // (optional=false)
 	@EqualsAndHashCode.Exclude 
 	@JoinColumn(name="TERM_ID", foreignKey=@ForeignKey(name = "FK_ACCOUNT_TERM"))
 	private Term term;
@@ -59,13 +57,13 @@ public @Data class Account extends AbstractDomain {
 	@EqualsAndHashCode.Exclude
 	// do not CascadeType.ALL on OneToMany / ManyToMany, results in eager fetch
 	@OneToMany(mappedBy="account", cascade={CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval=true)
-	private List<PurchaseOrder> purchaseOrders;
+	private List<PurchaseOrder> purchaseOrders = new ArrayList<PurchaseOrder>();
 	
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
 	@EqualsAndHashCode.Exclude
 	// do not CascadeType.ALL on OneToMany / ManyToMany, results in eager fetch
 	@OneToMany(mappedBy="account", cascade={CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval=true)
-	private List<Invoice> invoices;
+	private List<Invoice> invoices = new ArrayList<Invoice>();
 	
 	public Account() {
 		super();
@@ -79,23 +77,6 @@ public @Data class Account extends AbstractDomain {
 		this.setBillingAddress(accountDto.getBillingAddress());
 		this.setShippingAddress(accountDto.getShippingAddress());
 	}
-
-	// for bi-directional, make the relationship when assigning
-	public void setInvoices(List<Invoice> invoices) {
-		invoices.forEach(i-> {
-			i.setAccount(this);
-		});
-		
-		this.invoices = invoices;
-	}
 	
-	// for bi-directional, make the relationship when assigning
-	public void setPurchaseOrders(List<PurchaseOrder> purchaseOrders) {
-		purchaseOrders.forEach(p-> {
-			p.setAccount(this);
-		});
-		
-		this.purchaseOrders = purchaseOrders;
-	}
 
 }
