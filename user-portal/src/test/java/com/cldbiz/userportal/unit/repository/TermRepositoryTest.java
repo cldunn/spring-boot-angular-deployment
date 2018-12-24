@@ -192,6 +192,8 @@ public class TermRepositoryTest extends BaseRepositoryTest {
 		assertThat(terms.size()).isLessThanOrEqualTo(2);
 	}
 
+	// TODO: whenCountSearchByDto_thenReturnCount
+	
 	@Test
 	public void whenSearchByDto_thenReturnTerms() {
 		TermDto termDto = new TermDto();

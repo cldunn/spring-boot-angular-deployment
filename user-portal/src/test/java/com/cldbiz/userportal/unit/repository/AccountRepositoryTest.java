@@ -26,6 +26,7 @@ import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
+import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -41,6 +42,9 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 	@Autowired
 	CustomerRepository customerRepository;
+
+	@Autowired
+	PurchaseOrderRepository purchaseOrderRepository;
 
 	@Autowired
 	AccountRepository accountRepository;
@@ -72,7 +76,10 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(customer.orElse(null)).isNull();
 		
 		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
+		
+		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
+		assertThat(purchaseOrders.isEmpty());
 	}
 	
 	@Test
@@ -92,10 +99,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 			assertThat(customer.orElse(null)).isNull();
+			
+			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
+			assertThat(purchaseOrders.isEmpty());
 		});
 		
 		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
+
 
 	}
 	
@@ -117,10 +128,13 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 		assertThat(customer.orElse(null)).isNull();
 
-		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
-	}
+		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
+		assertThat(purchaseOrders.isEmpty());
 
+		// TODO check associated invoice deleted too
+
+	}
 
 	@Test
 	public void whenDeleteByIds_thenRemoveAllAccounts() {
@@ -141,10 +155,13 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 			assertThat(customer.orElse(null)).isNull();
+			
+			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
+			assertThat(purchaseOrders.isEmpty());
 		});
 
 		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
 	}
 
 	@Test
@@ -446,6 +463,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(account.orElse(null)).isNotNull();
 	}
 
+	// TODO: whenCountSearchByDto_thenReturnCount
+	
 	@Test
 	public void whenSearchByDto_thenReturnAccounts() {
 		AccountDto accountDto = new AccountDto();

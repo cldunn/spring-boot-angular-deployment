@@ -8,11 +8,13 @@ import org.slf4j.LoggerFactory;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QTerm;
+import com.cldbiz.userportal.domain.QTest;
 import com.cldbiz.userportal.domain.QUser;
 import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.domain.User;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.TermDto;
+import com.cldbiz.userportal.dto.TestDto;
 import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
@@ -62,6 +64,17 @@ public class UserRepositoryImpl extends BaseRepositoryImpl<User, UserDto, Long> 
 				.offset(userDto.getStart().intValue())
 				.limit(userDto.getLimit().intValue())
 				.fetch();
+	}
+
+	public Long countSearchByDto(UserDto userDto) {
+		QUser user = QUser.user;
+
+		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
+		Predicate predicate = builder.searchPredicate(user, userDto).asPredicate();
+
+		return jpaQueryFactory.selectFrom(user)
+				.where(predicate)
+				.fetchCount();
 	}
 
 	@Override

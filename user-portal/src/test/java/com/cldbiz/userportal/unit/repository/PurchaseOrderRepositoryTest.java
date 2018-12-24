@@ -14,12 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Account;
-import com.cldbiz.userportal.domain.Customer;
-import com.cldbiz.userportal.domain.Invoice;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.PurchaseOrder;
-import com.cldbiz.userportal.domain.Term;
-import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
@@ -351,6 +347,8 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		assertThat(purchaseOrder.orElse(null)).isNotNull();
 	}
 
+	// TODO: whenCountSearchByDto_thenReturnCount
+	
 	@Test
 	public void whenSearchByDto_thenReturnPurchaseOrders() {
 		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();

@@ -324,6 +324,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(customer.get().getCanContact().equals(customerDto.getCanContact())).isTrue();
 	}
 
+	// TODO: whenCountSearchByDto_thenReturnCount
+	
 	@Test
 	public void whenSearchByDto_thenReturnCustomers() {
 		CustomerDto customerDto = new CustomerDto();

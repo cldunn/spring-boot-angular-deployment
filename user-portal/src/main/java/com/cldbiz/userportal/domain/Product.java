@@ -33,7 +33,7 @@ public @Data class Product extends AbstractDomain {
 	@Column(length=4096)
 	private String description;
 	
-	@ManyToMany(mappedBy="products")
+	@ManyToMany(mappedBy="products", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
 	private List<Category> categories;
 	
 	public Product() {

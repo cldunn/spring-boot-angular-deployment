@@ -169,6 +169,16 @@ public class DynBooleanBuilder<E, D> {
     	return buildPredicate(false, entity, dto, predicates);
     }
     
+    public DynBooleanBuilder and(Predicate predicate) {
+    	this.builder.and(predicate);
+    	return this;
+    }
+    
+    public DynBooleanBuilder or(Predicate predicate) {
+    	this.builder.or(predicate);
+    	return this;
+    }
+
     public Predicate asPredicate() {
     	return this.builder;
     }

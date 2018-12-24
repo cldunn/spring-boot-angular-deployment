@@ -1,7 +1,11 @@
 package com.cldbiz.userportal.dto;
 
+import java.util.Arrays;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.LineItem;
 
@@ -17,11 +21,15 @@ public @Data class LineItemDto extends AbstractDto {
 	
 	public LineItemDto() {
 		super();
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.DESC, "quantity"))); 
 	}
 	
 	public LineItemDto(LineItem lineItem) {
 		super(lineItem);
 		
 		this.setQuantity(lineItem.getQuantity());
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.DESC, "quantity"))); 
 	}
 }

@@ -16,6 +16,8 @@ public interface BaseRepository<T, D, ID> {
 	
 	public abstract List<T> findPageByDto(D dto);
 	
+	public abstract Long countSearchByDto(D dto);
+	
 	public abstract List<T> searchByDto(D dto);
 	
 	public abstract List<T> searchPageByDto(D dto);

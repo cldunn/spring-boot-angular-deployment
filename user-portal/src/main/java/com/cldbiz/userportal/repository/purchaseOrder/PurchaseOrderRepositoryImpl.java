@@ -5,9 +5,11 @@ import java.util.List;
 import com.cldbiz.userportal.domain.PurchaseOrder;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCustomer;
+import com.cldbiz.userportal.domain.QProduct;
 import com.cldbiz.userportal.domain.QPurchaseOrder;
 import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.dto.CustomerDto;
+import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
@@ -71,7 +73,6 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 				.innerJoin(account.term, term).fetchJoin()
 				.where(predicate)
 				.fetch();
-
 	}
 
 	@Override
@@ -96,7 +97,17 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 				.offset(purchaseOrderDto.getStart().intValue())
 				.limit(purchaseOrderDto.getLimit().intValue())
 				.fetch();
+	}
 
+	public Long countSearchByDto(PurchaseOrderDto purchaseOrderDto) {
+		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
+
+		DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> builder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
+		Predicate predicate = builder.searchPredicate(purchaseOrder, purchaseOrderDto).asPredicate();
+
+		return jpaQueryFactory.selectFrom(purchaseOrder)
+				.where(predicate)
+				.fetchCount();
 	}
 
 	@Override

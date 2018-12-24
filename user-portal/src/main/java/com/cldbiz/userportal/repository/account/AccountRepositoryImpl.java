@@ -87,6 +87,17 @@ public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, AccountDt
 				.fetch();
 	}
 
+	public Long countSearchByDto(AccountDto accountDto) {
+		QAccount account = QAccount.account;
+
+		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
+		Predicate predicate = builder.searchPredicate(account, accountDto).asPredicate();
+
+		return jpaQueryFactory.selectFrom(account)
+				.where(predicate)
+				.fetchCount();
+	}
+	
 	@Override
 	public List<Account> searchByDto(AccountDto accountDto) {
 		QAccount account = QAccount.account;

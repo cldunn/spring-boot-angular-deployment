@@ -24,7 +24,7 @@ public @Data class Category extends AbstractDomain {
 	@Column
 	private String Name;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "CATEGORY_PRODUCT", 
          joinColumns = {@JoinColumn(name = "CATEGORY_ID", foreignKey=@ForeignKey(name = "FK_PRODUCT_CATEGORY"))}, 
          inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_CATEGORY_PRODUCT"))})
@@ -39,4 +39,15 @@ public @Data class Category extends AbstractDomain {
 		
 		this.setName(categoryDto.getName());
 	}
+	
+    public void addProduct(Product product) {
+    	products.add(product);
+    	product.getCategories().add(this);
+    }
+ 
+    public void removeProduct(Product product) {
+    	products.remove(product);
+    	product.getCategories().remove(this);
+    }
+
 }

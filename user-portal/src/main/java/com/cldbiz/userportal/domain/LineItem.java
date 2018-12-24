@@ -1,5 +1,6 @@
 package com.cldbiz.userportal.domain;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
@@ -23,8 +24,8 @@ public @Data class LineItem extends AbstractDomain {
 	@Column(nullable=false)
 	private Long quantity;
 	
-	@ManyToOne
-	@JoinColumn(name="PRODUCT_ID", nullable=true, foreignKey=@ForeignKey(name = "FK_LINE_ITEM_PRODUCT")) // TODO: nullable = false
+	@ManyToOne(optional=false)
+	@JoinColumn(name="PRODUCT_ID", nullable = false, foreignKey=@ForeignKey(name = "FK_LINE_ITEM_PRODUCT"))
 	private Product product;
 	
 	public LineItem() {

@@ -5,8 +5,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cldbiz.userportal.domain.QPurchaseOrder;
 import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.domain.Term;
+import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
@@ -54,6 +56,17 @@ public class TermRepositoryImpl extends BaseRepositoryImpl<Term, TermDto, Long> 
 				.offset(termDto.getStart().intValue())
 				.limit(termDto.getLimit().intValue())
 				.fetch();
+	}
+
+	public Long countSearchByDto(TermDto termDto) {
+		QTerm term = QTerm.term;
+
+		DynBooleanBuilder<QTerm, TermDto> builder = new DynBooleanBuilder<QTerm, TermDto>();
+		Predicate predicate = builder.searchPredicate(term, termDto).asPredicate();
+
+		return jpaQueryFactory.selectFrom(term)
+				.where(predicate)
+				.fetchCount();
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+/* TODO: Consider find/searchByDto with Predicate ... parameters, permits service to customize/extend */
 public abstract class BaseRepositoryImpl<T, D, ID> implements BaseRepository<T, D, ID>, InitializingBean {
 
 	private Class<T> type;
@@ -39,6 +40,9 @@ public abstract class BaseRepositoryImpl<T, D, ID> implements BaseRepository<T, 
 	@Override
 	public abstract List<T> findPageByDto(D dto);
 	
+	@Override
+	public abstract Long countSearchByDto(D dto);
+
 	@Override
 	public abstract List<T> searchByDto(D dto);
 	

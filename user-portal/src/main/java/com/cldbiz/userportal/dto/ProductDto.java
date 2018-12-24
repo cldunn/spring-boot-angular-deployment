@@ -1,11 +1,14 @@
 package com.cldbiz.userportal.dto;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.Product;
 
@@ -35,6 +38,8 @@ public @Data class ProductDto extends AbstractDto {
 	
 	public ProductDto() {
 		super();
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "name"))); 
 	}
 	
 	public ProductDto(Product product) {
@@ -45,6 +50,8 @@ public @Data class ProductDto extends AbstractDto {
 		this.setName(product.getName());
 		this.setPrice(product.getPrice());
 		this.setDescription(product.getDescription());
+		
+		this.setSortOrders(Arrays.asList(new Sort.Order(Sort.Direction.ASC, "name"))); 
 	}
 
 }

@@ -88,6 +88,17 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 				.fetch();
 	}
 
+	public Long countSearchByDto(CustomerDto customerDto) {
+		QCustomer customer = QCustomer.customer;
+
+		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
+		Predicate predicate = builder.searchPredicate(customer, customerDto).asPredicate();
+
+		return jpaQueryFactory.selectFrom(customer)
+				.where(predicate)
+				.fetchCount();
+	}
+	
 	@Override
 	public List<Customer> searchByDto(CustomerDto customerDto) {
 		QCustomer customer = QCustomer.customer;
