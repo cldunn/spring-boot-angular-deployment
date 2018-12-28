@@ -159,6 +159,9 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvCategory.get().equals(savedCategory)).isTrue();
 		
 		assertThat(savedCategory.getProducts().contains(anotherProduct));
+		
+		Optional<Product> savedProduct = savedCategory.getProducts().stream().filter(p -> p.getId().equals(anotherProduct.getId())).findFirst();
+		assertThat(savedProduct.get().getCategories().contains(anotherCategory));
 	}
 
 	@Test
@@ -351,7 +354,6 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		assertThat(categorys).isNotEmpty();
 		assertThat(categorys.size()).isLessThanOrEqualTo(2);
 		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
-
 	}
 
 	private Category getAnotherCategory() {

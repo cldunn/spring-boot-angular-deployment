@@ -1,5 +1,6 @@
 package com.cldbiz.userportal.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -22,13 +23,13 @@ import lombok.EqualsAndHashCode;
 public @Data class WishList extends AbstractDomain {
 	
 	@Column
-	private String Name;
+	private String name;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(name = "WISH_LIST_PRODUCT", 
          joinColumns = {@JoinColumn(name = "WISH_LIST_ID", foreignKey=@ForeignKey(name = "FK_PRODUCT_WISH_LIST"))}, 
          inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_WISH_LIST_PRODUCT"))})
-	private List<Product> products;
+	private List<Product> products = new ArrayList<Product>();
 	
 	public WishList() {
 		super();
@@ -39,5 +40,4 @@ public @Data class WishList extends AbstractDomain {
 		
 		this.setName(wishListDto.getName());
 	}
-
 }
