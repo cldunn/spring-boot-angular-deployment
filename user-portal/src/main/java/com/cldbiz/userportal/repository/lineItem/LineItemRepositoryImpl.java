@@ -115,7 +115,6 @@ public class LineItemRepositoryImpl extends BaseRepositoryImpl<LineItem, LineIte
 		return jpaQueryFactory.selectFrom(lineItem)
 				.where(builder.asPredicate())
 				.fetchCount();
-
 	}
 
 	@Override

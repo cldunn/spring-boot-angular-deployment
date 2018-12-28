@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.cldbiz.userportal.domain.Category;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
 import com.cldbiz.userportal.dto.LineItemDto;
@@ -111,45 +110,14 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenExistsById_thenReturnTrue() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
-		LineItem lineItem = lineItems.get(0);
+	public void whenModified_thenLineItemUpdated() {
+		Optional<LineItem> originalLineItem = lineItemRepository.findById(3L);
+		originalLineItem.get().setQuantity(originalLineItem.get().getQuantity() + 1L);
+		originalLineItem.get().getProduct().setName("UPDATED - " + originalLineItem.get().getProduct().getName());
 		
-		Boolean exists = lineItemRepository.existsById(lineItem.getId());
-		lineItemRepository.flush();
-		
-		assertThat(exists).isTrue();
-	}
-
-	@Test
-	public void whenFindAll_thenReturnAllLineItems() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
-		lineItemRepository.flush();
-		
-		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(lineItems.get(0).getProduct()).isNotNull();
-		
-	}
-
-	@Test
-	public void whenFindAllById_thenReturnAllLineItems() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
-		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
-		
-		lineItems = lineItemRepository.findAllById(lineItemIds);
-		lineItemRepository.flush();
-		
-		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(lineItems.get(0).getProduct()).isNotNull();
-	}
-
-	@Test
-	public void whenFindById_thenReturnLineItem() {
-		Optional<LineItem> sameLineItem = lineItemRepository.findById(3L);
-		lineItemRepository.flush();
-		
-		assertThat(sameLineItem.orElse(null)).isNotNull();
-		assertThat(sameLineItem.get().getProduct()).isNotNull();
+		Optional<LineItem> rtrvdLineItem = lineItemRepository.findById(3L);
+		assertThat(originalLineItem.get().getQuantity().equals((rtrvdLineItem.get().getQuantity())));
+		assertThat(originalLineItem.get().getProduct().getName().equals((rtrvdLineItem.get().getProduct().getName())));
 	}
 
 	@Test
@@ -172,17 +140,6 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvLineItem.get().equals(savedLineItem)).isTrue();
 		
 		assertThat(savedLineItem.getProduct()).isNotNull();
-	}
-
-	@Test
-	public void whenModified_thenLineItemUpdated() {
-		Optional<LineItem> originalLineItem = lineItemRepository.findById(3L);
-		originalLineItem.get().setQuantity(originalLineItem.get().getQuantity() + 1L);
-		originalLineItem.get().getProduct().setName("UPDATED - " + originalLineItem.get().getProduct().getName());
-		
-		Optional<LineItem> rtrvdLineItem = lineItemRepository.findById(3L);
-		assertThat(originalLineItem.get().getQuantity().equals((rtrvdLineItem.get().getQuantity())));
-		assertThat(originalLineItem.get().getProduct().getName().equals((rtrvdLineItem.get().getProduct().getName())));
 	}
 
 	@Test
@@ -245,6 +202,49 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
+	public void whenExistsById_thenReturnTrue() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		LineItem lineItem = lineItems.get(0);
+		
+		Boolean exists = lineItemRepository.existsById(lineItem.getId());
+		lineItemRepository.flush();
+		
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	public void whenFindAll_thenReturnAllLineItems() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		lineItemRepository.flush();
+		
+		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(lineItems.get(0).getProduct()).isNotNull();
+		
+	}
+
+	@Test
+	public void whenFindAllById_thenReturnAllLineItems() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+		
+		lineItems = lineItemRepository.findAllById(lineItemIds);
+		lineItemRepository.flush();
+		
+		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(lineItems.get(0).getProduct()).isNotNull();
+	}
+
+	@Test
+	public void whenFindById_thenReturnLineItem() {
+		Optional<LineItem> sameLineItem = lineItemRepository.findById(3L);
+		lineItemRepository.flush();
+		
+		assertThat(sameLineItem.orElse(null)).isNotNull();
+		assertThat(sameLineItem.get().getProduct()).isNotNull();
+	}
+
+
+	@Test
 	public void whenFindByDto_thenReturnLineItems() {
 		LineItemDto lineItemDto = new LineItemDto();
 		
@@ -277,7 +277,9 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		List<LineItem> lineItems = lineItemRepository.findPageByDto(lineItemDto);
 		lineItemRepository.flush();
 		
+		assertThat(lineItems).isNotEmpty();
 		assertThat(lineItems.size()).isLessThanOrEqualTo(2);
+		assertThat(lineItems.get(0).getProduct()).isNotNull();
 	}
 
 	@Test
@@ -322,6 +324,7 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		List<LineItem> lineItems = lineItemRepository.searchPageByDto(lineItemDto);
 		lineItemRepository.flush();
 		
+		assertThat(lineItems).isNotEmpty();
 		assertThat(lineItems.size()).isLessThanOrEqualTo(2);
 		assertThat(lineItems.get(0).getProduct()).isNotNull();
 

@@ -22,10 +22,13 @@ import com.cldbiz.userportal.domain.Invoice;
 import com.cldbiz.userportal.domain.PurchaseOrder;
 import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.dto.AccountDto;
+import com.cldbiz.userportal.dto.CustomerDto;
+import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
+import com.cldbiz.userportal.repository.invoice.InvoiceRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
@@ -38,16 +41,19 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	private static final Long TOTAL_ROWS = 3L;
 	
 	@Autowired
+	AccountRepository accountRepository;
+
+	@Autowired
 	TermRepository termRepository;
 
 	@Autowired
 	CustomerRepository customerRepository;
 
 	@Autowired
-	PurchaseOrderRepository purchaseOrderRepository;
-
+	InvoiceRepository invoiceRepository;
+	
 	@Autowired
-	AccountRepository accountRepository;
+	PurchaseOrderRepository purchaseOrderRepository;
 
 	@Test
 	public void whenCount_thenReturnCount() {
@@ -75,7 +81,9 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 		assertThat(customer.orElse(null)).isNull();
 		
-		// TODO check associated invoice deleted too
+		List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+		List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
+		assertThat(invoices.isEmpty());
 		
 		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
@@ -100,14 +108,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 			assertThat(customer.orElse(null)).isNull();
 			
+			List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+			List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
+			assertThat(invoices.isEmpty());
+			
 			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
 			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
 			assertThat(purchaseOrders.isEmpty());
 		});
-		
-		// TODO check associated invoice deleted too
-
-
 	}
 	
 	@Test
@@ -128,12 +136,13 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 		assertThat(customer.orElse(null)).isNull();
 
+		List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+		List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
+		assertThat(invoices.isEmpty());
+		
 		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
 		assertThat(purchaseOrders.isEmpty());
-
-		// TODO check associated invoice deleted too
-
 	}
 
 	@Test
@@ -156,12 +165,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 			assertThat(customer.orElse(null)).isNull();
 			
+			List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+			List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
+			assertThat(invoices.isEmpty());
+			
 			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
 			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
 			assertThat(purchaseOrders.isEmpty());
 		});
-
-		// TODO check associated invoice deleted too
 	}
 
 	@Test
@@ -184,12 +195,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accounts.get(0).getTerm()).isNotNull();
 		assertThat(accounts.get(0).getCustomer()).isNotNull();
 		
+		/* check at least one test account has invoices */
 		Optional<Account> invoicedAccount = accounts.stream().
 			    filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty())).
 			    findFirst();
 		
 		assertThat(invoicedAccount.orElse(null)).isNotNull();
 		
+		/* check at least one test account has purchaseOrders */
 		Optional<Account> purcheOrderdAccount = accounts.stream().
 			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
 			    findFirst();
@@ -208,12 +221,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accounts.get(0).getTerm()).isNotNull();
 		assertThat(accounts.get(0).getCustomer()).isNotNull();
 		
+		/* check at least one test account has invoices */
 		Optional<Account> invoicedAccount = accounts.stream().
 			    filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty())).
 			    findFirst();
 		
 		assertThat(invoicedAccount.orElse(null)).isNotNull();
 		
+		/* check at least one test account has purchaseOrders */
 		Optional<Account> purcheOrderdAccount = accounts.stream().
 			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
 			    findFirst();
@@ -301,14 +316,17 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Term anotherTerm = getAnotherTerm();
 		anotherAccount.setTerm(anotherTerm);
 		
+		// Manually resolve bi-directional references
 		Customer anotherCustomer = getAnotherCustomer();
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
+		// Manually resolve bi-directional references
 		List<Invoice> someInvoices = getSomeInvoices();
 		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
+		// Manually resolve bi-directional references
 		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
 		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
@@ -318,14 +336,17 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Term extraTerm = getExtraTerm();
 		extraAccount.setTerm(extraTerm);
 		
+		// Manually resolve bi-directional references
 		Customer extraCustomer = getExtraCustomer();
 		extraCustomer.setAccount(extraAccount);
 		extraAccount.setCustomer(extraCustomer);
 		
+		// Manually resolve bi-directional references
 		List<Invoice> moreInvoices = getMoreInvoices();
 		moreInvoices.forEach(i -> i.setAccount(extraAccount));
 		extraAccount.setInvoices(moreInvoices);
 		
+		// Manually resolve bi-directional references
 		List<PurchaseOrder> morePurchaseOrders = getMorePurchaseOrders();
 		morePurchaseOrders.forEach(po -> po.setAccount(extraAccount));
 		extraAccount.setPurchaseOrders(morePurchaseOrders);
@@ -358,7 +379,6 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(Boolean.FALSE.equals(rtrvAnotherAccount.get().getPurchaseOrders().isEmpty()));
 		assertThat(rtrvAnotherAccount.get().getPurchaseOrders().stream().allMatch(t -> somePurchaseOrders.contains(t))).isTrue();
 		assertThat(somePurchaseOrders.stream().allMatch(t -> rtrvAnotherAccount.get().getPurchaseOrders().contains(t))).isTrue();
-
 		
 		Optional<Account> rtrvExtaAccount = accountRepository.findById(extraAccount.getId());
 		assertThat(rtrvExtaAccount.orElse(null)).isNotNull();
@@ -425,6 +445,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior Dry Cleaners");
 		
+		TermDto termDto = new TermDto();
+		termDto.setCode("EOM");
+		accountDto.setTermDto(termDto);
+		
+		CustomerDto customerDto = new CustomerDto();
+		customerDto.setWorkEmail("alex.crowe.yahoo.com");
+		accountDto.setCustomerDto(customerDto);
+		
 		List<Account> accounts = accountRepository.findByDto(accountDto);
 		accountRepository.flush();
 		
@@ -439,6 +467,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(account.orElse(null)).isNotNull();
 		assertThat(account.get().getAccountName().equals(accountDto.getAccountName())).isTrue();
+		assertThat(account.get().getTerm().getCode().equals(accountDto.getTermDto().getCode())).isTrue();
+		assertThat(account.get().getCustomer().getWorkEmail().equals(accountDto.getCustomerDto().getWorkEmail())).isTrue();
 	}
 
 	@Test
@@ -463,12 +493,30 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(account.orElse(null)).isNotNull();
 	}
 
-	// TODO: whenCountSearchByDto_thenReturnCount
+	@Test
+	public void whenCountSearchByDto_thenReturnCount() {
+		AccountDto accountDto = new AccountDto();
+		
+		accountDto.setActive(true);
+		
+		Long accountCount = accountRepository.countSearchByDto(accountDto);
+		accountRepository.flush();
+		
+		assertThat(accountCount).isGreaterThan(0L);
+	}
 	
 	@Test
 	public void whenSearchByDto_thenReturnAccounts() {
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior");
+		
+		TermDto termDto = new TermDto();
+		termDto.setDescription("Month");
+		accountDto.setTermDto(termDto);
+		
+		CustomerDto customerDto = new CustomerDto();
+		customerDto.setWorkEmail("yahoo.com");
+		accountDto.setCustomerDto(customerDto);
 		
 		List<Account> accounts = accountRepository.searchByDto(accountDto);
 		accountRepository.flush();

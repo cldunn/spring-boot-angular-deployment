@@ -13,13 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Category;
+import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
+import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
 import com.cldbiz.userportal.repository.product.ProductRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/productData.xml"})  // TODO:  add "/lineItemData.xml", "/categoryData.xml", "/categoryProductData.xml"
+@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml", "/categoryData.xml", "/categoryProductData.xml"})  
 public class ProductRepositoryTest  extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoryTest.class);
 	
@@ -28,6 +31,9 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 	@Autowired
 	ProductRepository productRepository;
 	
+	@Autowired
+	LineItemRepository lineItemRepository;
+
 	@Test
 	public void whenCount_thenReturnCount() {
 		long productCnt = productRepository.count();
@@ -41,8 +47,15 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		List<Product> products = productRepository.findAll();
 		Product product = products.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
 		
-		/* TODO: Develop LineItem.findByDto to return lineItmes with related product */
-		/* TODO: delete lineItems with product before deleting product */
+		/* find the line items using this product */
+		ProductDto productDto = new ProductDto(product);
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(productDto);
+		
+		/* delete the line items using this product */
+		List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
+		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+		lineItemRepository.deleteByIds(lineItemIds);
 		
 		productRepository.delete(product);
 		productRepository.flush();
@@ -58,8 +71,17 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 	public void whenDeleteAll_thenRemoveAllProducts() {
 		List<Product> products = productRepository.findAll();
 		
-		/* TODO: Develop LineItem.findByDto to return lineItmes with related product */
-		/* TODO: delete lineItems for each product before deleting products */
+		products.stream().forEach(product -> {
+			/* find the line items using this product */
+			ProductDto productDto = new ProductDto(product);
+			LineItemDto lineItemDto = new LineItemDto();
+			lineItemDto.setProductDto(productDto);
+			
+			/* delete the line items using this product */
+			List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
+			List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+			lineItemRepository.deleteByIds(lineItemIds);
+		});
 
 		productRepository.deleteAll(products);
 		productRepository.flush();
@@ -78,9 +100,16 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		List<Product> products = productRepository.findAll();
 		Product product = products.get(0);
 		
-		/* TODO: Develop LineItem.findByDto to return lineItmes with related product */
-		/* TODO: delete lineItems for each product before deleting products */
-
+		/* find the line items using this product, , uni-directional */
+		ProductDto productDto = new ProductDto(product);
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(productDto);
+		
+		/* delete the line items using this product, uni-directional */
+		List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
+		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+		lineItemRepository.deleteByIds(lineItemIds);
+	
 		productRepository.deleteById(product.getId());
 		productRepository.flush();
 		
@@ -95,9 +124,18 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 	public void whenDeleteByIds_thenRemoveAllProducts() {
 		List<Product> products = productRepository.findAll();
 
-		/* TODO: Develop LineItem.findByDto to return lineItmes with related product */
-		/* TODO: delete lineItems for each product before deleting products */
-
+		products.stream().forEach(product -> {
+			/* find the line items using this product, , uni-directional */
+			ProductDto productDto = new ProductDto(product);
+			LineItemDto lineItemDto = new LineItemDto();
+			lineItemDto.setProductDto(productDto);
+			
+			/* delete the line items using this product, uni-directional */
+			List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
+			List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+			lineItemRepository.deleteByIds(lineItemIds);
+		});
+	
 		List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
 		
 		productRepository.deleteByIds(productIds);
@@ -130,7 +168,9 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		productRepository.flush();
 		
 		assertThat(products.size()).isEqualTo(TOTAL_ROWS.intValue());
-		// Assert that at least one product belongs to a category
+		
+		List<Product> categorizedProducts = products.stream().filter(p -> !p.getCategories().isEmpty()).collect(Collectors.toList());
+		assertThat(categorizedProducts.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -142,7 +182,9 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		productRepository.flush();
 		
 		assertThat(products.size()).isEqualTo(TOTAL_ROWS.intValue());
-		// Assert that at least one product belongs to a category
+		
+		List<Product> categorizedProducts = products.stream().filter(p -> !p.getCategories().isEmpty()).collect(Collectors.toList());
+		assertThat(categorizedProducts.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -151,7 +193,8 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		productRepository.flush();
 		
 		assertThat(sameProduct.orElse(null)).isNotNull();
-		// Assert that the product belongs to a category
+
+		assertThat(sameProduct.get().getCategories().isEmpty()).isFalse();
 	}
 
 	@Test

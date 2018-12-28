@@ -1,5 +1,6 @@
 package com.cldbiz.userportal.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -22,13 +23,13 @@ import lombok.EqualsAndHashCode;
 public @Data class Category extends AbstractDomain {
 	
 	@Column
-	private String Name;
+	private String name;
 	
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@ManyToMany(cascade = { CascadeType.PERSIST })
     @JoinTable(name = "CATEGORY_PRODUCT", 
          joinColumns = {@JoinColumn(name = "CATEGORY_ID", foreignKey=@ForeignKey(name = "FK_PRODUCT_CATEGORY"))}, 
          inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_CATEGORY_PRODUCT"))})
-	private List<Product> products;
+	private List<Product> products = new ArrayList<Product>();
 	
 	public Category() {
 		super();

@@ -14,11 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Customer;
+import com.cldbiz.userportal.domain.Invoice;
+import com.cldbiz.userportal.domain.PurchaseOrder;
 import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
+import com.cldbiz.userportal.repository.invoice.InvoiceRepository;
+import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
@@ -37,6 +41,13 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 	
 	@Autowired
 	TermRepository termRepository;
+	
+	@Autowired
+	InvoiceRepository invoiceRepository;
+
+	@Autowired
+	PurchaseOrderRepository purchaseOrderRepository;
+
 
 	@Test
 	public void whenCount_thenReturnCount() {
@@ -60,9 +71,6 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 
 		Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 		assertThat(account.orElse(null)).isNull();
-		
-		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
 	}
 
 	@Test
@@ -80,9 +88,6 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 			assertThat(account.orElse(null)).isNull();
 		});
-		
-		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
 	}
 	
 	@Test
@@ -99,9 +104,6 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		
 		Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 		assertThat(account.orElse(null)).isNull();
-		
-		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
 	}
 
 	@Test
@@ -121,10 +123,6 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
 			assertThat(account.orElse(null)).isNull();
 		});
-		
-		// TODO check associated invoice deleted too
-		// TODO check associated purchaseOrder too
-
 	}
 
 	@Test
@@ -144,7 +142,11 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		customerRepository.flush();
 		
 		assertThat(customers.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(customers.get(0).getAccount()).isNotNull();
+		
+		customers.forEach(customer -> {
+			Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
+			assertThat(account.orElse(null)).isNotNull();
+		});
 	}
 
 	@Test
@@ -156,7 +158,11 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		customerRepository.flush();
 		
 		assertThat(customers.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(customers.get(0).getAccount()).isNotNull();
+		
+		customers.forEach(customer -> {
+			Optional<Account> account = accountRepository.findById(customer.getAccount().getId());
+			assertThat(account.orElse(null)).isNotNull();
+		});
 	}
 
 	@Test
@@ -166,7 +172,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(sameCustomer.orElse(null)).isNotNull();
 		
-		assertThat(sameCustomer.get().getAccount()).isNotNull();
+		Optional<Account> account = accountRepository.findById(sameCustomer.get().getAccount().getId());
+		assertThat(account.orElse(null)).isNotNull();
 	}
 
 	@Test
@@ -291,6 +298,10 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		CustomerDto customerDto = new CustomerDto();
 		customerDto.setCompany("Superior Dry Cleaners");
 		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setShippingAddress("1234 Main St. Dallas Texas 75002");
+		customerDto.setAccountDto(accountDto);
+		
 		List<Customer> customers = customerRepository.findByDto(customerDto);
 		customerRepository.flush();
 		
@@ -302,6 +313,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(customer.orElse(null)).isNotNull();
 		assertThat(customer.get().getCompany().equals(customerDto.getCompany())).isTrue();
+		assertThat(customer.get().getAccount().getShippingAddress().equals(customerDto.getAccountDto().getShippingAddress())).isTrue();
 	}
 
 	@Test
@@ -325,11 +337,26 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 	}
 
 	// TODO: whenCountSearchByDto_thenReturnCount
-	
+	@Test
+	public void whenCountSearchByDto_thenReturnCount() {
+		CustomerDto customerDto = new CustomerDto();
+		
+		customerDto.setCanContact(true);
+		
+		Long customerCount = customerRepository.countSearchByDto(customerDto);
+		customerRepository.flush();
+		
+		assertThat(customerCount).isGreaterThan(0L);
+	}
+
 	@Test
 	public void whenSearchByDto_thenReturnCustomers() {
 		CustomerDto customerDto = new CustomerDto();
-		customerDto.setCompany("Cleaners");
+		customerDto.setWorkPhone("555");
+		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setBillingAddress("Dallas");
+		customerDto.setAccountDto(accountDto);
 		
 		List<Customer> customers = customerRepository.searchByDto(customerDto);
 		customerRepository.flush();
@@ -341,7 +368,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(customer.orElse(null)).isNotNull();
-		assertThat(customer.get().getCompany().contains(customerDto.getCompany())).isTrue();
+		assertThat(customer.get().getWorkPhone().contains(customerDto.getWorkPhone())).isTrue();
+		assertThat(customer.get().getAccount().getBillingAddress().contains(customerDto.getAccountDto().getBillingAddress())).isTrue();
 	}
 
 	@Test

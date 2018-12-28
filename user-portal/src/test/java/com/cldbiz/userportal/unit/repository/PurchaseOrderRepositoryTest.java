@@ -16,9 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.PurchaseOrder;
+import com.cldbiz.userportal.dto.AccountDto;
+import com.cldbiz.userportal.dto.LineItemDto;
+import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
+import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
@@ -39,6 +43,9 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	@Autowired
 	AccountRepository accountRepository;
 	
+	@Autowired
+	LineItemRepository lineItemRepository;
+
 	@Autowired
 	PurchaseOrderRepository purchaseOrderRepository;
 
@@ -65,7 +72,11 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
 		assertThat(account.orElse(null)).isNotNull();
 
-		// TODO check associated lineItems too
+		Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
+			Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
+			return lineItem.orElse(null) != null;
+		}).findFirst();
+		assertThat(deletedLineItem.orElse(null)).isNull();
 	}
 
 	@Test
@@ -82,10 +93,13 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		purchaseOrders.forEach(purchaseOrder -> {
 			Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
 			assertThat(account.orElse(null)).isNotNull();
-		});
-		
-		// TODO check associated lineItems too
 
+			Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
+				Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
+				return lineItem.orElse(null) != null;
+			}).findFirst();
+			assertThat(deletedLineItem.orElse(null)).isNull();
+		});
 	}
 
 	@Test
@@ -103,7 +117,11 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
 		assertThat(account.orElse(null)).isNotNull();
 
-		// TODO check associated lineItems too
+		Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
+			Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
+			return lineItem.orElse(null) != null;
+		}).findFirst();
+		assertThat(deletedLineItem.orElse(null)).isNull();
 	}
 
 	@Test
@@ -122,9 +140,13 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		purchaseOrders.forEach(purchaseOrder -> {
 			Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
 			assertThat(account.orElse(null)).isNotNull();
-		});
 
-		// TODO check associated lineItems too
+			Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
+				Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
+				return lineItem.orElse(null) != null;
+			}).findFirst();
+			assertThat(deletedLineItem.orElse(null)).isNull();
+		});
 	}
 
 	@Test
@@ -190,8 +212,8 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		anotherPurchaseOrder.setAccount(anotherAccount);
 		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
 		
-		List<LineItem> moreLineItems = getSomeLineItems();
-		anotherPurchaseOrder.setLineItems(moreLineItems);
+		List<LineItem>someLineItems = getSomeLineItems();
+		anotherPurchaseOrder.setLineItems(someLineItems);
 		
 		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.save(anotherPurchaseOrder);
 		purchaseOrderRepository.flush();
@@ -208,8 +230,8 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvPurchaseOrder.get().getAccount().equals(anotherAccount)).isTrue();
 
 		assertThat(Boolean.FALSE.equals(rtrvPurchaseOrder.get().getLineItems().isEmpty()));
-		assertThat(rtrvPurchaseOrder.get().getLineItems().stream().allMatch(t -> moreLineItems.contains(t))).isTrue();
-		assertThat(moreLineItems.stream().allMatch(t -> rtrvPurchaseOrder.get().getLineItems().contains(t))).isTrue();
+		assertThat(rtrvPurchaseOrder.get().getLineItems().stream().allMatch(t -> someLineItems.contains(t))).isTrue();
+		assertThat(someLineItems.stream().allMatch(t -> rtrvPurchaseOrder.get().getLineItems().contains(t))).isTrue();
 	}
 
 	@Test
@@ -229,6 +251,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	public void whenSaveAll_thenReturnSavedPurchaseOrders() {
 		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder();
 		
+		// Manually resolve bi-directional references
 		Account anotherAccount = getAnotherAccount();
 		anotherPurchaseOrder.setAccount(anotherAccount);
 		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
@@ -238,6 +261,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		
 		PurchaseOrder extraPurchaseOrder = getExtraPurchaseOrder();
 		
+		// Manually resolve bi-directional references
 		Account extraAccount = getExtraAccount();
 		extraPurchaseOrder.setAccount(extraAccount);
 		extraAccount.getPurchaseOrders().add(extraPurchaseOrder);
@@ -287,8 +311,8 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		anotherPurchaseOrder.setAccount(anotherAccount);
 		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
 		
-		List<LineItem> moreLineItems = getSomeLineItems();
-		anotherPurchaseOrder.setLineItems(moreLineItems);
+		List<LineItem> someLineItems = getSomeLineItems();
+		anotherPurchaseOrder.setLineItems(someLineItems);
 		
 		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.saveAndFlush(anotherPurchaseOrder);
 		
@@ -304,14 +328,21 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvPurchaseOrder.get().getAccount().equals(anotherAccount)).isTrue();
 
 		assertThat(Boolean.FALSE.equals(rtrvPurchaseOrder.get().getLineItems().isEmpty()));
-		assertThat(rtrvPurchaseOrder.get().getLineItems().stream().allMatch(t -> moreLineItems.contains(t))).isTrue();
-		assertThat(moreLineItems.stream().allMatch(t -> rtrvPurchaseOrder.get().getLineItems().contains(t))).isTrue();
+		assertThat(rtrvPurchaseOrder.get().getLineItems().stream().allMatch(t -> someLineItems.contains(t))).isTrue();
+		assertThat(someLineItems.stream().allMatch(t -> rtrvPurchaseOrder.get().getLineItems().contains(t))).isTrue();
 	}
 
 	@Test
 	public void whenFindByDto_thenReturnPurchaseOrders() {
 		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
 		purchaseOrderDto.setOrderIdentifier("NET30-417");
+		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Target");
+		purchaseOrderDto.setAccountDto(accountDto);
+		
+		/* TODO incorporate find product in any lineitem for purchaseOrder */
+		/* TODO incorporate find product in all lineitems for purchaseOrder */
 		
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
@@ -325,6 +356,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(purchaseOrder.orElse(null)).isNotNull();
 		assertThat(purchaseOrder.get().getOrderIdentifier().equals(purchaseOrderDto.getOrderIdentifier())).isTrue();
+		assertThat(purchaseOrder.get().getAccount().getAccountName().equals(purchaseOrderDto.getAccountDto().getAccountName())).isTrue();
 	}
 
 	@Test
@@ -334,10 +366,18 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		purchaseOrderDto.setStart(0);
 		purchaseOrderDto.setLimit(2);
 		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Target");
+		purchaseOrderDto.setAccountDto(accountDto);
+
+		/* TODO incorporate find product in any lineitem for purchaseOrder */
+		/* TODO incorporate find product in all lineitems for purchaseOrder */
+
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findPageByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
 		
-		assertThat(purchaseOrders.size()).isEqualTo(2);
+		assertThat(purchaseOrders.isEmpty()).isFalse();
+		assertThat(purchaseOrders.size()).isLessThanOrEqualTo(2);
 		
 		Optional<PurchaseOrder> purchaseOrder = purchaseOrders.stream()
 			.filter(p -> p.getAccount() != null)
@@ -345,15 +385,40 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(purchaseOrder.orElse(null)).isNotNull();
+		assertThat(purchaseOrder.get().getStatus().equals(purchaseOrderDto.getStatus())).isTrue();
+		assertThat(purchaseOrder.get().getAccount().getAccountName().equals(purchaseOrderDto.getAccountDto().getAccountName())).isTrue();
 	}
 
-	// TODO: whenCountSearchByDto_thenReturnCount
+	@Test
+	public void whenCountSearchByDto_thenReturnCount() {
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Target");
+		purchaseOrderDto.setAccountDto(accountDto);
+		
+		/* TODO incorporate find product in any lineitem for purchaseOrder */
+		/* TODO incorporate find product in all lineitems for purchaseOrder */
+
+		Long purchaseOrderCount = purchaseOrderRepository.countSearchByDto(purchaseOrderDto);
+		purchaseOrderRepository.flush();
+		
+		assertThat(purchaseOrderCount).isGreaterThan(0L);
+	}
+
 	
 	@Test
 	public void whenSearchByDto_thenReturnPurchaseOrders() {
 		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
 		purchaseOrderDto.setOrderIdentifier("NET30");
 		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setShippingAddress("750");
+		purchaseOrderDto.setAccountDto(accountDto);
+
+		/* TODO incorporate find product in any lineitem for purchaseOrder */
+		/* TODO incorporate find product in all lineitems for purchaseOrder */
+
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.searchByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
 		
@@ -365,6 +430,8 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(purchaseOrder.orElse(null)).isNotNull();
+		assertThat(purchaseOrder.get().getOrderIdentifier().contains(purchaseOrderDto.getOrderIdentifier())).isTrue();
+		assertThat(purchaseOrder.get().getAccount().getShippingAddress().contains(purchaseOrderDto.getAccountDto().getShippingAddress())).isTrue();
 	}
 
 	@Test
@@ -374,10 +441,17 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		purchaseOrderDto.setStart(0);
 		purchaseOrderDto.setLimit(2);
 		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setShippingAddress("750");
+		purchaseOrderDto.setAccountDto(accountDto);
+
+		/* TODO incorporate find product in any lineitem for purchaseOrder */
+		/* TODO incorporate find product in all lineitems for purchaseOrder */
+
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.searchPageByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
 		
-		assertThat(purchaseOrders.size()).isEqualTo(2);
+		assertThat(purchaseOrders.size()).isLessThanOrEqualTo(2);
 		
 		Optional<PurchaseOrder> purchaseOrder = purchaseOrders.stream()
 			.filter(p -> p.getAccount() != null)
@@ -385,6 +459,8 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(purchaseOrder.orElse(null)).isNotNull();
+		assertThat(purchaseOrder.get().getOrderIdentifier().contains(purchaseOrderDto.getOrderIdentifier())).isTrue();
+		assertThat(purchaseOrder.get().getAccount().getShippingAddress().contains(purchaseOrderDto.getAccountDto().getShippingAddress())).isTrue();
 	}
 
 	private PurchaseOrder getAnotherPurchaseOrder() {

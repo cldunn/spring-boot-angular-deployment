@@ -32,7 +32,7 @@ public abstract class BaseRepositoryImpl<T, D, ID> implements BaseRepository<T, 
 	public abstract List<T> findAll();
 	
 	@Override
-	public abstract List<T> findAllById(List<ID> ids);
+	public abstract List<T> findAllById(List<ID> ids);  //findAllByIds()
 	
 	@Override
 	public abstract List<T> findByDto(D dto);

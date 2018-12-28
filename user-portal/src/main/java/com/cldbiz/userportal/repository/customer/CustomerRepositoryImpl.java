@@ -5,9 +5,11 @@ import java.util.List;
 import com.cldbiz.userportal.domain.Customer;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCustomer;
+import com.cldbiz.userportal.domain.QInvoice;
 import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
+import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -54,7 +56,13 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		QTerm term = QTerm.term;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-		Predicate predicate = builder.findPredicate(customer, customerDto).asPredicate();
+		builder = builder.findPredicate(customer, customerDto);
+
+		if (customerDto.getAccountDto() != null) {
+			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
+			Predicate byAccountPredicate = byAccountBuilder.findPredicate(customer.account, customerDto.getAccountDto()).asPredicate();
+			builder.and(byAccountPredicate);
+		}
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -62,7 +70,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
 				.innerJoin(account.term, term).fetchJoin()
-				.where(predicate)
+				.where(builder.asPredicate())
 				.fetch();
 	}
 
@@ -73,7 +81,13 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		QTerm term = QTerm.term;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-		Predicate predicate = builder.findPredicate(customer, customerDto).asPredicate();
+		builder = builder.findPredicate(customer, customerDto);
+
+		if (customerDto.getAccountDto() != null) {
+			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
+			Predicate byAccountPredicate = byAccountBuilder.findPredicate(customer.account, customerDto.getAccountDto()).asPredicate();
+			builder.and(byAccountPredicate);
+		}
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -81,7 +95,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
 				.innerJoin(account.term, term).fetchJoin()
-				.where(predicate)
+				.where(builder.asPredicate())
 				.orderBy(sortBy(customerDto))
 				.offset(customerDto.getStart().intValue())
 				.limit(customerDto.getLimit().intValue())
@@ -92,10 +106,16 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		QCustomer customer = QCustomer.customer;
 
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-		Predicate predicate = builder.searchPredicate(customer, customerDto).asPredicate();
+		builder = builder.searchPredicate(customer, customerDto);
 
+		if (customerDto.getAccountDto() != null) {
+			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
+			Predicate byAccountPredicate = byAccountBuilder.searchPredicate(customer.account, customerDto.getAccountDto()).asPredicate();
+			builder.and(byAccountPredicate);
+		}
+		
 		return jpaQueryFactory.selectFrom(customer)
-				.where(predicate)
+				.where(builder.asPredicate())
 				.fetchCount();
 	}
 	
@@ -106,7 +126,13 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		QTerm term = QTerm.term;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-		Predicate predicate = builder.searchPredicate(customer, customerDto).asPredicate();
+		builder = builder.searchPredicate(customer, customerDto);
+
+		if (customerDto.getAccountDto() != null) {
+			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
+			Predicate byAccountPredicate = byAccountBuilder.searchPredicate(customer.account, customerDto.getAccountDto()).asPredicate();
+			builder.and(byAccountPredicate);
+		}
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -114,7 +140,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
 				.innerJoin(account.term, term).fetchJoin()
-				.where(predicate)
+				.where(builder.asPredicate())
 				.fetch();
 	}
 
@@ -125,7 +151,13 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		QTerm term = QTerm.term;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-		Predicate predicate = builder.searchPredicate(customer, customerDto).asPredicate();
+		builder = builder.searchPredicate(customer, customerDto);
+
+		if (customerDto.getAccountDto() != null) {
+			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
+			Predicate byAccountPredicate = byAccountBuilder.searchPredicate(customer.account, customerDto.getAccountDto()).asPredicate();
+			builder.and(byAccountPredicate);
+		}
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -133,7 +165,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
 				.innerJoin(account.term, term).fetchJoin()
-				.where(predicate)
+				.where(builder.asPredicate())
 				.orderBy(sortBy(customerDto))
 				.offset(customerDto.getStart().intValue())
 				.limit(customerDto.getLimit().intValue())
