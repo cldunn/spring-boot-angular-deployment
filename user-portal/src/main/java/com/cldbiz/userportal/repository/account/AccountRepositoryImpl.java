@@ -5,10 +5,14 @@ import java.util.List;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCustomer;
+import com.cldbiz.userportal.domain.QInvoice;
+import com.cldbiz.userportal.domain.QProduct;
 import com.cldbiz.userportal.domain.QPurchaseOrder;
 import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
+import com.cldbiz.userportal.dto.InvoiceDto;
+import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.dto.TermDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
@@ -59,16 +63,30 @@ public class AccountRepositoryImpl extends BaseRepositoryImpl<Account, AccountDt
 		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
 		builder = builder.findPredicate(account, accountDto);
 
+		if (accountDto.getTermDto() != null) {
+			DynBooleanBuilder<QTerm, TermDto> byTermBuilder = new DynBooleanBuilder<QTerm, TermDto>();
+			Predicate byTermPredicate = byTermBuilder.findPredicate(account.term, accountDto.getTermDto()).asPredicate();
+			builder.and(byTermPredicate);
+		}
+
 		if (accountDto.getCustomerDto() != null) {
 			DynBooleanBuilder<QCustomer, CustomerDto> byCustomerBuilder = new DynBooleanBuilder<QCustomer, CustomerDto>();
 			Predicate byCustomerPredicate = byCustomerBuilder.findPredicate(account.customer, accountDto.getCustomerDto()).asPredicate();
 			builder.and(byCustomerPredicate);
 		}
 
-		if (accountDto.getTermDto() != null) {
-			DynBooleanBuilder<QTerm, TermDto> byTermBuilder = new DynBooleanBuilder<QTerm, TermDto>();
-			Predicate byTermPredicate = byTermBuilder.findPredicate(account.term, accountDto.getTermDto()).asPredicate();
-			builder.and(byTermPredicate);
+		/*  Marginal benefit because purchaseOrder has account, could just find purchaseOrders and filter accounts */
+		if (accountDto.getPurchaseOrderDto() != null) {
+			DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> byPurchaseOrderBuilder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
+			Predicate byPurchaseOrderPredicate = byPurchaseOrderBuilder.findPredicate(account.purchaseOrders.any(), accountDto.getPurchaseOrderDto()).asPredicate();
+			builder.and(byPurchaseOrderPredicate);
+		}
+
+		/* Marginal benefit because invoice has account, could just find invoices and filter accounts */
+		if (accountDto.getInvoiceDto() != null) {
+			DynBooleanBuilder<QInvoice, InvoiceDto> byInvoiceBuilder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
+			Predicate byInvoicePredicate = byInvoiceBuilder.findPredicate(account.invoices.any(), accountDto.getInvoiceDto()).asPredicate();
+			builder.and(byInvoicePredicate);
 		}
 
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin

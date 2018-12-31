@@ -25,7 +25,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 public class LineItemRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoryTest.class);
 	
-	private static final Long TOTAL_ROWS = 6L;
+	private static final Long TOTAL_ROWS = 4L;
 	
 	@Autowired
 	LineItemRepository lineItemRepository;

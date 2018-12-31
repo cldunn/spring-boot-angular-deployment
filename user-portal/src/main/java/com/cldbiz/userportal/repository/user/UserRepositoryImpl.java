@@ -5,23 +5,13 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cldbiz.userportal.domain.Account;
-import com.cldbiz.userportal.domain.QAccount;
-import com.cldbiz.userportal.domain.QTerm;
-import com.cldbiz.userportal.domain.QTest;
 import com.cldbiz.userportal.domain.QUser;
-import com.cldbiz.userportal.domain.Term;
 import com.cldbiz.userportal.domain.User;
-import com.cldbiz.userportal.dto.AccountDto;
-import com.cldbiz.userportal.dto.TermDto;
-import com.cldbiz.userportal.dto.TestDto;
 import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 
 public class UserRepositoryImpl extends BaseRepositoryImpl<User, UserDto, Long> implements UserRepositoryExt {

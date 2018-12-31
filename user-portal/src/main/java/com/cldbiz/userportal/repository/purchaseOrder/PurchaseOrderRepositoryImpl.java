@@ -6,12 +6,14 @@ import com.cldbiz.userportal.domain.PurchaseOrder;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCustomer;
 import com.cldbiz.userportal.domain.QInvoice;
+import com.cldbiz.userportal.domain.QLineItem;
 import com.cldbiz.userportal.domain.QProduct;
 import com.cldbiz.userportal.domain.QPurchaseOrder;
 import com.cldbiz.userportal.domain.QTerm;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
+import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
@@ -71,6 +73,12 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
 			Predicate byAccountPredicate = byAccountBuilder.findPredicate(purchaseOrder.account, purchaseOrderDto.getAccountDto()).asPredicate();
 			builder.and(byAccountPredicate);
+		}
+
+		if (purchaseOrderDto.getLineItemDto() != null) {
+			DynBooleanBuilder<QLineItem, LineItemDto> byLineItemBuilder = new DynBooleanBuilder<QLineItem, LineItemDto>();
+			Predicate byLineItemPredicate = byLineItemBuilder.findPredicate(purchaseOrder.lineItems.any(), purchaseOrderDto.getLineItemDto()).asPredicate();
+			builder.and(byLineItemPredicate);
 		}
 
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin

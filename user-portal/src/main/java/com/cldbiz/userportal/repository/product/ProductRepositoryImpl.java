@@ -3,9 +3,13 @@ package com.cldbiz.userportal.repository.product;
 import java.util.List;
 
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.domain.QCategory;
 import com.cldbiz.userportal.domain.QCustomer;
+import com.cldbiz.userportal.domain.QInvoice;
 import com.cldbiz.userportal.domain.QProduct;
+import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.CustomerDto;
+import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
@@ -44,6 +48,12 @@ public class ProductRepositoryImpl extends BaseRepositoryImpl<Product, ProductDt
 		
 		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
 		Predicate predicate = builder.findPredicate(product, productDto).asPredicate();
+
+		if (productDto.getCategoryDto() != null) {
+			DynBooleanBuilder<QCategory, CategoryDto> byCategoryBuilder = new DynBooleanBuilder<QCategory, CategoryDto>();
+			Predicate byCategoryPredicate = byCategoryBuilder.findPredicate(product.categories.any(), productDto.getCategoryDto()).asPredicate();
+			builder.and(byCategoryPredicate);
+		}
 
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient

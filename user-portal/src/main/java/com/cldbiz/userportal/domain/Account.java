@@ -43,7 +43,7 @@ public @Data class Account extends AbstractDomain {
 	
 	
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
-	@OneToOne // (optional=false)
+	@OneToOne(optional=false)
 	@EqualsAndHashCode.Exclude 
 	@JoinColumn(name="TERM_ID", foreignKey=@ForeignKey(name = "FK_ACCOUNT_TERM"))
 	private Term term;

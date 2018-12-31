@@ -335,7 +335,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	@Test
 	public void whenFindByDto_thenReturnPurchaseOrders() {
 		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
-		purchaseOrderDto.setOrderIdentifier("NET30-417");
+		purchaseOrderDto.setOrderIdentifier("NET30-418");
 		
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Target");

@@ -319,7 +319,7 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		Long categoryCount = categoryRepository.countSearchByDto(categoryDto);
 		categoryRepository.flush();
 		
-		assertThat(categoryCount).isGreaterThanOrEqualTo(2L);
+		assertThat(categoryCount).isGreaterThanOrEqualTo(1L);
 	}
 
 	@Test
@@ -335,7 +335,7 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		categoryRepository.flush();
 		
 		assertThat(categorys).isNotEmpty();
-		assertThat(categorys.get(0).getProducts().get(0).equals("Stationary"));
+		assertThat(categorys.get(0).getProducts().stream().map(p -> p.getName()).collect(Collectors.toList()).contains("Stationary"));
 	}
 
 	@Test

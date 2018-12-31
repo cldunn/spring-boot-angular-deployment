@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
 	<CATEGORY ID="1" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Writing" />
-	<CATEGORY ID="2" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Stationary" />
+	<CATEGORY ID="2" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Furniture" />
 	<CATEGORY ID="3" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Electronic" />
 </dataset>
