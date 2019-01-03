@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation;
-import org.springframework.data.jpa.repository.support.QuerydslJpaRepository;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -41,7 +41,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  Iterable<T> findAll()
  */
 
-public class AbstractRepositoryImpl<T, ID extends Serializable> extends QuerydslJpaRepository<T, ID> implements AbstractRepository<T, ID> {
+public class AbstractRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements AbstractRepository<T, ID> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRepositoryImpl.class);
 
     protected final Class<T> tClass;
@@ -51,7 +51,7 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
 	
 	protected JPAQueryFactory jpaQueryFactory;
 	
-	protected QuerydslJpaRepository<T, ID> repository;
+	protected SimpleJpaRepository<T, ID> repository;
 	
     public AbstractRepositoryImpl(JpaEntityInformation<T, ID> entityMetadata, EntityManager entityManager) {
         super(entityMetadata, entityManager);
@@ -60,8 +60,8 @@ public class AbstractRepositoryImpl<T, ID extends Serializable> extends Querydsl
     	this.tClass = entityMetadata.getJavaType();
 
     	JpaEntityInformation<T, ID> entityInfo = new JpaMetamodelEntityInformation<T, ID>(this.tClass, entityManager.getMetamodel());
-		repository = new QuerydslJpaRepository<T, ID>(entityInfo, entityManager);
-		
+		repository = new SimpleJpaRepository<T, ID>(entityInfo, entityManager);
+    	
 		jpaQueryFactory = new JPAQueryFactory(entityManager);
     }
 

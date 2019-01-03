@@ -7,11 +7,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.stereotype.Repository;
 
 /* Interface appears in all descendants */
 
 @NoRepositoryBean
-public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QuerydslPredicateExecutor<T> {
+public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
 
 	public void deleteById(ID id);
 	public void deleteByIds(Iterable<ID> ids);  // custom

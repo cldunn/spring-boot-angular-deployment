@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cldbiz.userportal.domain.User;
 import com.cldbiz.userportal.dto.UserDto;
 import com.cldbiz.userportal.repository.user.UserRepository;
+import com.cldbiz.userportal.repository.user.UserRepositoryImpl;
 
 @Service
 @Transactional
@@ -33,21 +34,21 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserDto> findByDto(UserDto userDto) {
-		List<User> users = userRepository.findByDto(userDto);
+		List<User> users =  userRepository.findByDto(userDto);
 		return users.stream().map(u -> new UserDto(u)).collect(Collectors.toList());
 	}
 
 	@Override
 	public UserDto save(UserDto userDto) {
 		User user = new User(userDto);
-		user = userRepository.save(user);
+		user =  userRepository.save(user);
 
 		return new UserDto(user);
 	}
 
 	@Override
 	public void deleteById(Long id) {
-		userRepository.deleteById(id);
+		 userRepository.deleteById(id);
 	}
 
 	@Override
