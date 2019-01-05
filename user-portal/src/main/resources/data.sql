@@ -11,9 +11,9 @@ VALUES (
     0,
     'sysgen',
     '2018-10-01T12:00:00',
-    'Cliff', 
-    'Dunn', 
-    'cliffdunntx@yahoo.com');
+    'Clifff', 
+    'Dunnn', 
+    'clifffdunnntx@yahoo.com');
 
 INSERT INTO TEST (
     ID,
