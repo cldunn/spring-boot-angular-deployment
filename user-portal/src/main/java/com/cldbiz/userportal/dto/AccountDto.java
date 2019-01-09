@@ -38,7 +38,7 @@ public @Data class AccountDto extends AbstractDto {
 	@NotNull
 	private Boolean active;
 	
-	private TermDto termDto;
+	private ContactDto contactDto;
 
 	private CustomerDto customerDto;
 	

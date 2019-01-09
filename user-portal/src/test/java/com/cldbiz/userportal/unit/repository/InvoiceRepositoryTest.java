@@ -29,7 +29,7 @@ import com.cldbiz.userportal.repository.invoice.InvoiceRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml"})
+@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml"})
 public class InvoiceRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(InvoiceRepositoryTest.class);
 	

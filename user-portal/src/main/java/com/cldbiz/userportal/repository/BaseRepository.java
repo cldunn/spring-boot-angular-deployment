@@ -2,8 +2,6 @@ package com.cldbiz.userportal.repository;
 
 import java.util.List;
 
-import com.cldbiz.userportal.domain.Term;
-import com.cldbiz.userportal.dto.TermDto;
 import com.querydsl.core.types.OrderSpecifier;
 
 public interface BaseRepository<T, D, ID> {

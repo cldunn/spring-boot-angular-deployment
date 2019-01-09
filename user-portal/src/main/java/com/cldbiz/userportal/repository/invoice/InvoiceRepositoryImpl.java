@@ -6,13 +6,9 @@ import com.cldbiz.userportal.domain.Invoice;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCustomer;
 import com.cldbiz.userportal.domain.QInvoice;
-import com.cldbiz.userportal.domain.QLineItem;
-import com.cldbiz.userportal.domain.QProduct;
-import com.cldbiz.userportal.domain.QTerm;
+import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
-import com.cldbiz.userportal.dto.LineItemDto;
-import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -27,7 +23,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		QInvoice invoice = QInvoice.invoice;
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -35,7 +31,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		return jpaQueryFactory.selectFrom(invoice)
 				.innerJoin(invoice.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.fetch();
 	}
 
@@ -44,7 +40,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		QInvoice invoice = QInvoice.invoice;
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -52,7 +48,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		return jpaQueryFactory.selectFrom(invoice)
 				.innerJoin(invoice.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(invoice.id.in(invoiceIds))
 				.fetch();
 	}
@@ -62,7 +58,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		QInvoice invoice = QInvoice.invoice;
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
@@ -80,7 +76,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		return jpaQueryFactory.selectFrom(invoice)
 				.innerJoin(invoice.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.fetch();
 	}
@@ -90,7 +86,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		QInvoice invoice = QInvoice.invoice;
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
 		builder = builder.findPredicate(invoice, invoiceDto);
@@ -107,7 +103,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		return jpaQueryFactory.selectFrom(invoice)
 				.innerJoin(invoice.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.orderBy(sortBy(invoiceDto))
 				.offset(invoiceDto.getStart().intValue())
@@ -138,7 +134,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		QInvoice invoice = QInvoice.invoice;
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
 		builder = builder.searchPredicate(invoice, invoiceDto);
@@ -155,7 +151,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		return jpaQueryFactory.selectFrom(invoice)
 				.innerJoin(invoice.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.fetch();
 	}
@@ -165,7 +161,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		QInvoice invoice = QInvoice.invoice;
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
 		builder = builder.searchPredicate(invoice, invoiceDto);
@@ -182,7 +178,7 @@ public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDt
 		return jpaQueryFactory.selectFrom(invoice)
 				.innerJoin(invoice.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.orderBy(sortBy(invoiceDto))
 				.offset(invoiceDto.getStart().intValue())

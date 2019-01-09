@@ -9,7 +9,7 @@ import com.cldbiz.userportal.domain.QInvoice;
 import com.cldbiz.userportal.domain.QLineItem;
 import com.cldbiz.userportal.domain.QProduct;
 import com.cldbiz.userportal.domain.QPurchaseOrder;
-import com.cldbiz.userportal.domain.QTerm;
+import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
@@ -29,7 +29,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -37,7 +37,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		return jpaQueryFactory.selectFrom(purchaseOrder)
 				.innerJoin(purchaseOrder.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.fetch();
 	}
 
@@ -46,7 +46,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -54,7 +54,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		return jpaQueryFactory.selectFrom(purchaseOrder)
 				.innerJoin(purchaseOrder.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(purchaseOrder.id.in(purchaseOrderIds))
 				.fetch();
 	}
@@ -64,7 +64,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> builder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
 		builder = builder.findPredicate(purchaseOrder, purchaseOrderDto);
@@ -79,6 +79,12 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 			DynBooleanBuilder<QLineItem, LineItemDto> byLineItemBuilder = new DynBooleanBuilder<QLineItem, LineItemDto>();
 			Predicate byLineItemPredicate = byLineItemBuilder.findPredicate(purchaseOrder.lineItems.any(), purchaseOrderDto.getLineItemDto()).asPredicate();
 			builder.and(byLineItemPredicate);
+			
+			if (purchaseOrderDto.getLineItemDto().getProductDto() != null) {
+				DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
+				Predicate byProductPredicate = byProductBuilder.findPredicate(purchaseOrder.lineItems.any().product, purchaseOrderDto.getLineItemDto().getProductDto()).asPredicate();
+				builder.and(byProductPredicate);
+			}
 		}
 
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
@@ -87,7 +93,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		return jpaQueryFactory.selectFrom(purchaseOrder)
 				.innerJoin(purchaseOrder.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.fetch();
 	}
@@ -97,7 +103,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> builder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
 		builder = builder.findPredicate(purchaseOrder, purchaseOrderDto);
@@ -114,7 +120,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		return jpaQueryFactory.selectFrom(purchaseOrder)
 				.innerJoin(purchaseOrder.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.orderBy(sortBy(purchaseOrderDto))
 				.offset(purchaseOrderDto.getStart().intValue())
@@ -144,7 +150,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> builder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
 		builder = builder.searchPredicate(purchaseOrder, purchaseOrderDto);
@@ -161,7 +167,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		return jpaQueryFactory.selectFrom(purchaseOrder)
 				.innerJoin(purchaseOrder.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.fetch();
 	}
@@ -171,7 +177,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		QPurchaseOrder purchaseOrder = QPurchaseOrder.purchaseOrder;
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> builder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
 		builder = builder.searchPredicate(purchaseOrder, purchaseOrderDto);
@@ -188,7 +194,7 @@ public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrde
 		return jpaQueryFactory.selectFrom(purchaseOrder)
 				.innerJoin(purchaseOrder.account, account).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.orderBy(sortBy(purchaseOrderDto))
 				.offset(purchaseOrderDto.getStart().intValue())

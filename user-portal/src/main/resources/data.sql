@@ -1,20 +1,3 @@
-INSERT INTO USER_PROFILE (
-    ID,
-    VERSION,
-    CREATED_BY,
-    CREATED_DATE,
-    FIRST_NAME, 
-    LAST_NAME, 
-    EMAIL)
-VALUES (  
-    1, 
-    0,
-    'sysgen',
-    '2018-10-01T12:00:00',
-    'Clifff', 
-    'Dunnn', 
-    'clifffdunnntx@yahoo.com');
-
 INSERT INTO TEST (
     ID,
     VERSION,
@@ -33,7 +16,7 @@ INSERT INTO TEST (
     VAR_TIME,
     VAR_DTTM)
 VALUES (  
-    1, 
+    76, 
     0,
     'sysgen',
     '2018-10-01T12:00:00',
@@ -49,3 +32,21 @@ VALUES (
     '2018-09-01',
     '10:15:30',
     '2015-03-25T12:00:00');
+
+INSERT INTO USER_PROFILE (
+    ID,
+    VERSION,
+    CREATED_BY,
+    CREATED_DATE,
+    FIRST_NAME, 
+    LAST_NAME, 
+    EMAIL)
+VALUES (  
+    75, 
+    0,
+    'sysgen',
+    '2018-10-01T12:00:00',
+    'Clifff', 
+    'Dunnn', 
+    'clifffdunnntx@yahoo.com');
+

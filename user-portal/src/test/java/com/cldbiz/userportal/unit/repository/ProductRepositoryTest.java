@@ -22,7 +22,7 @@ import com.cldbiz.userportal.repository.product.ProductRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml", "/categoryData.xml", "/categoryProductData.xml"})  
+@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml", "/categoryData.xml", "/categoryProductData.xml"})  
 public class ProductRepositoryTest  extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoryTest.class);
 	

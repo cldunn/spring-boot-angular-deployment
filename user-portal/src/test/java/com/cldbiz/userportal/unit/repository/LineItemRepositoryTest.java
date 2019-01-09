@@ -14,14 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.domain.PurchaseOrder;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
 import com.cldbiz.userportal.repository.product.ProductRepository;
+import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml"})
+@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml"})
 public class LineItemRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoryTest.class);
 	
@@ -32,6 +34,9 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 
 	@Autowired
 	ProductRepository productRepository;
+
+	@Autowired
+	PurchaseOrderRepository purchaseOrderRepository;
 	
 	@Test
 	public void whenCount_thenReturnCount() {
@@ -123,9 +128,15 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	@Test
 	public void whenSave_thenReturnSavedLineItem() {
 		LineItem anotherLineItem = getAnotherLineItem();
+		
 		Product anotherProduct = getAnotherProduct(); 
 		anotherLineItem.setProduct(anotherProduct);
 		
+		// Since purchaseOrder.lineItems is uni-directional, assigning lineitem to purchaseOrder is how to insert
+		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder(); 
+		anotherPurchaseOrder.getLineItems().add(anotherLineItem);
+
+		// Since purchaseOrder.lineItems is uni-directional, save(lineItem) is for update
 		LineItem savedLineItem = lineItemRepository.save(anotherLineItem);
 		lineItemRepository.flush();
 		
@@ -149,15 +160,24 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		Product anotherProduct = getAnotherProduct(); 
 		anotherLineItem.setProduct(anotherProduct);
 		
+		// Since purchaseOrder.lineItems is uni-directional, assigning lineitem to purchaseOrder is how to insert
+		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder(); 
+		anotherPurchaseOrder.getLineItems().add(anotherLineItem);
+
 		LineItem extraLineItem = getExtraLineItem();
 		
 		Product extraProduct = getExtraProduct(); 
 		extraLineItem.setProduct(extraProduct);
 
+		// Since purchaseOrder.lineItems is uni-directional, assigning lineitem to purchaseOrder is how to insert
+		PurchaseOrder extraPurchaseOrder = getExtraPurchaseOrder(); 
+		extraPurchaseOrder.getLineItems().add(extraLineItem);
+
 		List<LineItem> lineItems = new ArrayList<LineItem>();
 		lineItems.add(anotherLineItem);
 		lineItems.add(extraLineItem);
 		
+		// Since purchaseOrder.lineItems is uni-directional, save(lineItem) is for update
 		List<LineItem> savedLineItems = lineItemRepository.saveAll(lineItems);
 		lineItemRepository.flush();
 		
@@ -187,6 +207,11 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		Product anotherProduct = getAnotherProduct(); 
 		anotherLineItem.setProduct(anotherProduct);
 		
+		// Since purchaseOrder.lineItems is uni-directional, assigning lineitem to purchaseOrder is how to insert
+		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder(); 
+		anotherPurchaseOrder.getLineItems().add(anotherLineItem);
+
+		// Since purchaseOrder.lineItems is uni-directional, save(lineItem) is for update
 		LineItem savedLineItem = lineItemRepository.saveAndFlush(anotherLineItem);
 		
 		assertThat(savedLineItem.equals(anotherLineItem)).isTrue();
@@ -357,4 +382,15 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		return product.orElse(null);
 	}
 
+	private PurchaseOrder getAnotherPurchaseOrder() {
+		Optional<PurchaseOrder> purchaseOrder = purchaseOrderRepository.findById(1L);
+
+		return purchaseOrder.orElse(null);
+	}
+
+	private PurchaseOrder getExtraPurchaseOrder() {
+		Optional<PurchaseOrder> purchaseOrder = purchaseOrderRepository.findById(2L);
+
+		return purchaseOrder.orElse(null);
+	}
 }

@@ -14,28 +14,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Account;
+import com.cldbiz.userportal.domain.Customer;
 import com.cldbiz.userportal.domain.LineItem;
+import com.cldbiz.userportal.domain.Product;
 import com.cldbiz.userportal.domain.PurchaseOrder;
+import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
+import com.cldbiz.userportal.repository.contact.ContactRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
 import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
+import com.cldbiz.userportal.repository.product.ProductRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
-import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/customerData.xml", "/productData.xml", "/purchaseOrderData.xml", "/lineItemData.xml"})
+@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/productData.xml", "/purchaseOrderData.xml", "/lineItemData.xml"})
 public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PurchaseOrderRepositoryTest.class);
 	
 	private static final Long TOTAL_ROWS = 3L;
 	
 	@Autowired
-	TermRepository termRepository;
+	ContactRepository contactRepository;
 
 	@Autowired
 	CustomerRepository customerRepository;
@@ -45,6 +49,9 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	
 	@Autowired
 	LineItemRepository lineItemRepository;
+
+	@Autowired
+	ProductRepository productRepository;
 
 	@Autowired
 	PurchaseOrderRepository purchaseOrderRepository;
@@ -209,10 +216,22 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder();
 		
 		Account anotherAccount = getAnotherAccount();
+		
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
+		
+		Customer anotherCustomer = getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
+
 		anotherPurchaseOrder.setAccount(anotherAccount);
 		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
 		
 		List<LineItem>someLineItems = getSomeLineItems();
+		
+		Product anotherProduct = getAnotherProduct();
+		someLineItems.forEach(l -> l.setProduct(anotherProduct));
+		
 		anotherPurchaseOrder.setLineItems(someLineItems);
 		
 		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.save(anotherPurchaseOrder);
@@ -253,20 +272,44 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		
 		// Manually resolve bi-directional references
 		Account anotherAccount = getAnotherAccount();
+		
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
+		
+		Customer anotherCustomer = getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
+
 		anotherPurchaseOrder.setAccount(anotherAccount);
 		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
 		
 		List<LineItem> someLineItems = getSomeLineItems();
+		
+		Product anotherProduct = getAnotherProduct();
+		someLineItems.forEach(l -> l.setProduct(anotherProduct));
+		
 		anotherPurchaseOrder.setLineItems(someLineItems);
 		
 		PurchaseOrder extraPurchaseOrder = getExtraPurchaseOrder();
 		
 		// Manually resolve bi-directional references
 		Account extraAccount = getExtraAccount();
+
+		Contact extraContact = ContactDynData.getExtraContact();
+		extraAccount.setContact(extraContact);
+		
+		Customer extraCustomer = getExtraCustomer();
+		extraCustomer.setAccount(extraAccount);
+		extraAccount.setCustomer(extraCustomer);
+
 		extraPurchaseOrder.setAccount(extraAccount);
 		extraAccount.getPurchaseOrders().add(extraPurchaseOrder);
 		
 		List<LineItem> moreLineItems = getMoreLineItems();
+		
+		Product extraProduct = getExtraProduct();
+		moreLineItems.forEach(l -> l.setProduct(extraProduct));
+		
 		extraPurchaseOrder.setLineItems(moreLineItems);
 		
 		List<PurchaseOrder> purchaseOrders = new ArrayList<PurchaseOrder>();
@@ -308,10 +351,22 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder();
 		
 		Account anotherAccount = getAnotherAccount();
+		
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
+		
+		Customer anotherCustomer = getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
+
 		anotherPurchaseOrder.setAccount(anotherAccount);
 		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
 		
 		List<LineItem> someLineItems = getSomeLineItems();
+		
+		Product anotherProduct = getAnotherProduct();
+		someLineItems.forEach(l -> l.setProduct(anotherProduct));
+		
 		anotherPurchaseOrder.setLineItems(someLineItems);
 		
 		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.saveAndFlush(anotherPurchaseOrder);
@@ -339,10 +394,14 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Target");
+		
 		purchaseOrderDto.setAccountDto(accountDto);
 		
-		/* TODO incorporate find product in any lineitem for purchaseOrder */
-		/* TODO incorporate find product in all lineitems for purchaseOrder */
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(new ProductDto());
+		lineItemDto.getProductDto().setName("Papermate Pen");
+		
+		purchaseOrderDto.setLineItemDto(lineItemDto);
 		
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
@@ -370,8 +429,11 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		accountDto.setAccountName("Target");
 		purchaseOrderDto.setAccountDto(accountDto);
 
-		/* TODO incorporate find product in any lineitem for purchaseOrder */
-		/* TODO incorporate find product in all lineitems for purchaseOrder */
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(new ProductDto());
+		lineItemDto.getProductDto().setName("Papermate Pen");
+		
+		purchaseOrderDto.setLineItemDto(lineItemDto);
 
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findPageByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
@@ -397,8 +459,9 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		accountDto.setAccountName("Target");
 		purchaseOrderDto.setAccountDto(accountDto);
 		
-		/* TODO incorporate find product in any lineitem for purchaseOrder */
-		/* TODO incorporate find product in all lineitems for purchaseOrder */
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(new ProductDto());
+		lineItemDto.getProductDto().setName("Pen");
 
 		Long purchaseOrderCount = purchaseOrderRepository.countSearchByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
@@ -416,8 +479,9 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		accountDto.setShippingAddress("750");
 		purchaseOrderDto.setAccountDto(accountDto);
 
-		/* TODO incorporate find product in any lineitem for purchaseOrder */
-		/* TODO incorporate find product in all lineitems for purchaseOrder */
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(new ProductDto());
+		lineItemDto.getProductDto().setName("Pen");
 
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.searchByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
@@ -445,8 +509,9 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		accountDto.setShippingAddress("750");
 		purchaseOrderDto.setAccountDto(accountDto);
 
-		/* TODO incorporate find product in any lineitem for purchaseOrder */
-		/* TODO incorporate find product in all lineitems for purchaseOrder */
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(new ProductDto());
+		lineItemDto.getProductDto().setName("Pen");
 
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.searchPageByDto(purchaseOrderDto);
 		purchaseOrderRepository.flush();
@@ -494,7 +559,6 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		anotherAccount.setActive(true);
 		
 		 return anotherAccount;
-	
 	}
 
 	private Account getExtraAccount() {
@@ -508,16 +572,36 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		 return extraAccount;
 	}
 
+	private Customer getAnotherCustomer() {
+		Customer anotherCustomer = new Customer();
+		anotherCustomer.setFirstName("Amy");
+		anotherCustomer.setLastName("Winecroft");
+		anotherCustomer.setWorkEmail("amy.winecroft@yahoo.com");
+		anotherCustomer.setWorkPhone("(555) 777-7654");
+		anotherCustomer.setCanContact(true);
+		
+		return anotherCustomer;
+	}
+
+	private Customer getExtraCustomer() {
+		Customer extraCustomer = new Customer();
+		extraCustomer.setFirstName("Barnaby");
+		extraCustomer.setLastName("Jones");
+		extraCustomer.setWorkEmail("barnaby.jones@yahoo.com");
+		extraCustomer.setWorkPhone("(555) 222-3333");
+		extraCustomer.setCanContact(true);
+		
+		return extraCustomer;
+	}
+	
 	private List<LineItem> getSomeLineItems() {
 		List<LineItem> lineItems = new ArrayList<LineItem>();
 		
 		LineItem anotherLineItem = new LineItem();
 		anotherLineItem.setQuantity(15L);
-		// TODO: setProduct
 		
 		LineItem extraLineItem = new LineItem();
 		extraLineItem.setQuantity(16L);
-		// TODO: setProduct
 		
 		lineItems.add(anotherLineItem);
 		lineItems.add(extraLineItem);
@@ -530,11 +614,9 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		
 		LineItem anotherLineItem = new LineItem();
 		anotherLineItem.setQuantity(17L);
-		// TODO: setProduct
 		
 		LineItem extraLineItem = new LineItem();
 		extraLineItem.setQuantity(18L);
-		// TODO: setProduct
 		
 		lineItems.add(anotherLineItem);
 		lineItems.add(extraLineItem);
@@ -542,4 +624,15 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		return lineItems;
 	}
 
+	private Product getAnotherProduct() {
+		Optional<Product> product = productRepository.findById(1L);
+
+		return product.orElse(null);
+	}
+
+	private Product getExtraProduct() {
+		Optional<Product> product = productRepository.findById(2L);
+
+		return product.orElse(null);
+	}
 }

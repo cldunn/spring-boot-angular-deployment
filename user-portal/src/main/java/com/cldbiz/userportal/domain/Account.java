@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -41,13 +42,12 @@ public @Data class Account extends AbstractDomain {
 	@Column(nullable=false)
 	private Boolean active;
 	
-	
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
-	@OneToOne(optional=false)
 	@EqualsAndHashCode.Exclude 
-	@JoinColumn(name="TERM_ID", foreignKey=@ForeignKey(name = "FK_ACCOUNT_TERM"))
-	private Term term;
-	
+	@OneToOne(cascade={CascadeType.PERSIST, CascadeType.REMOVE}, optional=false)
+	@JoinColumn(name="CONTACT_ID", foreignKey=@ForeignKey(name = "FK_ACCOUNT_CONTACT"))
+	private Contact contact;
+
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
 	@EqualsAndHashCode.Exclude
 	@OneToOne(mappedBy="account", cascade={CascadeType.ALL}, optional=false, orphanRemoval=true)

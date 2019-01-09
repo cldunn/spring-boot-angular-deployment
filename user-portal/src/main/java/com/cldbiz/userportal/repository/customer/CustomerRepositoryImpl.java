@@ -6,7 +6,7 @@ import com.cldbiz.userportal.domain.Customer;
 import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCustomer;
 import com.cldbiz.userportal.domain.QInvoice;
-import com.cldbiz.userportal.domain.QTerm;
+import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
@@ -22,14 +22,14 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 	public List<Customer> findAll() {
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.fetch();
 	}
 
@@ -37,14 +37,14 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 	public List<Customer> findAllById(List<Long> customerIds) {
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(customer.id.in(customerIds))
 				.fetch();
 	}
@@ -53,7 +53,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 	public List<Customer> findByDto(CustomerDto customerDto) {
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
 		builder = builder.findPredicate(customer, customerDto);
@@ -69,7 +69,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.fetch();
 	}
@@ -78,7 +78,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 	public List<Customer> findPageByDto(CustomerDto customerDto) {
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
 		builder = builder.findPredicate(customer, customerDto);
@@ -94,7 +94,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.orderBy(sortBy(customerDto))
 				.offset(customerDto.getStart().intValue())
@@ -123,7 +123,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 	public List<Customer> searchByDto(CustomerDto customerDto) {
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
 		builder = builder.searchPredicate(customer, customerDto);
@@ -139,7 +139,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.fetch();
 	}
@@ -148,7 +148,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 	public List<Customer> searchPageByDto(CustomerDto customerDto) {
 		QCustomer customer = QCustomer.customer;
 		QAccount account = QAccount.account;
-		QTerm term = QTerm.term;
+		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QCustomer, CustomerDto> builder = new DynBooleanBuilder<QCustomer, CustomerDto>();
 		builder = builder.searchPredicate(customer, customerDto);
@@ -164,7 +164,7 @@ public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, Custome
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(customer)
 				.innerJoin(customer.account, account).fetchJoin()
-				.innerJoin(account.term, term).fetchJoin()
+				.innerJoin(account.contact, contact).fetchJoin()
 				.where(builder.asPredicate())
 				.orderBy(sortBy(customerDto))
 				.offset(customerDto.getStart().intValue())

@@ -14,20 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Customer;
-import com.cldbiz.userportal.domain.Invoice;
-import com.cldbiz.userportal.domain.PurchaseOrder;
-import com.cldbiz.userportal.domain.Term;
+import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
+import com.cldbiz.userportal.repository.contact.ContactRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
 import com.cldbiz.userportal.repository.invoice.InvoiceRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
-import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/customerData.xml"})
+@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml"})
 public class CustomerRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRepositoryTest.class);
 	
@@ -40,7 +38,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 	AccountRepository accountRepository;
 	
 	@Autowired
-	TermRepository termRepository;
+	ContactRepository contactRepository;
 	
 	@Autowired
 	InvoiceRepository invoiceRepository;
@@ -181,8 +179,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		Customer anotherCustomer = getAnotherCustomer();
 		
 		Account anotherAccount = getAnotherAccount();
-		Term anotherTerm = getAnotherTerm();
-		anotherAccount.setTerm(anotherTerm);
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
 		
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
@@ -200,7 +198,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvCustomer.get().equals(anotherCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().equals(savedCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().getAccount().equals(anotherAccount)).isTrue();
-		assertThat(rtrvCustomer.get().getAccount().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvCustomer.get().getAccount().getContact().equals(anotherContact)).isTrue();
 	    assertThat(rtrvCustomer.get().getAccount().getCustomer().equals(anotherCustomer)).isTrue();
 	}
 	
@@ -219,20 +217,18 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 	@Test
 	public void whenSaveAll_thenReturnSavedCustomers() {
 		Customer anotherCustomer = getAnotherCustomer();
-		
 		Account anotherAccount = getAnotherAccount();
-		Term anotherTerm = getAnotherTerm();
-		anotherAccount.setTerm(anotherTerm);
+		Contact anotherContact = ContactDynData.getAnotherContact();
 
+		anotherAccount.setContact(anotherContact);
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
 		Customer extraCustomer = getExtraCustomer();
-		
 		Account extraAccount = getExtraAccount();
-		Term extraTerm = getExtraTerm();
-		extraAccount.setTerm(extraTerm);
-
+		Contact extraContact = ContactDynData.getExtraContact();
+		
+		extraAccount.setContact(extraContact);
 		extraCustomer.setAccount(extraAccount);
 		extraAccount.setCustomer(extraCustomer);
 		
@@ -255,14 +251,14 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvAnotherCustomer.orElse(null)).isNotNull();
 		assertThat(rtrvAnotherCustomer.get().equals(anotherCustomer)).isTrue();
 		assertThat(rtrvAnotherCustomer.get().getAccount().equals(anotherAccount)).isTrue();
-		assertThat(rtrvAnotherCustomer.get().getAccount().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvAnotherCustomer.get().getAccount().getContact().equals(anotherContact)).isTrue();
 		assertThat(rtrvAnotherCustomer.get().getAccount().getCustomer().equals(anotherCustomer)).isTrue();
 		
 		Optional<Customer> rtrvExtaCustomer = customerRepository.findById(extraCustomer.getId());
 		assertThat(rtrvExtaCustomer.orElse(null)).isNotNull();
 		assertThat(rtrvExtaCustomer.get().equals(extraCustomer)).isTrue();
 		assertThat(rtrvExtaCustomer.get().getAccount().equals(extraAccount)).isTrue();
-		assertThat(rtrvExtaCustomer.get().getAccount().getTerm().equals(extraTerm)).isTrue();
+		assertThat(rtrvExtaCustomer.get().getAccount().getContact().equals(extraContact)).isTrue();
 		assertThat(rtrvExtaCustomer.get().getAccount().getCustomer().equals(extraCustomer)).isTrue();
 	}
 	
@@ -271,8 +267,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		Customer anotherCustomer = getAnotherCustomer();
 		
 		Account anotherAccount = getAnotherAccount();
-		Term anotherTerm = getAnotherTerm();
-		anotherAccount.setTerm(anotherTerm);
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
 		
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
@@ -289,7 +285,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvCustomer.get().equals(anotherCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().equals(savedCustomer)).isTrue();
 		assertThat(rtrvCustomer.get().getAccount().equals(anotherAccount)).isTrue();
-		assertThat(rtrvCustomer.get().getAccount().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvCustomer.get().getAccount().getContact().equals(anotherContact)).isTrue();
 		assertThat(rtrvCustomer.get().getAccount().getCustomer().equals(anotherCustomer)).isTrue();
 	}
 
@@ -436,18 +432,4 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 		 return extraAccount;
 	
 	}
-	
-	private Term getAnotherTerm() {
-		Optional<Term> term = termRepository.findById(1L);
-
-		return term.orElse(null);
-	}
-
-	private Term getExtraTerm() {
-		Optional<Term> term = termRepository.findById(2L);
-
-		return term.orElse(null);
-	}
-
-
 }

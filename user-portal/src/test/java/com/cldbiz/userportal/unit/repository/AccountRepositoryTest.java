@@ -9,32 +9,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.hibernate.Hibernate;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Customer;
 import com.cldbiz.userportal.domain.Invoice;
 import com.cldbiz.userportal.domain.PurchaseOrder;
-import com.cldbiz.userportal.domain.Term;
+import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
-import com.cldbiz.userportal.dto.PurchaseOrderDto;
-import com.cldbiz.userportal.dto.TermDto;
-import com.cldbiz.userportal.domain.Account;
+import com.cldbiz.userportal.dto.ContactDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
+import com.cldbiz.userportal.repository.contact.ContactRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
 import com.cldbiz.userportal.repository.invoice.InvoiceRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
-import com.cldbiz.userportal.repository.term.TermRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup(value= {"/termData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml", "/purchaseOrderData.xml"})
+@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml", "/purchaseOrderData.xml"})
 public class AccountRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountRepositoryTest.class);
 	
@@ -44,8 +40,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	AccountRepository accountRepository;
 
 	@Autowired
-	TermRepository termRepository;
-
+	ContactRepository contactRepository;
+	
 	@Autowired
 	CustomerRepository customerRepository;
 
@@ -75,8 +71,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(accounts.contains(account)).isFalse();
 
-		Optional<Term> term = termRepository.findById(account.getTerm().getId());
-		assertThat(term.orElse(null)).isNotNull();
+		Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+		assertThat(contact.orElse(null)).isNull();
 
 		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 		assertThat(customer.orElse(null)).isNull();
@@ -102,8 +98,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accountCnt).isZero();
 		
 		accounts.forEach(account -> {
-			Optional<Term> term = termRepository.findById(account.getTerm().getId());
-			assertThat(term.orElse(null)).isNotNull();
+			Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+			assertThat(contact.orElse(null)).isNull();
 
 			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 			assertThat(customer.orElse(null)).isNull();
@@ -130,8 +126,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
 		assertThat(accounts.contains(account)).isFalse();
 		
-		Optional<Term> term = termRepository.findById(account.getTerm().getId());
-		assertThat(term.orElse(null)).isNotNull();
+		Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+		assertThat(contact.orElse(null)).isNull();
 
 		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 		assertThat(customer.orElse(null)).isNull();
@@ -159,8 +155,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accountCnt).isZero();
 
 		accounts.forEach(account -> {
-			Optional<Term> term = termRepository.findById(account.getTerm().getId());
-			assertThat(term.orElse(null)).isNotNull();
+			Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+			assertThat(contact.orElse(null)).isNull();
 
 			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
 			assertThat(customer.orElse(null)).isNull();
@@ -192,7 +188,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountRepository.flush();
 		
 		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(accounts.get(0).getTerm()).isNotNull();
+		assertThat(accounts.get(0).getContact()).isNotNull();
 		assertThat(accounts.get(0).getCustomer()).isNotNull();
 		
 		/* check at least one test account has invoices */
@@ -218,7 +214,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accounts = accountRepository.findAllById(accountIds);
 		
 		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(accounts.get(0).getTerm()).isNotNull();
+		assertThat(accounts.get(0).getContact()).isNotNull();
 		assertThat(accounts.get(0).getCustomer()).isNotNull();
 		
 		/* check at least one test account has invoices */
@@ -243,7 +239,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(sameAccount.orElse(null)).isNotNull();
 		
-		assertThat(sameAccount.get().getTerm()).isNotNull();
+		assertThat(sameAccount.get().getContact()).isNotNull();
 		assertThat(sameAccount.get().getCustomer()).isNotNull();
 		assertThat(sameAccount.get().getInvoices().isEmpty()).isFalse();
 		assertThat(sameAccount.get().getPurchaseOrders().isEmpty()).isFalse();
@@ -253,8 +249,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenSave_thenReturnSavedAccount() {
 		Account anotherAccount = getAnotherAccount();
 		
-		Term anotherTerm = getAnotherTerm();
-		anotherAccount.setTerm(anotherTerm);
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
 		
 		Customer anotherCustomer = getAnotherCustomer();
 		anotherCustomer.setAccount(anotherAccount);
@@ -280,7 +276,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvAccount.orElse(null)).isNotNull();
 		assertThat(rtrvAccount.get().equals(anotherAccount)).isTrue();
 		assertThat(rtrvAccount.get().equals(savedAccount)).isTrue();
-		assertThat(rtrvAccount.get().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvAccount.get().getContact().equals(anotherContact)).isTrue();
 		assertThat(rtrvAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
 
 		assertThat(Boolean.FALSE.equals(rtrvAccount.get().getInvoices().isEmpty()));
@@ -296,14 +292,14 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenModified_thenAccountUpdated() {
 		Optional<Account> originalAccount = accountRepository.findById(3L);
 		originalAccount.get().setBillingAddress("UPDATED - " + originalAccount.get().getBillingAddress());
-		originalAccount.get().getTerm().setDescription("UPDATED - " + originalAccount.get().getTerm().getDescription());
+		originalAccount.get().getContact().setName("UPDATED - " + originalAccount.get().getContact().getName());
 		originalAccount.get().getCustomer().setFirstName("UPDATED - " + originalAccount.get().getCustomer().getFirstName());
 		originalAccount.get().getInvoices().get(0).setInvoiceNbr("UPDATED - " + originalAccount.get().getInvoices().get(0).getInvoiceNbr());
 		originalAccount.get().getPurchaseOrders().get(0).setOrderIdentifier("UPDATED - " + originalAccount.get().getPurchaseOrders().get(0).getOrderIdentifier());
 		
 		Optional<Account> rtrvdAccount = accountRepository.findById(3L);
 		assertThat(originalAccount.get().getBillingAddress().equals((rtrvdAccount.get().getBillingAddress())));
-		assertThat(originalAccount.get().getTerm().getDescription().equals((rtrvdAccount.get().getTerm().getDescription())));
+		assertThat(originalAccount.get().getContact().getName().equals((rtrvdAccount.get().getContact().getName())));
 		assertThat(originalAccount.get().getCustomer().getFirstName().equals((rtrvdAccount.get().getCustomer().getFirstName())));
 		assertThat(originalAccount.get().getInvoices().get(0).getInvoiceNbr().equals((rtrvdAccount.get().getInvoices().get(0).getInvoiceNbr())));
 		assertThat(originalAccount.get().getPurchaseOrders().get(0).getOrderIdentifier().equals((rtrvdAccount.get().getPurchaseOrders().get(0).getOrderIdentifier())));
@@ -313,8 +309,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenSaveAll_thenReturnSavedAccounts() {
 		Account anotherAccount = getAnotherAccount();
 		
-		Term anotherTerm = getAnotherTerm();
-		anotherAccount.setTerm(anotherTerm);
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
 		
 		// Manually resolve bi-directional references
 		Customer anotherCustomer = getAnotherCustomer();
@@ -333,8 +329,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		
 		Account extraAccount = getExtraAccount();
 		
-		Term extraTerm = getExtraTerm();
-		extraAccount.setTerm(extraTerm);
+		Contact extraContact = ContactDynData.getExtraContact();
+		extraAccount.setContact(extraContact);
 		
 		// Manually resolve bi-directional references
 		Customer extraCustomer = getExtraCustomer();
@@ -369,7 +365,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Optional<Account> rtrvAnotherAccount = accountRepository.findById(anotherAccount.getId());
 		assertThat(rtrvAnotherAccount.orElse(null)).isNotNull();
 		assertThat(rtrvAnotherAccount.get().equals(anotherAccount)).isTrue();
-		assertThat(rtrvAnotherAccount.get().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvAnotherAccount.get().getContact().equals(anotherContact)).isTrue();
 		assertThat(rtrvAnotherAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
 		
 		assertThat(Boolean.FALSE.equals(rtrvAnotherAccount.get().getInvoices().isEmpty()));
@@ -383,7 +379,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Optional<Account> rtrvExtaAccount = accountRepository.findById(extraAccount.getId());
 		assertThat(rtrvExtaAccount.orElse(null)).isNotNull();
 		assertThat(rtrvExtaAccount.get().equals(extraAccount)).isTrue();
-		assertThat(rtrvExtaAccount.get().getTerm().equals(extraTerm)).isTrue();
+		assertThat(rtrvExtaAccount.get().getContact().equals(extraContact)).isTrue();
 		assertThat(rtrvExtaAccount.get().getCustomer().equals(extraCustomer)).isTrue();
 		
 		assertThat(Boolean.FALSE.equals(rtrvExtaAccount.get().getInvoices().isEmpty()));
@@ -399,8 +395,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenSaveAndFlush_thenReturnSavedAccount() {
 		Account anotherAccount = getAnotherAccount();
 		
-		Term anotherTerm = getAnotherTerm();
-		anotherAccount.setTerm(anotherTerm);
+		Contact anotherContact = ContactDynData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
 		
 		// Manually resolve bi-directional references
 		Customer anotherCustomer = getAnotherCustomer();
@@ -428,7 +424,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvAccount.orElse(null)).isNotNull();
 		assertThat(rtrvAccount.get().equals(anotherAccount)).isTrue();
 		assertThat(rtrvAccount.get().equals(savedAccount)).isTrue();
-		assertThat(rtrvAccount.get().getTerm().equals(anotherTerm)).isTrue();
+		assertThat(rtrvAccount.get().getContact().equals(anotherContact)).isTrue();
 		assertThat(rtrvAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
 
 		assertThat(Boolean.FALSE.equals(rtrvAccount.get().getInvoices().isEmpty()));
@@ -445,9 +441,9 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior Dry Cleaners");
 		
-		TermDto termDto = new TermDto();
-		termDto.setCode("EOM");
-		accountDto.setTermDto(termDto);
+		ContactDto suportDto = new ContactDto();
+		suportDto.setName("Tom Anderson");
+		accountDto.setContactDto(suportDto);
 		
 		CustomerDto customerDto = new CustomerDto();
 		customerDto.setWorkEmail("alex.crowe.yahoo.com");
@@ -459,7 +455,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accounts).isNotEmpty();
 		
 		Optional<Account> account = accounts.stream()
-			.filter(a -> a.getTerm() != null)
+			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
 			.filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty()))
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
@@ -467,7 +463,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(account.orElse(null)).isNotNull();
 		assertThat(account.get().getAccountName().equals(accountDto.getAccountName())).isTrue();
-		assertThat(account.get().getTerm().getCode().equals(accountDto.getTermDto().getCode())).isTrue();
+		assertThat(account.get().getContact().getName().equals(accountDto.getContactDto().getName())).isTrue();
 		assertThat(account.get().getCustomer().getWorkEmail().equals(accountDto.getCustomerDto().getWorkEmail())).isTrue();
 	}
 
@@ -484,7 +480,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accounts.size()).isEqualTo(2);
 		
 		Optional<Account> account = accounts.stream()
-			.filter(a -> a.getTerm() != null)
+			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
 			.filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty()))
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
@@ -510,9 +506,9 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior");
 		
-		TermDto termDto = new TermDto();
-		termDto.setDescription("Month");
-		accountDto.setTermDto(termDto);
+		ContactDto contactDto = new ContactDto();
+		contactDto.setName("Anderson");
+		accountDto.setContactDto(contactDto);
 		
 		CustomerDto customerDto = new CustomerDto();
 		customerDto.setWorkEmail("yahoo.com");
@@ -524,7 +520,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accounts).isNotEmpty();
 		
 		Optional<Account> account = accounts.stream()
-			.filter(a -> a.getTerm() != null)
+			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
 			.filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty()))
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
@@ -546,7 +542,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		assertThat(accounts.size()).isEqualTo(2);
 		
 		Optional<Account> account = accounts.stream()
-			.filter(a -> a.getTerm() != null)
+			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
 			.filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty()))
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
@@ -578,18 +574,6 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		 return extraAccount;
 	}
 	
-	private Term getAnotherTerm() {
-		Optional<Term> term = termRepository.findById(1L);
-
-		return term.orElse(null);
-	}
-
-	private Term getExtraTerm() {
-		Optional<Term> term = termRepository.findById(2L);
-
-		return term.orElse(null);
-	}
-
 	private Customer getAnotherCustomer() {
 		Customer anotherCustomer = new Customer();
 		anotherCustomer.setFirstName("Amy");
