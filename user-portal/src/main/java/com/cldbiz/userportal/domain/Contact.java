@@ -1,3 +1,4 @@
+/* Apcahe License goes here */
 package com.cldbiz.userportal.domain;
 
 import javax.persistence.Column;
