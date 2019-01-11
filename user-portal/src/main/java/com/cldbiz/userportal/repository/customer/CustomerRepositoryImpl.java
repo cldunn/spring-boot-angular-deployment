@@ -10,13 +10,13 @@ import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
-import com.cldbiz.userportal.repository.BaseRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class CustomerRepositoryImpl extends BaseRepositoryImpl<Customer, CustomerDto, Long> implements CustomerRepositoryExt {
+public class CustomerRepositoryImpl extends AbstractRepositoryImpl<Customer, CustomerDto, Long> implements CustomerRepositoryExt {
 
 	@Override
 	public List<Customer> findAll() {

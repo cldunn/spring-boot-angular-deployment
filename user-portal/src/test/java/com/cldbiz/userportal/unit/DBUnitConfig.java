@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 import com.github.springtestdbunit.bean.DatabaseConfigBean;
 import com.github.springtestdbunit.bean.DatabaseDataSourceConnectionFactoryBean;
 

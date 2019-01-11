@@ -12,13 +12,13 @@ import com.cldbiz.userportal.domain.QProduct;
 import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
-import com.cldbiz.userportal.repository.BaseRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class CategoryRepositoryImpl extends BaseRepositoryImpl<Category, CategoryDto, Long> implements CategoryRepositoryExt {
+public class CategoryRepositoryImpl extends AbstractRepositoryImpl<Category, CategoryDto, Long> implements CategoryRepositoryExt {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryRepositoryImpl.class);
 	

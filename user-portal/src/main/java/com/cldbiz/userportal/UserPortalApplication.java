@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.cldbiz.userportal.config.ApplicationConfiguration;
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.BaseRepositoryImpl;
 
 @SpringBootApplication
 public class UserPortalApplication {

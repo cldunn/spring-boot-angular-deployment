@@ -16,13 +16,13 @@ import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
-import com.cldbiz.userportal.repository.BaseRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class PurchaseOrderRepositoryImpl extends BaseRepositoryImpl<PurchaseOrder, PurchaseOrderDto, Long> implements PurchaseOrderRepositoryExt {
+public class PurchaseOrderRepositoryImpl extends AbstractRepositoryImpl<PurchaseOrder, PurchaseOrderDto, Long> implements PurchaseOrderRepositoryExt {
 
 	@Override
 	public List<PurchaseOrder> findAll() {

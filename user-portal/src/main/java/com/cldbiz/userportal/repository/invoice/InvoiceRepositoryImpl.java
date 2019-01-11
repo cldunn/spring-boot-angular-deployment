@@ -9,13 +9,13 @@ import com.cldbiz.userportal.domain.QInvoice;
 import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
-import com.cldbiz.userportal.repository.BaseRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class InvoiceRepositoryImpl extends BaseRepositoryImpl<Invoice, InvoiceDto, Long> implements InvoiceRepositoryExt {
+public class InvoiceRepositoryImpl extends AbstractRepositoryImpl<Invoice, InvoiceDto, Long> implements InvoiceRepositoryExt {
 
 	/* TODO: Remove from interface, findByDto(new *Dto) should be the same */
 	@Override

@@ -1,34 +1,24 @@
 package com.cldbiz.userportal.repository;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.Repository;
+import com.querydsl.core.types.OrderSpecifier;
 
-/* Interface appears in all descendants */
+public interface AbstractRepository<T, D, ID> {
 
-@NoRepositoryBean
-public interface AbstractRepository<T, ID extends Serializable> extends Repository<T, ID> {
-// public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QuerydslPredicateExecutor {
-
-	public void deleteById(ID id);
-	public void deleteByIds(Iterable<ID> ids);  // custom
-	 
-	public void delete(T entity);
-	public void deleteAll(Iterable<? extends T> entities);
-	 
-	public <S extends T> S save(S entity);
-	public <S extends T> S saveAndFlush(S entity);
-	public <S extends T> List<S> saveAll(Iterable<S> entities);
-
-	public void flush();
-
-	public boolean existsById(ID id);
-	public Optional<T> findById(ID id);
-	 
-	long count();
+	public abstract List<T> findAll();
 	
-	public void doSql(String sqlStr, Object... parameters);
+	public abstract List<T> findAllById(List<ID> ids);
+	
+	public abstract List<T> findByDto(D dto);
+	
+	public abstract List<T> findPageByDto(D dto);
+	
+	public abstract Long countSearchByDto(D dto);
+	
+	public abstract List<T> searchByDto(D dto);
+	
+	public abstract List<T> searchPageByDto(D dto);
+	
+	public abstract OrderSpecifier[] sortBy(D dto);
 }

@@ -8,13 +8,13 @@ import org.slf4j.LoggerFactory;
 import com.cldbiz.userportal.domain.QUser;
 import com.cldbiz.userportal.domain.User;
 import com.cldbiz.userportal.dto.UserDto;
-import com.cldbiz.userportal.repository.BaseRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class UserRepositoryImpl extends BaseRepositoryImpl<User, UserDto, Long> implements UserRepositoryExt {
+public class UserRepositoryImpl extends AbstractRepositoryImpl<User, UserDto, Long> implements UserRepositoryExt {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
 	
