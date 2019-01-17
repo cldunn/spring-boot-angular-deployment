@@ -10,49 +10,49 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.Account;
+import com.cldbiz.userportal.domain.WishList;
 import com.cldbiz.userportal.dto.AbstractDto;
-import com.cldbiz.userportal.dto.AccountDto;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.EntityPathBase;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /* TODO: Consider find/searchByDto with Predicate ... parameters, permits service to customize/extend */
 public abstract class AbstractRepositoryImpl<T, D, ID> implements AbstractRepository<T, D, ID>, InitializingBean {
 
-	private Class<T> type;
-	
 	@PersistenceContext
 	protected EntityManager entityManager;
 	
 	protected JPAQueryFactory jpaQueryFactory;
 
 	@Override
+	public abstract Boolean existsByDto(D dto, Predicate... predicates);
+	
+	@Override
+	public abstract Long countByDto(D dto, Predicate... predicates);
+	
+	@Override
+	public abstract List<T> findByIds(List<ID> ids);
+	
+	@Override
 	public abstract List<T> findAll();
 	
 	@Override
-	public abstract List<T> findAllById(List<ID> ids);  //findAllByIds()
+	public abstract List<T> findByDto(D dto, Predicate... predicates);
 	
 	@Override
-	public abstract List<T> findByDto(D dto);
+	public abstract List<T> findPageByDto(D dto, Predicate... predicates);
 	
 	@Override
-	public abstract List<T> findPageByDto(D dto);
+	public abstract List<T> searchByDto(D dto, Predicate... predicates);
 	
 	@Override
-	public abstract Long countSearchByDto(D dto);
-
-	@Override
-	public abstract List<T> searchByDto(D dto);
-	
-	@Override
-	public abstract List<T> searchPageByDto(D dto);
+	public abstract List<T> searchPageByDto(D dto, Predicate... predicates);
 	
 	@Override
 	public abstract OrderSpecifier[] sortBy(D dto);
 
-	// @Override
 	public OrderSpecifier[] sortOrderOf(PathBuilder pb, AbstractDto dto) {
 		List<OrderSpecifier> sortOrder = new ArrayList<OrderSpecifier>();
 		
@@ -67,6 +67,4 @@ public abstract class AbstractRepositoryImpl<T, D, ID> implements AbstractReposi
 	public void afterPropertiesSet() {
 		jpaQueryFactory = new JPAQueryFactory(entityManager);
 	}
-	
-	
 }

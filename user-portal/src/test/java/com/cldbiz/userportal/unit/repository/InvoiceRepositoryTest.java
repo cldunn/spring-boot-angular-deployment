@@ -21,6 +21,7 @@ import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Invoice;
 import com.cldbiz.userportal.domain.Product;
 import com.cldbiz.userportal.dto.AccountDto;
+import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
@@ -41,46 +42,53 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 	@Autowired
 	InvoiceRepository invoiceRepository;
 
-	
 	@Test
-	public void whenCount_thenReturnCount() {
-		long invoiceCnt = invoiceRepository.count();
+	public void whenExistsById_thenReturnTrue() {
+		List<Invoice> invoices = invoiceRepository.findAll();
+		Invoice invoice = invoices.get(0);
+		
+		Boolean exists = invoiceRepository.existsById(invoice.getId());
+		invoiceRepository.flush();
+		
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	public void whenCountAll_thenReturnLong() {
+		long invoiceCnt = invoiceRepository.countAll();
 		invoiceRepository.flush();
 		
 		assertThat(invoiceCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
-	public void whenDelete_thenRemoveInvoice() {
-		List<Invoice> invoices = invoiceRepository.findAll();
-		Invoice invoice = invoices.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		
-		invoiceRepository.delete(invoice);
+	public void whenFindById_thenReturnInvoice() {
+		Optional<Invoice> sameInvoice = invoiceRepository.findById(3L);
 		invoiceRepository.flush();
 		
-		invoices = invoiceRepository.findAll();
-		
-		assertThat(invoices.contains(invoice)).isFalse();
-
-		Optional<Account> account = accountRepository.findById(invoice.getAccount().getId());
-		assertThat(account.orElse(null)).isNotNull();
+		assertThat(sameInvoice.orElse(null)).isNotNull();
+		assertThat(sameInvoice.get().getAccount()).isNotNull();
 	}
 
 	@Test
-	public void whenDeleteAll_thenRemoveAllInvoices() {
+	public void whenFindByIds_thenReturnInvoices() {
 		List<Invoice> invoices = invoiceRepository.findAll();
+		List<Long> invoiceIds = invoices.stream().map(Invoice::getId).collect(Collectors.toList());
 		
-		invoiceRepository.deleteAll(invoices);
+		invoices = invoiceRepository.findByIds(invoiceIds);
 		invoiceRepository.flush();
 		
-		long invoiceCnt = invoiceRepository.count();
+		assertThat(invoices.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(invoices.get(0).getAccount()).isNotNull();
+	}
 
-		assertThat(invoiceCnt).isZero();
+	@Test
+	public void whenFindAll_thenReturnAllInvoices() {
+		List<Invoice> invoices = invoiceRepository.findAll();
+		invoiceRepository.flush();
 		
-		invoices.forEach(invoice -> {
-			Optional<Account> account = accountRepository.findById(invoice.getAccount().getId());
-			assertThat(account.orElse(null)).isNotNull();
-		});
+		assertThat(invoices.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(invoices.get(0).getAccount()).isNotNull();
 	}
 
 	@Test
@@ -100,7 +108,7 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenDeleteByIds_thenRemoveAllInvoices() {
+	public void whenDeleteByIds_thenRemoveInvoices() {
 		List<Invoice> invoices = invoiceRepository.findAll();
 
 		List<Long> invoiceIds = invoices.stream().map(Invoice::getId).collect(Collectors.toList());
@@ -108,7 +116,7 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 		invoiceRepository.deleteByIds(invoiceIds);
 		invoiceRepository.flush();
 		
-		long invoiceCnt = invoiceRepository.count();
+		long invoiceCnt = invoiceRepository.countAll();
 
 		assertThat(invoiceCnt).isZero();
 
@@ -119,60 +127,53 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenExistsById_thenReturnTrue() {
+	public void whenDeleteByEntity_thenRemoveInvoice() {
 		List<Invoice> invoices = invoiceRepository.findAll();
-		Invoice invoice = invoices.get(0);
+		Invoice invoice = invoices.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
 		
-		Boolean exists = invoiceRepository.existsById(invoice.getId());
+		invoiceRepository.deleteByEntity(invoice);
 		invoiceRepository.flush();
 		
-		assertThat(exists).isTrue();
+		invoices = invoiceRepository.findAll();
+		
+		assertThat(invoices.contains(invoice)).isFalse();
+
+		Optional<Account> account = accountRepository.findById(invoice.getAccount().getId());
+		assertThat(account.orElse(null)).isNotNull();
 	}
 
+
 	@Test
-	public void whenFindAll_thenReturnAllInvoices() {
+	public void whenDeleteByEntities_thenRemoveInvoices() {
 		List<Invoice> invoices = invoiceRepository.findAll();
+		
+		invoiceRepository.deleteByEntities(invoices);
 		invoiceRepository.flush();
 		
-		assertThat(invoices.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(invoices.get(0).getAccount()).isNotNull();
+		long invoiceCnt = invoiceRepository.countAll();
+
+		assertThat(invoiceCnt).isZero();
+		
+		invoices.forEach(invoice -> {
+			Optional<Account> account = accountRepository.findById(invoice.getAccount().getId());
+			assertThat(account.orElse(null)).isNotNull();
+		});
 	}
 
 	@Test
-	public void whenFindAllById_thenReturnAllInvoices() {
-		List<Invoice> invoices = invoiceRepository.findAll();
-		List<Long> invoiceIds = invoices.stream().map(Invoice::getId).collect(Collectors.toList());
-		
-		invoices = invoiceRepository.findAllById(invoiceIds);
-		invoiceRepository.flush();
-		
-		assertThat(invoices.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(invoices.get(0).getAccount()).isNotNull();
-	}
-
-	@Test
-	public void whenFindById_thenReturnInvoice() {
-		Optional<Invoice> sameInvoice = invoiceRepository.findById(3L);
-		invoiceRepository.flush();
-		
-		assertThat(sameInvoice.orElse(null)).isNotNull();
-		assertThat(sameInvoice.get().getAccount()).isNotNull();
-	}
-
-	@Test
-	public void whenSave_thenReturnSavedInvoice() {
+	public void whenSaveEntity_thenReturnSavedInvoice() {
 		Invoice anotherInvoice = getAnotherInvoice();
 		Account anotherAccount = getAnotherAccount(); 
 
 		anotherInvoice.setAccount(anotherAccount);
 		anotherAccount.getInvoices().add(anotherInvoice);
 		
-		Invoice savedInvoice = invoiceRepository.save(anotherInvoice);
+		Invoice savedInvoice = invoiceRepository.saveEntity(anotherInvoice);
 		invoiceRepository.flush();
 		
 		assertThat(savedInvoice.equals(anotherInvoice)).isTrue();
 		
-		long invoiceCnt = invoiceRepository.count();
+		long invoiceCnt = invoiceRepository.countAll();
 		assertThat(invoiceCnt).isEqualTo(TOTAL_ROWS + 1);
 		
 		Optional<Invoice> rtrvInvoice = invoiceRepository.findById(savedInvoice.getId());
@@ -185,18 +186,7 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenModified_thenInvoiceUpdated() {
-		Optional<Invoice> originalInvoice = invoiceRepository.findById(3L);
-		originalInvoice.get().setStatus("UPDATED - " + originalInvoice.get().getStatus());
-		originalInvoice.get().getAccount().setAccountName("UPDATED - " + originalInvoice.get().getAccount().getAccountName());
-		
-		Optional<Invoice> rtrvdInvoice = invoiceRepository.findById(3L);
-		assertThat(originalInvoice.get().getStatus().equals((rtrvdInvoice.get().getStatus())));
-		assertThat(originalInvoice.get().getAccount().getAccountName().equals((rtrvdInvoice.get().getAccount().getAccountName())));
-	}
-
-	@Test
-	public void whenSaveAll_thenReturnSavedInvoices() {
+	public void whenSaveEntities_thenReturnSavedInvoices() {
 		Invoice anotherInvoice = getAnotherInvoice();
 		Account anotherAccount = getAnotherAccount(); 
 
@@ -213,7 +203,7 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 		invoices.add(anotherInvoice);
 		invoices.add(extraInvoice);
 		
-		List<Invoice> savedInvoices = invoiceRepository.saveAll(invoices);
+		List<Invoice> savedInvoices = invoiceRepository.saveEntities(invoices);
 		invoiceRepository.flush();
 		
 		assertThat(savedInvoices.size() == 2).isTrue();
@@ -221,7 +211,7 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 		assertThat(invoices.stream().allMatch(t -> savedInvoices.contains(t))).isTrue();
 		assertThat(savedInvoices.stream().allMatch(t -> invoices.contains(t))).isTrue();
 		
-		long invoiceCnt = invoiceRepository.count();
+		long invoiceCnt = invoiceRepository.countAll();
 		assertThat(invoiceCnt).isEqualTo(TOTAL_ROWS + 2);
 		
 		Optional<Invoice> rtrvAnotherInvoice = invoiceRepository.findById(anotherInvoice.getId());
@@ -238,26 +228,43 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSaveAndFlush_thenReturnSavedInvoice() {
-		Invoice anotherInvoice = getAnotherInvoice();
-		Account anotherAccount = getAnotherAccount(); 
+	public void whenModified_thenInvoiceUpdated() {
+		Optional<Invoice> originalInvoice = invoiceRepository.findById(3L);
+		originalInvoice.get().setStatus("UPDATED - " + originalInvoice.get().getStatus());
+		originalInvoice.get().getAccount().setAccountName("UPDATED - " + originalInvoice.get().getAccount().getAccountName());
+		
+		Optional<Invoice> rtrvdInvoice = invoiceRepository.findById(3L);
+		assertThat(originalInvoice.get().getStatus().equals((rtrvdInvoice.get().getStatus())));
+		assertThat(originalInvoice.get().getAccount().getAccountName().equals((rtrvdInvoice.get().getAccount().getAccountName())));
+	}
 
-		anotherInvoice.setAccount(anotherAccount);
-		anotherAccount.getInvoices().add(anotherInvoice);
-
-		Invoice savedInvoice = invoiceRepository.saveAndFlush(anotherInvoice);
+	@Test
+	public void whenExistsByDto_thenReturnTrue() {
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setInvoiceNbr("315");
 		
-		assertThat(savedInvoice.equals(anotherInvoice)).isTrue();
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Target");
+		invoiceDto.setAccountDto(accountDto);
 		
-		long invoiceCnt = invoiceRepository.count();
-		assertThat(invoiceCnt).isEqualTo(TOTAL_ROWS + 1);
+		Boolean exists = invoiceRepository.existsByDto(invoiceDto);
+		invoiceRepository.flush();
 		
-		Optional<Invoice> rtrvInvoice = invoiceRepository.findById(savedInvoice.getId());
-		assertThat(rtrvInvoice.orElse(null)).isNotNull();
-		assertThat(rtrvInvoice.get().equals(anotherInvoice)).isTrue();
-		assertThat(rtrvInvoice.get().equals(savedInvoice)).isTrue();
-		assertThat(rtrvInvoice.get().getAccount().equals(anotherAccount)).isTrue();
-		assertThat(rtrvInvoice.get().getAccount().getInvoices().contains(anotherInvoice)).isTrue();
+		assertThat(Boolean.TRUE).isEqualTo(exists);
+	}
+	
+	@Test
+	public void whenCountByDto_thenReturnCount() {
+		InvoiceDto invoiceDto = new InvoiceDto();
+		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Target");
+		invoiceDto.setAccountDto(accountDto);
+		
+		long invoiceCnt =  invoiceRepository.countByDto(invoiceDto);
+		invoiceRepository.flush();
+		
+		assertThat(invoiceCnt).isGreaterThanOrEqualTo(2L);
 	}
 
 	@Test
@@ -297,21 +304,6 @@ public class InvoiceRepositoryTest extends BaseRepositoryTest {
 		invoiceRepository.flush();
 		
 		assertThat(invoices.size()).isLessThanOrEqualTo(2);
-	}
-
-	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		InvoiceDto invoiceDto = new InvoiceDto();
-		invoiceDto.setStatus("PENDING");
-		
-		AccountDto accountDto = new AccountDto();
-		accountDto.setShippingAddress("750");
-		invoiceDto.setAccountDto(accountDto);
-		
-		Long invoiceCount = invoiceRepository.countSearchByDto(invoiceDto);
-		invoiceRepository.flush();
-		
-		assertThat(invoiceCount).isGreaterThan(0L);
 	}
 
 	@Test

@@ -6,8 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cldbiz.userportal.domain.LineItem;
+import com.cldbiz.userportal.domain.QAccount;
+import com.cldbiz.userportal.domain.QInvoice;
 import com.cldbiz.userportal.domain.QLineItem;
 import com.cldbiz.userportal.domain.QProduct;
+import com.cldbiz.userportal.dto.AccountDto;
+import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
@@ -20,7 +24,54 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LineItemRepositoryImpl.class);
 	
-	/* TODO: Remove from interface, findByDto(new *Dto) should be the same */
+	@Override
+	public Boolean existsByDto(LineItemDto lineItemDto, Predicate... predicates) {
+		QLineItem lineItem = QLineItem.lineItem;
+		
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = searchByCriteria(lineItemDto, predicates);
+		
+		return jpaQueryFactory.selectFrom(lineItem).where(builder.asPredicate()).fetchCount() > 0 ? Boolean.TRUE : Boolean.FALSE;
+	}
+	
+	@Override
+	public Long countByDto(LineItemDto lineItemDto, Predicate... predicates) {
+		QLineItem lineItem = QLineItem.lineItem;
+		
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = searchByCriteria(lineItemDto, predicates);
+		
+		return jpaQueryFactory.selectFrom(lineItem).where(builder.asPredicate()).fetchCount();
+	}
+
+	/*
+	@Override
+	public LineItem findById(Long lineItemId) {
+		QLineItem lineItem = QLineItem.lineItem;
+		QProduct product = QProduct.product;
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(lineItem)
+				.innerJoin(lineItem.product, product).fetchJoin()
+				.where(lineItem.id.eq(lineItemId))
+				.fetch();
+	}
+	*/
+
+	@Override
+	public List<LineItem> findByIds(List<Long> lineItemIds) {
+		QLineItem lineItem = QLineItem.lineItem;
+		QProduct product = QProduct.product;
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(lineItem)
+				.innerJoin(lineItem.product, product).fetchJoin()
+				.where(lineItem.id.in(lineItemIds))
+				.fetch();
+	}
+
 	@Override
 	public List<LineItem> findAll() {
 		QLineItem lineItem = QLineItem.lineItem;
@@ -35,24 +86,13 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 	}
 
 	@Override
-	public List<LineItem> findAllById(List<Long> lineItemIds) {
+	public List<LineItem> findByDto(LineItemDto lineItemDto, Predicate... predicates) {
 		QLineItem lineItem = QLineItem.lineItem;
 		QProduct product = QProduct.product;
+
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = findByCriteria(lineItemDto, predicates);
 		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(lineItem)
-				.innerJoin(lineItem.product, product).fetchJoin()
-				.where(lineItem.id.in(lineItemIds))
-				.fetch();
-	}
-
-	@Override
-	public List<LineItem> findByDto(LineItemDto lineItemDto) {
-		QLineItem lineItem = QLineItem.lineItem;
-		QProduct product = QProduct.product;
-
+		/*
 		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
 		builder = builder.findPredicate(lineItem, lineItemDto);
 
@@ -61,6 +101,7 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 			Predicate byProductPredicate = byProductBuilder.findPredicate(lineItem.product, lineItemDto.getProductDto()).asPredicate();
 			builder.and(byProductPredicate);
 		}
+		*/
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -73,10 +114,13 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 	}
 
 	@Override
-	public List<LineItem> findPageByDto(LineItemDto lineItemDto) {
+	public List<LineItem> findPageByDto(LineItemDto lineItemDto, Predicate... predicates) {
 		QLineItem lineItem = QLineItem.lineItem;
 		QProduct product = QProduct.product;
 
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = findByCriteria(lineItemDto, predicates);
+		
+		/*
 		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
 		builder = builder.findPredicate(lineItem, lineItemDto);
 
@@ -85,6 +129,7 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 			Predicate byProductPredicate = byProductBuilder.findPredicate(lineItem.product, lineItemDto.getProductDto()).asPredicate();
 			builder.and(byProductPredicate);
 		}
+		*/
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -99,38 +144,22 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 	}
 
 	@Override
-	public Long countSearchByDto(LineItemDto lineItemDto) {
+	public List<LineItem> searchByDto(LineItemDto lineItemDto, Predicate... predicates) {
 		QLineItem lineItem = QLineItem.lineItem;
 		QProduct product = QProduct.product;
 
-		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
-		builder = builder.searchPredicate(lineItem, lineItemDto);
-
-		if (lineItemDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.searchPredicate(lineItem.product, lineItemDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-
-		return jpaQueryFactory.selectFrom(lineItem)
-				.where(builder.asPredicate())
-				.fetchCount();
-	}
-
-	@Override
-	public List<LineItem> searchByDto(LineItemDto lineItemDto) {
-		QLineItem lineItem = QLineItem.lineItem;
-		QProduct product = QProduct.product;
-
-		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
-		builder = builder.searchPredicate(lineItem, lineItemDto);
-
-		if (lineItemDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.searchPredicate(lineItem.product, lineItemDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = searchByCriteria(lineItemDto, predicates);
 		
+		/*
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
+		builder = builder.searchPredicate(lineItem, lineItemDto);
+
+		if (lineItemDto.getProductDto() != null) {
+			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
+			Predicate byProductPredicate = byProductBuilder.searchPredicate(lineItem.product, lineItemDto.getProductDto()).asPredicate();
+			builder.and(byProductPredicate);
+		}
+		*/
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
@@ -141,10 +170,13 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 	}
 
 	@Override
-	public List<LineItem> searchPageByDto(LineItemDto lineItemDto) {
+	public List<LineItem> searchPageByDto(LineItemDto lineItemDto, Predicate... predicates) {
 		QLineItem lineItem = QLineItem.lineItem;
 		QProduct product = QProduct.product;
 
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = searchByCriteria(lineItemDto, predicates);
+		
+		/*
 		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
 		builder = builder.searchPredicate(lineItem, lineItemDto);
 
@@ -153,7 +185,8 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 			Predicate byProductPredicate = byProductBuilder.searchPredicate(lineItem.product, lineItemDto.getProductDto()).asPredicate();
 			builder.and(byProductPredicate);
 		}
-
+		*/
+		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
@@ -164,6 +197,37 @@ public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, Lin
 				.offset(lineItemDto.getStart().intValue())
 				.limit(lineItemDto.getLimit().intValue())
 				.fetch();
+	}
+
+
+	protected DynBooleanBuilder<QLineItem, LineItemDto> findByCriteria(LineItemDto lineItemDto, Predicate... predicates) {
+		QLineItem lineItem = QLineItem.lineItem;
+		
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
+		builder = builder.findPredicate(lineItem, lineItemDto, predicates);
+
+		if (lineItemDto.getProductDto() != null) {
+			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
+			Predicate byProductPredicate = byProductBuilder.findPredicate(lineItem.product, lineItemDto.getProductDto(), predicates).asPredicate();
+			builder.and(byProductPredicate);
+		}
+
+		return builder;
+	}
+	
+	protected DynBooleanBuilder<QLineItem, LineItemDto> searchByCriteria(LineItemDto lineItemDto, Predicate... predicates) {
+		QLineItem lineItem = QLineItem.lineItem;
+		
+		DynBooleanBuilder<QLineItem, LineItemDto> builder = new DynBooleanBuilder<QLineItem, LineItemDto>();
+		builder = builder.searchPredicate(lineItem, lineItemDto, predicates);
+
+		if (lineItemDto.getProductDto() != null) {
+			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
+			Predicate byProductPredicate = byProductBuilder.searchPredicate(lineItem.product, lineItemDto.getProductDto(), predicates).asPredicate();
+			builder.and(byProductPredicate);
+		}
+
+		return builder;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cldbiz.userportal.domain.Category;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
@@ -35,64 +36,57 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 	LineItemRepository lineItemRepository;
 
 	@Test
-	public void whenCount_thenReturnCount() {
-		long productCnt = productRepository.count();
+	public void whenExistsById_thenReturnTrue() {
+		List<Product> products = productRepository.findAll();
+		Product product = products.get(0);
+		
+		Boolean exists = productRepository.existsById(product.getId());
+		productRepository.flush();
+		
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	public void whenCountAll_thenReturnLong() {
+		long productCnt = productRepository.countAll();
 		productRepository.flush();
 		
 		assertThat(productCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
-	public void whenDelete_thenRemoveProduct() {
-		List<Product> products = productRepository.findAll();
-		Product product = products.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		
-		/* find the line items using this product */
-		ProductDto productDto = new ProductDto(product);
-		LineItemDto lineItemDto = new LineItemDto();
-		lineItemDto.setProductDto(productDto);
-		
-		/* delete the line items using this product */
-		List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
-		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
-		lineItemRepository.deleteByIds(lineItemIds);
-		
-		productRepository.delete(product);
+	public void whenFindById_thenReturnProduct() {
+		Optional<Product> sameProduct = productRepository.findById(3L);
 		productRepository.flush();
 		
-		products = productRepository.findAll();
-		
-		assertThat(products.contains(product)).isFalse();
+		assertThat(sameProduct.orElse(null)).isNotNull();
 
-		// TODO check categories still exists
+		assertThat(sameProduct.get().getCategories().isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenDeleteAll_thenRemoveAllProducts() {
+	public void whenFindByIds_thenReturnProducts() {
 		List<Product> products = productRepository.findAll();
+		List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
 		
-		products.stream().forEach(product -> {
-			/* find the line items using this product */
-			ProductDto productDto = new ProductDto(product);
-			LineItemDto lineItemDto = new LineItemDto();
-			lineItemDto.setProductDto(productDto);
-			
-			/* delete the line items using this product */
-			List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
-			List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
-			lineItemRepository.deleteByIds(lineItemIds);
-		});
-
-		productRepository.deleteAll(products);
+		products = productRepository.findByIds(productIds);
 		productRepository.flush();
 		
-		long productCnt = productRepository.count();
-
-		assertThat(productCnt).isZero();
+		assertThat(products.size()).isEqualTo(TOTAL_ROWS.intValue());
 		
-		products.forEach(product -> {
-			// check categories still exist but without products
-		});
+		List<Product> categorizedProducts = products.stream().filter(p -> !p.getCategories().isEmpty()).collect(Collectors.toList());
+		assertThat(categorizedProducts.isEmpty()).isFalse();
+	}
+
+	@Test
+	public void whenFindAll_thenReturnAllProducts() {
+		List<Product> products = productRepository.findAll();
+		productRepository.flush();
+		
+		assertThat(products.size()).isEqualTo(TOTAL_ROWS.intValue());
+		
+		List<Product> categorizedProducts = products.stream().filter(p -> !p.getCategories().isEmpty()).collect(Collectors.toList());
+		assertThat(categorizedProducts.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -117,11 +111,11 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 
 		assertThat(products.contains(product)).isFalse();
 		
-		// check category still exist but without product
+		// TODO: check category still exist but without product
 	}
 	
 	@Test
-	public void whenDeleteByIds_thenRemoveAllProducts() {
+	public void whenDeleteByIds_thenRemoveProducts() {
 		List<Product> products = productRepository.findAll();
 
 		products.stream().forEach(product -> {
@@ -141,74 +135,81 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		productRepository.deleteByIds(productIds);
 		productRepository.flush();
 		
-		long productCnt = productRepository.count();
+		long productCnt = productRepository.countAll();
 
 		assertThat(productCnt).isZero();
 
 		products.forEach(product -> {
-			// check categories still exist but without products
+			// TODO: check categories still exist but without products
+		});
+	}
+
+
+	@Test
+	public void whenDeleteByEntity_thenRemoveProduct() {
+		List<Product> products = productRepository.findAll();
+		Product product = products.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
+		
+		/* find the line items using this product */
+		ProductDto productDto = new ProductDto(product);
+		LineItemDto lineItemDto = new LineItemDto();
+		lineItemDto.setProductDto(productDto);
+		
+		/* delete the line items using this product */
+		List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
+		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+		lineItemRepository.deleteByIds(lineItemIds);
+		
+		productRepository.deleteByEntity(product);
+		productRepository.flush();
+		
+		products = productRepository.findAll();
+		
+		assertThat(products.contains(product)).isFalse();
+
+		// TODO: check categories still exists
+	}
+
+	@Test
+	public void whenDeleteByEntities_thenRemoveProducts() {
+		List<Product> products = productRepository.findAll();
+		
+		products.stream().forEach(product -> {
+			/* find the line items using this product */
+			ProductDto productDto = new ProductDto(product);
+			LineItemDto lineItemDto = new LineItemDto();
+			lineItemDto.setProductDto(productDto);
+			
+			/* delete the line items using this product */
+			List<LineItem> lineItems = lineItemRepository.findByDto(lineItemDto);
+			List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
+			lineItemRepository.deleteByIds(lineItemIds);
 		});
 
-	}
-
-	@Test
-	public void whenExistsById_thenReturnTrue() {
-		List<Product> products = productRepository.findAll();
-		Product product = products.get(0);
-		
-		Boolean exists = productRepository.existsById(product.getId());
+		productRepository.deleteByEntities(products);
 		productRepository.flush();
 		
-		assertThat(exists).isTrue();
+		long productCnt = productRepository.countAll();
+
+		assertThat(productCnt).isZero();
+		
+		products.forEach(product -> {
+			// TODO: check categories still exist but without products
+		});
 	}
 
 	@Test
-	public void whenFindAll_thenReturnAllProducts() {
-		List<Product> products = productRepository.findAll();
-		productRepository.flush();
-		
-		assertThat(products.size()).isEqualTo(TOTAL_ROWS.intValue());
-		
-		List<Product> categorizedProducts = products.stream().filter(p -> !p.getCategories().isEmpty()).collect(Collectors.toList());
-		assertThat(categorizedProducts.isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenFindAllById_thenReturnAllProducts() {
-		List<Product> products = productRepository.findAll();
-		List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
-		
-		products = productRepository.findAllById(productIds);
-		productRepository.flush();
-		
-		assertThat(products.size()).isEqualTo(TOTAL_ROWS.intValue());
-		
-		List<Product> categorizedProducts = products.stream().filter(p -> !p.getCategories().isEmpty()).collect(Collectors.toList());
-		assertThat(categorizedProducts.isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenFindById_thenReturnProduct() {
-		Optional<Product> sameProduct = productRepository.findById(3L);
-		productRepository.flush();
-		
-		assertThat(sameProduct.orElse(null)).isNotNull();
-
-		assertThat(sameProduct.get().getCategories().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenSave_thenReturnSavedProduct() {
+	public void whenSaveEntity_thenReturnSavedProduct() {
 		Product anotherProduct = getAnotherProduct();
 		List<Category> someCategories = getSomeCategories(); // TODO: implement getting categories for real
 		anotherProduct.setCategories(someCategories);
 		
-		Product savedProduct = productRepository.save(anotherProduct);
+		Product savedProduct = productRepository.saveEntity(anotherProduct);
 		productRepository.flush();
 		
 		assertThat(savedProduct.equals(anotherProduct)).isTrue();
 		
-		long productCnt = productRepository.count();
+		long productCnt = productRepository.countAll();
 		assertThat(productCnt).isEqualTo(TOTAL_ROWS + 1);
 		
 		Optional<Product> rtrvProduct = productRepository.findById(savedProduct.getId());
@@ -216,24 +217,14 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		assertThat(rtrvProduct.get().equals(anotherProduct)).isTrue();
 		assertThat(rtrvProduct.get().equals(savedProduct)).isTrue();
 		
+		// TODO: uncomment
 		// assertThat(Boolean.FALSE.equals(rtrvProduct.get().getCategories().isEmpty()));
 		// assertThat(rtrvProduct.get().getCategories().stream().allMatch(t -> someCategories.contains(t))).isTrue();
 		// assertThat(someCategories.stream().allMatch(t -> rtrvProduct.get().getCategories().contains(t))).isTrue();
 	}
 
 	@Test
-	public void whenModified_thenProductUpdated() {
-		Optional<Product> originalProduct = productRepository.findById(3L);
-		originalProduct.get().setDescription("UPDATED - " + originalProduct.get().getDescription());
-		// originalProduct.get().getCategories().get(0).setName("UPDATED - " + originalProduct.get().getCategories().get(0).getName());
-		
-		Optional<Product> rtrvdProduct = productRepository.findById(3L);
-		assertThat(originalProduct.get().getDescription().equals((rtrvdProduct.get().getDescription())));
-		// assertThat(originalProduct.get().getCategories().get(0).getName().equals((rtrvdProduct.get().getCategories().get(0).getName())));
-	}
-
-	@Test
-	public void whenSaveAll_thenReturnSavedProducts() {
+	public void whenSaveEntities_thenReturnSavedProducts() {
 		Product anotherProduct = getAnotherProduct();
 
 		List<Category> someCategories = getSomeCategories(); // TODO: implement getting categories for real
@@ -248,7 +239,7 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		products.add(anotherProduct);
 		products.add(extraProduct);
 		
-		List<Product> savedProducts = productRepository.saveAll(products);
+		List<Product> savedProducts = productRepository.saveEntities(products);
 		productRepository.flush();
 		
 		assertThat(savedProducts.size() == 2).isTrue();
@@ -256,13 +247,14 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		assertThat(products.stream().allMatch(t -> savedProducts.contains(t))).isTrue();
 		assertThat(savedProducts.stream().allMatch(t -> products.contains(t))).isTrue();
 		
-		long productCnt = productRepository.count();
+		long productCnt = productRepository.countAll();
 		assertThat(productCnt).isEqualTo(TOTAL_ROWS + 2);
 		
 		Optional<Product> rtrvAnotherProduct = productRepository.findById(anotherProduct.getId());
 		assertThat(rtrvAnotherProduct.orElse(null)).isNotNull();
 		assertThat(rtrvAnotherProduct.get().equals(anotherProduct)).isTrue();
 		
+		// TODO:
 		// assertThat(Boolean.FALSE.equals(rtrvProduct.get().getCategories().isEmpty()));
 		// assertThat(rtrvProduct.get().getCategories().stream().allMatch(t -> someCategories.contains(t))).isTrue();
 		// assertThat(someCategories.stream().allMatch(t -> rtrvProduct.get().getCategories().contains(t))).isTrue();
@@ -271,33 +263,48 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		assertThat(rtrvExtaProduct.orElse(null)).isNotNull();
 		assertThat(rtrvExtaProduct.get().equals(extraProduct)).isTrue();
 		
+		// TODO:
 		// assertThat(Boolean.FALSE.equals(rtrvExtaProduct.get().getCategories().isEmpty()));
 		// assertThat(rtrvExtaProduct.get().getCategories().stream().allMatch(t -> moreCategories.contains(t))).isTrue();
 		// assertThat(moreCategories.stream().allMatch(t -> rtrvExtaProduct.get().getCategories().contains(t))).isTrue();
 	}
 
 	@Test
-	public void whenSaveAndFlush_thenReturnSavedProduct() {
-		Product anotherProduct = getAnotherProduct();
+	public void whenModified_thenProductUpdated() {
+		Optional<Product> originalProduct = productRepository.findById(3L);
+		originalProduct.get().setDescription("UPDATED - " + originalProduct.get().getDescription());
+		// originalProduct.get().getCategories().get(0).setName("UPDATED - " + originalProduct.get().getCategories().get(0).getName());
 		
-		List<Category> someCategories = getSomeCategories(); // TODO: implement getting categories for real
-		anotherProduct.setCategories(someCategories);
-		
-		Product savedProduct = productRepository.saveAndFlush(anotherProduct);
-		
-		assertThat(savedProduct.equals(anotherProduct)).isTrue();
-		
-		long productCnt = productRepository.count();
-		assertThat(productCnt).isEqualTo(TOTAL_ROWS + 1);
-		
-		Optional<Product> rtrvProduct = productRepository.findById(savedProduct.getId());
-		assertThat(rtrvProduct.orElse(null)).isNotNull();
-		assertThat(rtrvProduct.get().equals(anotherProduct)).isTrue();
-		assertThat(rtrvProduct.get().equals(savedProduct)).isTrue();
+		Optional<Product> rtrvdProduct = productRepository.findById(3L);
+		assertThat(originalProduct.get().getDescription().equals((rtrvdProduct.get().getDescription())));
+		// assertThat(originalProduct.get().getCategories().get(0).getName().equals((rtrvdProduct.get().getCategories().get(0).getName())));
+	}
 
-		// assertThat(Boolean.FALSE.equals(rtrvExtaProduct.get().getCategories().isEmpty()));
-		// assertThat(rtrvExtaProduct.get().getCategories().stream().allMatch(t -> moreCategories.contains(t))).isTrue();
-		// assertThat(moreCategories.stream().allMatch(t -> rtrvExtaProduct.get().getCategories().contains(t))).isTrue();
+
+	@Test
+	public void whenExistsByDto_thenReturnTrue() {
+		ProductDto productDto = new ProductDto();
+		productDto.setName("Stationary");
+		
+		CategoryDto categoryDto = new CategoryDto();
+		categoryDto.setName("Writing");
+		productDto.setCategoryDto(categoryDto);
+		
+		Boolean exists = productRepository.existsByDto(productDto);
+		productRepository.flush();
+		
+		assertThat(Boolean.TRUE).isEqualTo(exists);
+	}
+	
+	@Test
+	public void whenCountByDto_thenReturnCount() {
+		ProductDto productDto = new ProductDto();
+		productDto.setDescription("pack");
+		
+		long productCnt =  productRepository.countByDto(productDto);
+		productRepository.flush();
+		
+		assertThat(productCnt).isGreaterThanOrEqualTo(2L);
 	}
 
 	@Test
@@ -329,18 +336,6 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		assertThat(products.size()).isLessThanOrEqualTo(2);
 	}
 
-	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		ProductDto productDto = new ProductDto();
-		productDto.setDescription("pack");
-		
-		Long productCount = productRepository.countSearchByDto(productDto);
-		productRepository.flush();
-		
-		assertThat(productCount).isGreaterThan(0L);
-
-	}
-	
 	@Test
 	public void whenSearchByDto_thenReturnProducts() {
 		ProductDto productDto = new ProductDto();

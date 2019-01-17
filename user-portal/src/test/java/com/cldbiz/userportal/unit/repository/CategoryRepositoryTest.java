@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cldbiz.userportal.domain.Category;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CategoryDto;
+import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.category.CategoryRepository;
@@ -37,78 +39,62 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 	CategoryRepository categoryRepository;
 	
 	@Test
-	public void whenCount_thenReturnCount() {
-		long categoryCnt = categoryRepository.count();
+	public void whenExistsById_thenReturnTrue() {
+		List<Category> categorys = categoryRepository.findAll();
+		Category category = categorys.get(0);
+		
+		Boolean exists = categoryRepository.existsById(category.getId());
+		categoryRepository.flush();
+		
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	public void whenCountAll_thenReturnLong() {
+		long categoryCnt = categoryRepository.countAll();
 		categoryRepository.flush();
 		
 		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
-	public void whenDelete_thenRemoveCategory() {
-		List<Category> categories = categoryRepository.findAll();
-		Category category = categories.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		category.getProducts().size();
-		
-		categoryRepository.delete(category);
+	public void whenFindById_thenReturnCategory() {
+		Optional<Category> sameCategory = categoryRepository.findById(3L);
 		categoryRepository.flush();
 		
-		categories = categoryRepository.findAll();
-		
-		assertThat(categories.contains(category)).isFalse();
-
-		List<Product> deletedProducts = category.getProducts().stream()
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		assertThat(sameCategory.orElse(null)).isNotNull();
+		assertThat(sameCategory.get().getProducts().isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenDeleteAll_thenRemoveAllCategorys() {
-		List<Category> categories = categoryRepository.findAll();
-		categories.forEach(c -> c.getProducts().size());
+	public void whenFindByIds_thenReturnAllCategorys() {
+		List<Category> categorys = categoryRepository.findAll();
+		List<Long> categoryIds = categorys.stream().map(Category::getId).collect(Collectors.toList());
 		
-		categoryRepository.deleteAll(categories);
+		categorys = categoryRepository.findByIds(categoryIds);
 		categoryRepository.flush();
 		
-		long categoryCnt = categoryRepository.count();
-
-		assertThat(categoryCnt).isZero();
-		
-		List<Product> deletedProducts = categories.stream()
-			.flatMap(c -> c.getProducts().stream())
-			.filter(p -> productRepository.findById(p.getId()) != null )
-			.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		assertThat(categorys.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenDeleteByIds_thenRemoveAllCategorys() {
+	public void whenFindAll_thenReturnAllCategories() {
 		List<Category> categories = categoryRepository.findAll();
-		categories.forEach(c -> c.getProducts().size());
-		
-		List<Long> categoryIds = categories.stream().map(Category::getId).collect(Collectors.toList());
-		
-		categoryRepository.deleteByIds(categoryIds);
 		categoryRepository.flush();
 		
-		long categoryCnt = categoryRepository.count();
-
-		assertThat(categoryCnt).isZero();
-
-		List<Product> deletedProducts = categories.stream()
-				.flatMap(c -> c.getProducts().stream())
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		assertThat(categories.size()).isEqualTo(TOTAL_ROWS.intValue());
+		
+		Optional<Category> category = categories.stream()
+			.filter(c -> c.getProducts().size() > 0)
+			.findFirst();
+		assertThat(category.orElse(null)).isNotNull();
 	}
 
 	@Test
 	public void whenDeleteById_thenRemoveCategory() {
 		List<Category> categorys = categoryRepository.findAll();
+
 		Category category = categorys.get(0);
 		category.getProducts().size();
 		
@@ -127,30 +113,81 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenModified_thenCategoryUpdated() {
-		Optional<Category> originalCategory = categoryRepository.findById(3L);
-		originalCategory.get().setName("UPDATED - " + originalCategory.get().getName());
-		originalCategory.get().getProducts().forEach(p -> p.setName("UPDATED - " + p.getName()));
+	public void whenDeleteByIds_thenRemoveCategories() {
+		List<Category> categories = categoryRepository.findAll();
+		categories.forEach(c -> c.getProducts().size());
 		
-		Optional<Category> rtrvdCategory = categoryRepository.findById(3L);
-		assertThat(originalCategory.get().getName().equals((rtrvdCategory.get().getName())));
-		rtrvdCategory.get().getProducts().forEach(p -> assertThat(originalCategory.get().getProducts().contains(p)));
+		List<Long> categoryIds = categories.stream().map(Category::getId).collect(Collectors.toList());
+		
+		categoryRepository.deleteByIds(categoryIds);
+		categoryRepository.flush();
+		
+		long categoryCnt = categoryRepository.countAll();
+
+		assertThat(categoryCnt).isZero();
+
+		List<Product> deletedProducts = categories.stream()
+				.flatMap(c -> c.getProducts().stream())
+				.filter(p -> productRepository.findById(p.getId()) != null )
+				.collect(Collectors.toList());
+
+		assertThat(deletedProducts.isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenSave_thenReturnSavedCategory() {
+	public void whenDeleteByEntity_thenRemoveCategory() {
+		List<Category> categories = categoryRepository.findAll();
+		Category category = categories.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
+		category.getProducts().size();
+		
+		categoryRepository.deleteByEntity(category);
+		categoryRepository.flush();
+		
+		categories = categoryRepository.findAll();
+		
+		assertThat(categories.contains(category)).isFalse();
+
+		List<Product> deletedProducts = category.getProducts().stream()
+				.filter(p -> productRepository.findById(p.getId()) != null )
+				.collect(Collectors.toList());
+
+		assertThat(deletedProducts.isEmpty()).isFalse();
+	}
+
+	@Test
+	public void whenDeleteByEntities_thenRemoveCategories() {
+		List<Category> categories = categoryRepository.findAll();
+		categories.forEach(c -> c.getProducts().size());
+		
+		categoryRepository.deleteByEntities(categories);
+		categoryRepository.flush();
+		
+		long categoryCnt = categoryRepository.countAll();
+
+		assertThat(categoryCnt).isZero();
+		
+		List<Product> deletedProducts = categories.stream()
+			.flatMap(c -> c.getProducts().stream())
+			.filter(p -> productRepository.findById(p.getId()) != null )
+			.collect(Collectors.toList());
+
+		assertThat(deletedProducts.isEmpty()).isFalse();
+	}
+
+	@Test
+	public void whenSaveEntity_thenReturnSavedCategory() {
 		Category anotherCategory = getAnotherCategory();
 		Product anotherProduct = getAnotherProduct(); 
 		
 		anotherCategory.getProducts().add(anotherProduct);
 		anotherProduct.getCategories().add(anotherCategory);
 		
-		Category savedCategory = categoryRepository.save(anotherCategory);
+		Category savedCategory = categoryRepository.saveEntity(anotherCategory);
 		categoryRepository.flush();
 		
 		assertThat(savedCategory.equals(anotherCategory)).isTrue();
 		
-		long categoryCnt = categoryRepository.count();
+		long categoryCnt = categoryRepository.countAll();
 		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS + 1);
 		
 		Optional<Category> rtrvCategory = categoryRepository.findById(savedCategory.getId());
@@ -165,29 +202,7 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSaveAndFlush_thenReturnSavedCategory() {
-		Category anotherCategory = getAnotherCategory();
-		Product anotherProduct = getAnotherProduct(); 
-		
-		anotherCategory.getProducts().add(anotherProduct);
-		anotherProduct.getCategories().add(anotherCategory);
-		
-		Category savedCategory = categoryRepository.saveAndFlush(anotherCategory);
-		
-		assertThat(savedCategory.equals(anotherCategory)).isTrue();
-		
-		long categoryCnt = categoryRepository.count();
-		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS + 1);
-		
-		Optional<Category> rtrvCategory = categoryRepository.findById(savedCategory.getId());
-		assertThat(rtrvCategory.orElse(null)).isNotNull();
-		assertThat(rtrvCategory.get().equals(anotherCategory)).isTrue();
-		assertThat(rtrvCategory.get().equals(savedCategory)).isTrue();
-		assertThat(rtrvCategory.get().getProducts().contains(anotherProduct));
-	}
-
-	@Test
-	public void whenSaveAll_thenReturnSavedCategoriess() {
+	public void whenSaveEntities_thenReturnSavedCategories() {
 		Category anotherCategory = getAnotherCategory();
 		Product anotherProduct = getAnotherProduct(); 
 
@@ -200,19 +215,19 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		extraCategory.getProducts().add(extraProduct);
 		extraProduct.getCategories().add(extraCategory);
 
-		List<Category> categorys = new ArrayList<Category>();
-		categorys.add(anotherCategory);
-		categorys.add(extraCategory);
+		List<Category> categories = new ArrayList<Category>();
+		categories.add(anotherCategory);
+		categories.add(extraCategory);
 		
-		List<Category> savedCategorys = categoryRepository.saveAll(categorys);
+		List<Category> savedCategorys = categoryRepository.saveEntities(categories);
 		categoryRepository.flush();
 		
 		assertThat(savedCategorys.size() == 2).isTrue();
 		
-		assertThat(categorys.stream().allMatch(t -> savedCategorys.contains(t))).isTrue();
-		assertThat(savedCategorys.stream().allMatch(t -> categorys.contains(t))).isTrue();
+		assertThat(categories.stream().allMatch(t -> savedCategorys.contains(t))).isTrue();
+		assertThat(savedCategorys.stream().allMatch(t -> categories.contains(t))).isTrue();
 		
-		long categoryCnt = categoryRepository.count();
+		long categoryCnt = categoryRepository.countAll();
 		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS + 2);
 		
 		Optional<Category> rtrvAnotherCategory = categoryRepository.findById(anotherCategory.getId());
@@ -227,48 +242,49 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenExistsById_thenReturnTrue() {
-		List<Category> categorys = categoryRepository.findAll();
-		Category category = categorys.get(0);
+	public void whenModified_thenCategoryUpdated() {
+		Optional<Category> originalCategory = categoryRepository.findById(3L);
+		originalCategory.get().setName("UPDATED - " + originalCategory.get().getName());
+		originalCategory.get().getProducts().forEach(p -> p.setName("UPDATED - " + p.getName()));
 		
-		Boolean exists = categoryRepository.existsById(category.getId());
-		categoryRepository.flush();
-		
-		assertThat(exists).isTrue();
+		Optional<Category> rtrvdCategory = categoryRepository.findById(3L);
+		assertThat(originalCategory.get().getName().equals((rtrvdCategory.get().getName())));
+		rtrvdCategory.get().getProducts().forEach(p -> assertThat(originalCategory.get().getProducts().contains(p)));
 	}
 
 	@Test
-	public void whenFindById_thenReturnCategory() {
-		Optional<Category> sameCategory = categoryRepository.findById(3L);
+	public void whenExistsByDto_thenReturnTrue() {
+		CategoryDto categoryDto = new CategoryDto();
+		categoryDto.setName("Writing");
+		
+		ProductDto productDto = new ProductDto();
+		productDto.setName("pen");
+		
+		categoryDto.setProductDto(productDto);
+
+		Boolean exists = categoryRepository.existsByDto(categoryDto);
 		categoryRepository.flush();
 		
-		assertThat(sameCategory.orElse(null)).isNotNull();
-		assertThat(sameCategory.get().getProducts().isEmpty()).isFalse();
+		assertThat(Boolean.TRUE).isEqualTo(exists);
+	}
+	
+	@Test
+	public void whenCountByDto_thenReturnCount() {
+		CategoryDto categoryDto = new CategoryDto();
+		
+		ProductDto productDto = new ProductDto();
+		productDto.setName("printer");
+		
+		categoryDto.setProductDto(productDto);
+		
+		long categoryCnt =  categoryRepository.countByDto(categoryDto);
+		categoryRepository.flush();
+		
+		assertThat(categoryCnt).isGreaterThanOrEqualTo(2L);
 	}
 
 	@Test
-	public void whenFindAll_thenReturnAllCategorys() {
-		List<Category> categorys = categoryRepository.findAll();
-		categoryRepository.flush();
-		
-		assertThat(categorys.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenFindAllById_thenReturnAllCategorys() {
-		List<Category> categorys = categoryRepository.findAll();
-		List<Long> categoryIds = categorys.stream().map(Category::getId).collect(Collectors.toList());
-		
-		categorys = categoryRepository.findAllById(categoryIds);
-		categoryRepository.flush();
-		
-		assertThat(categorys.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenFindByDto_thenReturnCategorys() {
+	public void whenFindByDto_thenReturnCategories() {
 		CategoryDto categoryDto = new CategoryDto();
 		categoryDto.setName("Writing");
 		
@@ -289,7 +305,7 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenFindPageByDto_thenReturnCategorys() {
+	public void whenFindPageByDto_thenReturnCategories() {
 		CategoryDto categoryDto = new CategoryDto();
 		categoryDto.setName("Writing");
 		
@@ -300,26 +316,12 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		categoryDto.setStart(0);
 		categoryDto.setLimit(2);
 		
-		List<Category> categorys = categoryRepository.findPageByDto(categoryDto);
+		List<Category> categories = categoryRepository.findPageByDto(categoryDto);
 		categoryRepository.flush();
 		
-		assertThat(categorys).isNotEmpty();
-		assertThat(categorys.size()).isLessThanOrEqualTo(2);
-		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		CategoryDto categoryDto = new CategoryDto();
-		
-		ProductDto productDto = new ProductDto();
-		productDto.setName("Stationary");
-		categoryDto.setProductDto(productDto);
-		
-		Long categoryCount = categoryRepository.countSearchByDto(categoryDto);
-		categoryRepository.flush();
-		
-		assertThat(categoryCount).isGreaterThanOrEqualTo(1L);
+		assertThat(categories).isNotEmpty();
+		assertThat(categories.size()).isLessThanOrEqualTo(2);
+		assertThat(categories.get(0).getProducts().isEmpty()).isFalse();
 	}
 
 	@Test
@@ -331,11 +333,11 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		productDto.setName("Stationary");
 		categoryDto.setProductDto(productDto);
 		
-		List<Category> categorys = categoryRepository.searchByDto(categoryDto);
+		List<Category> categories = categoryRepository.searchByDto(categoryDto);
 		categoryRepository.flush();
 		
-		assertThat(categorys).isNotEmpty();
-		assertThat(categorys.get(0).getProducts().stream().map(p -> p.getName()).collect(Collectors.toList()).contains("Stationary"));
+		assertThat(categories).isNotEmpty();
+		assertThat(categories.get(0).getProducts().stream().map(p -> p.getName()).collect(Collectors.toList()).contains("Stationary"));
 	}
 
 	@Test
@@ -348,12 +350,12 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		productDto.setName("Stationary");
 		categoryDto.setProductDto(productDto);
 
-		List<Category> categorys = categoryRepository.searchPageByDto(categoryDto);
+		List<Category> categories = categoryRepository.searchPageByDto(categoryDto);
 		categoryRepository.flush();
 		
-		assertThat(categorys).isNotEmpty();
-		assertThat(categorys.size()).isLessThanOrEqualTo(2);
-		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
+		assertThat(categories).isNotEmpty();
+		assertThat(categories.size()).isLessThanOrEqualTo(2);
+		assertThat(categories.get(0).getProducts().isEmpty()).isFalse();
 	}
 
 	private Category getAnotherCategory() {

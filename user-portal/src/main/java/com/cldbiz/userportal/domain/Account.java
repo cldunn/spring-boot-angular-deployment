@@ -15,6 +15,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.cldbiz.userportal.dto.AccountDto;
 
 import lombok.Data;
@@ -50,7 +53,7 @@ public @Data class Account extends AbstractDomain {
 
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
 	@EqualsAndHashCode.Exclude
-	@OneToOne(mappedBy="account", cascade={CascadeType.ALL}, optional=false, orphanRemoval=true)
+	@OneToOne(mappedBy="account", cascade={CascadeType.PERSIST, CascadeType.REMOVE}, optional=false, orphanRemoval=true)
 	private Customer customer;
 
 	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow

@@ -2,11 +2,15 @@ package com.cldbiz.userportal.repository.product;
 
 import java.util.List;
 
+import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.domain.QAccount;
 import com.cldbiz.userportal.domain.QCategory;
 import com.cldbiz.userportal.domain.QCustomer;
 import com.cldbiz.userportal.domain.QInvoice;
+import com.cldbiz.userportal.domain.QLineItem;
 import com.cldbiz.userportal.domain.QProduct;
+import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
@@ -20,18 +24,25 @@ import com.querydsl.core.types.dsl.PathBuilder;
 public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, ProductDto, Long> implements ProductRepositoryExt {
 
 	@Override
-	public List<Product> findAll() {
+	public Boolean existsByDto(ProductDto productDto, Predicate... predicates) {
 		QProduct product = QProduct.product;
 		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(product)
-				.fetch();
+		DynBooleanBuilder<QProduct, ProductDto> builder = searchByCriteria(productDto, predicates);
+		
+		return jpaQueryFactory.selectFrom(product).where(builder.asPredicate()).fetchCount() > 0 ? Boolean.TRUE : Boolean.FALSE;
 	}
-
+	
 	@Override
-	public List<Product> findAllById(List<Long> productIds) {
+	public Long countByDto(ProductDto productDto, Predicate... predicates) {
+		QProduct product = QProduct.product;
+		
+		DynBooleanBuilder<QProduct, ProductDto> builder = searchByCriteria(productDto, predicates);
+		
+		return jpaQueryFactory.selectFrom(product).where(builder.asPredicate()).fetchCount();
+	}
+	
+	@Override
+	public List<Product> findByIds(List<Long> productIds) {
 		QProduct product = QProduct.product;
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
@@ -43,9 +54,23 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 	}
 
 	@Override
-	public List<Product> findByDto(ProductDto productDto) {
+	public List<Product> findAll() {
 		QProduct product = QProduct.product;
 		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(product).fetch();
+	}
+
+	/* TODO Rework search criteria ... */
+	@Override
+	public List<Product> findByDto(ProductDto productDto, Predicate... predicates) {
+		QProduct product = QProduct.product;
+		
+		DynBooleanBuilder<QProduct, ProductDto> builder = findByCriteria(productDto, predicates);
+		
+		/*
 		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
 		Predicate predicate = builder.findPredicate(product, productDto).asPredicate();
 
@@ -54,77 +79,108 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 			Predicate byCategoryPredicate = byCategoryBuilder.findPredicate(product.categories.any(), productDto.getCategoryDto()).asPredicate();
 			builder.and(byCategoryPredicate);
 		}
-
+		*/
+		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(product)
-				.where(predicate)
+				.where(builder.asPredicate())
 				.fetch();
 	}
 
 	@Override
-	public List<Product> findPageByDto(ProductDto productDto) {
+	public List<Product> findPageByDto(ProductDto productDto, Predicate... predicates) {
 		QProduct product = QProduct.product;
 		
+		DynBooleanBuilder<QProduct, ProductDto> builder = findByCriteria(productDto, predicates);
+		
+		/*
 		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
 		Predicate predicate = builder.findPredicate(product, productDto).asPredicate();
-
+		*/
+		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(product)
-				.where(predicate)
+				.where(builder.asPredicate())
 				.orderBy(sortBy(productDto))
 				.offset(productDto.getStart().intValue())
 				.limit(productDto.getLimit().intValue())
 				.fetch();
 	}
 
-	public Long countSearchByDto(ProductDto productDto) {
+	@Override
+	public List<Product> searchByDto(ProductDto productDto, Predicate... predicates) {
 		QProduct product = QProduct.product;
-
+		
+		DynBooleanBuilder<QProduct, ProductDto> builder = searchByCriteria(productDto, predicates);
+		
+		/*
 		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
 		Predicate predicate = builder.searchPredicate(product, productDto).asPredicate();
-
+		*/
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
 		return jpaQueryFactory.selectFrom(product)
-				.where(predicate)
-				.fetchCount();
+				.where(builder.asPredicate())
+				.fetch();
+	}
+
+	@Override
+	public List<Product> searchPageByDto(ProductDto productDto, Predicate... predicates) {
+		QProduct product = QProduct.product;
+		
+		DynBooleanBuilder<QProduct, ProductDto> builder = searchByCriteria(productDto, predicates);
+		
+		/*
+		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
+		Predicate predicate = builder.searchPredicate(product, productDto).asPredicate();
+		*/
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(product)
+				.where(builder.asPredicate())
+				.orderBy(sortBy(productDto))
+				.offset(productDto.getStart().intValue())
+				.limit(productDto.getLimit().intValue())
+				.fetch();
+		
+	}
+
+	protected DynBooleanBuilder<QProduct, ProductDto> findByCriteria(ProductDto productDto, Predicate... predicates) {
+		QProduct product = QProduct.product;
+		
+		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
+		builder = builder.findPredicate(product, productDto, predicates);
+
+		if (productDto.getCategoryDto() != null) {
+			DynBooleanBuilder<QCategory, CategoryDto> byCategoryBuilder = new DynBooleanBuilder<QCategory, CategoryDto>();
+			Predicate byCategoryPredicate = byCategoryBuilder.findPredicate(product.categories.any(), productDto.getCategoryDto(), predicates).asPredicate();
+			builder.and(byCategoryPredicate);
+		}
+
+		return builder;
 	}
 	
-
-	@Override
-	public List<Product> searchByDto(ProductDto productDto) {
+	protected DynBooleanBuilder<QProduct, ProductDto> searchByCriteria(ProductDto productDto, Predicate... predicates) {
 		QProduct product = QProduct.product;
 		
 		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
-		Predicate predicate = builder.searchPredicate(product, productDto).asPredicate();
-		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(product)
-				.where(predicate)
-				.fetch();
-	}
+		builder = builder.searchPredicate(product, productDto, predicates);
 
-	@Override
-	public List<Product> searchPageByDto(ProductDto productDto) {
-		QProduct product = QProduct.product;
-		
-		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
-		Predicate predicate = builder.searchPredicate(product, productDto).asPredicate();
-		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(product)
-				.where(predicate)
-				.orderBy(sortBy(productDto))
-				.offset(productDto.getStart().intValue())
-				.limit(productDto.getLimit().intValue())
-				.fetch();
-		
+		if (productDto.getCategoryDto() != null) {
+			DynBooleanBuilder<QCategory, CategoryDto> byCategoryBuilder = new DynBooleanBuilder<QCategory, CategoryDto>();
+			Predicate byCategoryPredicate = byCategoryBuilder.findPredicate(product.categories.any(), productDto.getCategoryDto(), predicates).asPredicate();
+			builder.and(byCategoryPredicate);
+		}
+
+		return builder;
 	}
 
 	@Override

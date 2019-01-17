@@ -11,24 +11,36 @@ import org.springframework.data.repository.Repository;
 
 @NoRepositoryBean
 public interface BaseRepository<T, ID extends Serializable> extends Repository<T, ID> {
-// public interface AbstractRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, QuerydslPredicateExecutor {
 
+	// Returns whether an entity with the given id exists.
+	public boolean	existsById(ID id);
+	
+	// Returns the number of entities available. {count)
+	public Long	countAll();
+	
+	// Retrieves an entity by its id.  Check @ManyToOne and @OneToOne
+	public Optional<T> findById(ID id);
+	
+	// Deletes the entity with the given id.
 	public void deleteById(ID id);
-	public void deleteByIds(Iterable<ID> ids);  // custom
-	 
-	public void delete(T entity);
-	public void deleteAll(Iterable<? extends T> entities);
-	 
-	public <S extends T> S save(S entity);
-	public <S extends T> S saveAndFlush(S entity);
-	public <S extends T> List<S> saveAll(Iterable<S> entities);
+	
+	// Use deleteById(id) in loop, [in(ids) will cause FK violation] 
+	public void deleteByIds(Iterable<ID> ids);
+	
+	// Deletes a given entity. (delete)
+	public void deleteByEntity(T entity);
+	
+	// Deletes the given entities. (deleteAll)
+	public void deleteByEntities(Iterable<? extends T> entities);
+	
+	// Saves a given entity. (save)
+	public <S extends T> S	saveEntity(S entity);
+	
+	// Saves all given entities. (saveAll)
+	public <S extends T> List<S> saveEntities(Iterable<S> entities);
 
+	// Flushes all pending changes to the database.
 	public void flush();
 
-	public boolean existsById(ID id);
-	public Optional<T> findById(ID id);
-	 
-	long count();
-	
 	public void doSql(String sqlStr, Object... parameters);
 }

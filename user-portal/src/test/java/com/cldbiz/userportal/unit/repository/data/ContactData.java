@@ -1,8 +1,8 @@
-package com.cldbiz.userportal.unit.repository;
+package com.cldbiz.userportal.unit.repository.data;
 
 import com.cldbiz.userportal.domain.Contact;
 
-public class ContactDynData {
+public class ContactData {
 
 	public static Contact getAnotherContact() {
 		Contact anotherContact = new Contact();

@@ -76,65 +76,66 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		jpaQueryFactory = new JPAQueryFactory(entityManager);
     }
 
+    // Returns whether an entity with the given id exists.
     @Override
-    public void deleteById(ID id) {
-    	repository.deleteById(id);
-    }
-    
-    @Override
-    public void deleteByIds(Iterable<ID> ids) {
-    	// Avoid "where id in ids", causes FK violation when entity has child relationships as deletes are in order (parent, then children)
-    	// Single delete will apply cascadeTypes
-    	for(ID id: ids) {
-    		repository.deleteById(id);
-    	}
-    }
-    
-    @Override
-    public void delete(T entity) {
-    	repository.delete(entity);
-    }
-    
-    @Override
-    public void deleteAll(Iterable<? extends T> entities) {
-    	repository.deleteAll(entities);
-    }
-
-    @Override
-	public <S extends T> S save(S entity) {
-    	return repository.save(entity);
-    }
-
-    @Override
-    public <S extends T> S saveAndFlush(S entity) {
-    	return repository.saveAndFlush(entity);
-    }
-    
-    @Override
-    public <S extends T> List<S> saveAll(Iterable<S> entities) {
-    	return repository.saveAll(entities);
-    }
-
-	@Override
-	public void flush() {
-		repository.flush();
-	}
-
-	@Override
 	public boolean existsById(ID id) { 
 		return repository.existsById(id);
 	}
 	
     @Override
+	public Long countAll() { 
+		return repository.count();
+	}
+
+    // Retrieves an entity by its id.
+    @Override
 	public Optional<T> findById(ID id) {
 		return repository.findById(id);
 	}
 
-	@Override
-    public  long count() {
-    	return repository.count();
+	// Deletes the entity with the given id.
+    @Override
+    public void deleteById(ID id) {
+    	repository.deleteById(id);
     }
-	
+    
+    // Use deleteById(id) in loop, [in(ids) will cause FK violation, deleteById applies cascadeTypes] 
+    @Override
+    public void deleteByIds(Iterable<ID> ids) {
+    	for(ID id: ids) {
+    		repository.deleteById(id);
+    	}
+    }
+    
+	// Deletes a given entity.
+    @Override
+	public void deleteByEntity(T entity) {
+    	repository.delete(entity);
+    }
+    
+	// Deletes the given entities.
+    @Override
+	public void deleteByEntities(Iterable<? extends T> entities) {
+		repository.deleteAll(entities);
+	}
+
+	// Saves a given entity.
+    @Override
+	public <S extends T> S	saveEntity(S entity) {
+		return repository.save(entity);
+	}
+
+	// Saves all given entities. (saveAll)
+	public <S extends T> List<S> saveEntities(Iterable<S> entities) {
+		return repository.saveAll(entities);
+	}
+
+	// Flushes all pending changes to the database.
+	@Override
+	public void flush() {
+		repository.flush();
+	}
+
 	@Override
 	public void doSql(String sqlStr, Object... parameters) {
 		entityManager.flush();

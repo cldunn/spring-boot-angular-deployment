@@ -36,85 +36,64 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 	WishListRepository wishListRepository;
 	
 	@Test
-	public void whenCount_thenReturnCount() {
-		long wishListCnt = wishListRepository.count();
+	public void whenExistsById_thenReturnTrue() {
+		List<WishList> wishLists =  wishListRepository.findAll();
+		WishList wishList = wishLists.get(0);
+		
+		Boolean exists = wishListRepository.existsById(wishList.getId());
 		wishListRepository.flush();
 		
-		assertThat(wishListCnt).isEqualTo(TOTAL_ROWS);
+		assertThat(exists).isTrue();
 	}
 
 	@Test
-	public void whenDelete_thenRemoveWishList() {
-		List<WishList> wishLists = wishListRepository.findAll();
-		WishList wishList = wishLists.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		wishList.getProducts().size();
-		
-		wishListRepository.delete(wishList);
+	public void whenCountAll_thenReturnLong() {
+		Long wishListCount =  wishListRepository.countAll();
 		wishListRepository.flush();
 		
-		wishLists = wishListRepository.findAll();
-		
-		assertThat(wishLists.contains(wishList)).isFalse();
-
-		List<Product> deletedProducts = wishList.getProducts().stream()
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		assertThat(wishListCount).isEqualTo(TOTAL_ROWS.intValue());
 	}
 
 	@Test
-	public void whenDeleteAll_thenRemoveAllWishLists() {
-		List<WishList> wishLists = wishListRepository.findAll();
-		wishLists.forEach(c -> c.getProducts().size());
-		
-		wishListRepository.deleteAll(wishLists);
+	public void whenFindById_thenReturnWishList() {
+		Optional<WishList> sameWishList = wishListRepository.findById(3L);
 		wishListRepository.flush();
 		
-		long wishListCnt = wishListRepository.count();
-
-		assertThat(wishListCnt).isZero();
-		
-		List<Product> deletedProducts = wishLists.stream()
-			.flatMap(c -> c.getProducts().stream())
-			.filter(p -> productRepository.findById(p.getId()) != null )
-			.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		assertThat(sameWishList.orElse(null)).isNotNull();
+		assertThat(sameWishList.get().getProducts().isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenDeleteByIds_thenRemoveAllWishLists() {
+	public void whenFindByIds_thenReturnWishLists() {
 		List<WishList> wishLists = wishListRepository.findAll();
-		wishLists.forEach(c -> c.getProducts().size());
-		
 		List<Long> wishListIds = wishLists.stream().map(WishList::getId).collect(Collectors.toList());
 		
-		wishListRepository.deleteByIds(wishListIds);
+		wishLists = wishListRepository.findByIds(wishListIds);
 		wishListRepository.flush();
 		
-		long wishListCnt = wishListRepository.count();
+		assertThat(wishLists.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(wishLists.get(0).getProducts().isEmpty()).isFalse();
+	}
 
-		assertThat(wishListCnt).isZero();
-
-		List<Product> deletedProducts = wishLists.stream()
-				.flatMap(c -> c.getProducts().stream())
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+	@Test
+	public void whenFindAll_thenReturnAllWishLists() {
+		List<WishList> wishLists = wishListRepository.findAll();
+		wishListRepository.flush();
+		
+		assertThat(wishLists.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(wishLists.get(0).getProducts().isEmpty()).isFalse();
 	}
 
 	@Test
 	public void whenDeleteById_thenRemoveWishList() {
-		List<WishList> wishLists = wishListRepository.findAll();
+		List<WishList> wishLists =   wishListRepository.findAll();
 		WishList wishList = wishLists.get(0);
 		wishList.getProducts().size();
 		
 		wishListRepository.deleteById(wishList.getId());
 		wishListRepository.flush();
 		
-		wishLists = wishListRepository.findAll();
+		wishLists =  wishListRepository.findAll();
 
 		assertThat(wishLists.contains(wishList)).isFalse();
 		
@@ -126,29 +105,79 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenModified_thenWishListUpdated() {
-		Optional<WishList> originalWishList = wishListRepository.findById(3L);
-		originalWishList.get().setName("UPDATED - " + originalWishList.get().getName());
-		originalWishList.get().getProducts().forEach(p -> p.setName("UPDATED - " + p.getName()));
+	public void whenDeleteByIds_thenRemoveWishLists() {
+		List<WishList> wishLists =  wishListRepository.findAll();
+		wishLists.forEach(c -> c.getProducts().size());
 		
-		Optional<WishList> rtrvdWishList = wishListRepository.findById(3L);
-		assertThat(originalWishList.get().getName().equals((rtrvdWishList.get().getName())));
-		rtrvdWishList.get().getProducts().forEach(p -> assertThat(originalWishList.get().getProducts().contains(p)));
+		List<Long> wishListIds = wishLists.stream().map(WishList::getId).collect(Collectors.toList());
+		
+		wishListRepository.deleteByIds(wishListIds);
+		wishListRepository.flush();
+		
+		long wishListCnt =  wishListRepository.countAll();
+		
+		assertThat(wishListCnt).isZero();
+
+		List<Product> deletedProducts = wishLists.stream()
+				.flatMap(c -> c.getProducts().stream())
+				.filter(p -> productRepository.findById(p.getId()) != null )
+				.collect(Collectors.toList());
+
+		assertThat(deletedProducts.isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenSave_thenReturnSavedWishList() {
+	public void whenDeleteByEntity_thenRemoveWishList() {
+		List<WishList> wishLists =  wishListRepository.findAll();
+		WishList wishList = wishLists.get(0);
+		wishList.getProducts().size();
+		
+		wishListRepository.deleteByEntity(wishList);
+		wishListRepository.flush();
+		
+		wishLists =  wishListRepository.findAll();
+
+		assertThat(wishLists.contains(wishList)).isFalse();
+		
+		List<Product> deletedProducts = wishList.getProducts().stream()
+				.filter(p -> productRepository.findById(p.getId()) != null )
+				.collect(Collectors.toList());
+
+		assertThat(deletedProducts.size()).isEqualTo(wishList.getProducts().size());
+	}
+
+	@Test
+	public void whenDeleteByEntities_thenRemoveWishLists() {
+		List<WishList> wishLists =  wishListRepository.findAll();
+		wishLists.forEach(w -> w.getProducts().size());
+		
+		wishListRepository.deleteByEntities(wishLists);
+		wishListRepository.flush();
+		
+		long wishListCnt =  wishListRepository.countAll();
+		assertThat(wishListCnt).isZero();
+		
+		List<Product> deletedProducts = wishLists.stream()
+			.flatMap(c -> c.getProducts().stream())
+			.filter(p -> productRepository.findById(p.getId()) != null )
+			.collect(Collectors.toList());
+
+		assertThat(deletedProducts.isEmpty()).isFalse();
+	}
+
+	@Test
+	public void whenSaveEntity_thenReturnSavedWishList() {
 		WishList anotherWishList = getAnotherWishList();
 		Product anotherProduct = getAnotherProduct(); 
 		
 		anotherWishList.getProducts().add(anotherProduct);
 		
-		WishList savedWishList = wishListRepository.save(anotherWishList);
+		WishList savedWishList = wishListRepository.saveEntity(anotherWishList);
 		wishListRepository.flush();
 		
 		assertThat(savedWishList.equals(anotherWishList)).isTrue();
 		
-		long wishListCnt = wishListRepository.count();
+		long wishListCnt =  wishListRepository.countAll();
 		assertThat(wishListCnt).isEqualTo(TOTAL_ROWS + 1);
 		
 		Optional<WishList> rtrvWishList = wishListRepository.findById(savedWishList.getId());
@@ -160,29 +189,7 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSaveAndFlush_thenReturnSavedWishList() {
-		WishList anotherWishList = getAnotherWishList();
-		Product anotherProduct = getAnotherProduct(); 
-		
-		anotherWishList.getProducts().add(anotherProduct);
-		
-		WishList savedWishList = wishListRepository.saveAndFlush(anotherWishList);
-		
-		assertThat(savedWishList.equals(anotherWishList)).isTrue();
-		
-		long wishListCnt = wishListRepository.count();
-		assertThat(wishListCnt).isEqualTo(TOTAL_ROWS + 1);
-		
-		Optional<WishList> rtrvWishList = wishListRepository.findById(savedWishList.getId());
-		assertThat(rtrvWishList.orElse(null)).isNotNull();
-		assertThat(rtrvWishList.get().equals(anotherWishList)).isTrue();
-		assertThat(rtrvWishList.get().equals(savedWishList)).isTrue();
-		
-		assertThat(rtrvWishList.get().getProducts().contains(anotherProduct));
-	}
-
-	@Test
-	public void whenSaveAll_thenReturnSavedCategoriess() {
+	public void whenSaveEntities_thenReturnSavedCategoriess() {
 		WishList anotherWishList = getAnotherWishList();
 		Product anotherProduct = getAnotherProduct(); 
 
@@ -197,7 +204,7 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 		wishLists.add(anotherWishList);
 		wishLists.add(extraWishList);
 		
-		List<WishList> savedWishLists = wishListRepository.saveAll(wishLists);
+		List<WishList> savedWishLists = wishListRepository.saveEntities(wishLists);
 		wishListRepository.flush();
 		
 		assertThat(savedWishLists.size() == 2).isTrue();
@@ -205,7 +212,7 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 		assertThat(wishLists.stream().allMatch(t -> savedWishLists.contains(t))).isTrue();
 		assertThat(savedWishLists.stream().allMatch(t -> wishLists.contains(t))).isTrue();
 		
-		long wishListCnt = wishListRepository.count();
+		long wishListCnt =  wishListRepository.countAll();
 		assertThat(wishListCnt).isEqualTo(TOTAL_ROWS + 2);
 		
 		Optional<WishList> rtrvAnotherWishList = wishListRepository.findById(anotherWishList.getId());
@@ -219,55 +226,44 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 		assertThat(rtrvExtaWishList.get().getProducts().contains(extraProduct));
 	}
 
+
 	@Test
-	public void whenExistsById_thenReturnTrue() {
-		List<WishList> wishLists = wishListRepository.findAll();
-		WishList wishList = wishLists.get(0);
+	public void whenModified_thenWishListUpdated() {
+		Optional<WishList> originalWishList = wishListRepository.findById(3L);
+		originalWishList.get().setName("UPDATED - " + originalWishList.get().getName());
+		originalWishList.get().getProducts().forEach(p -> p.setName("UPDATED - " + p.getName()));
 		
-		Boolean exists = wishListRepository.existsById(wishList.getId());
-		wishListRepository.flush();
-		
-		assertThat(exists).isTrue();
+		Optional<WishList> rtrvdWishList = wishListRepository.findById(3L);
+		assertThat(originalWishList.get().getName().equals((rtrvdWishList.get().getName())));
+		rtrvdWishList.get().getProducts().forEach(p -> assertThat(originalWishList.get().getProducts().contains(p)));
 	}
 
 	@Test
-	public void whenFindById_thenReturnWishList() {
-		Optional<WishList> sameWishList = wishListRepository.findById(3L);
+	public void whenExistsByDto_thenReturnTrue() {
+		WishListDto wishListDto = new WishListDto();
+		wishListDto.setName("Weekly");
+		
+		Boolean exists = wishListRepository.existsByDto(wishListDto);
 		wishListRepository.flush();
 		
-		assertThat(sameWishList.orElse(null)).isNotNull();
-		assertThat(sameWishList.get().getProducts().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenFindAll_thenReturnAllWishLists() {
-		List<WishList> wishLists = wishListRepository.findAll();
-		wishListRepository.flush();
-		
-		assertThat(wishLists.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(wishLists.get(0).getProducts().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenFindAllById_thenReturnAllWishLists() {
-		List<WishList> wishLists = wishListRepository.findAll();
-		List<Long> wishListIds = wishLists.stream().map(WishList::getId).collect(Collectors.toList());
-		
-		wishLists = wishListRepository.findAllById(wishListIds);
-		wishListRepository.flush();
-		
-		assertThat(wishLists.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(wishLists.get(0).getProducts().isEmpty()).isFalse();
-	}
-
-	private WishList getAnotherWishList() {
-		WishList wishList = new WishList();
-		
-		wishList.setName("Monthly");
-		
-		return wishList;
+		assertThat(Boolean.TRUE).isEqualTo(exists);
 	}
 	
+	@Test
+	public void whenCountByDto_thenReturnCount() {
+		WishListDto wishListDto = new WishListDto();
+		
+		ProductDto productDto = new ProductDto();
+		productDto.setName("Pen");
+		wishListDto.setProductDto(productDto);
+		
+		long wishListCnt =  wishListRepository.countByDto(wishListDto);
+		wishListRepository.flush();
+		
+		assertThat(wishListCnt).isGreaterThanOrEqualTo(2L);
+	}
+	
+
 	@Test
 	public void whenFindByDto_thenReturnWishLists() {
 		WishListDto wishListDto = new WishListDto();
@@ -311,20 +307,6 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		WishListDto wishListDto = new WishListDto();
-		
-		ProductDto productDto = new ProductDto();
-		productDto.setName("Pen");
-		wishListDto.setProductDto(productDto);
-		
-		Long wishListCount = wishListRepository.countSearchByDto(wishListDto);
-		wishListRepository.flush();
-		
-		assertThat(wishListCount).isGreaterThanOrEqualTo(2L);
-	}
-
-	@Test
 	public void whenSearchByDto_thenReturnWishLists() {
 		WishListDto wishListDto = new WishListDto();
 		wishListDto.setName("l");
@@ -361,6 +343,14 @@ public class WishListRepositoryTest extends BaseRepositoryTest {
 		assertThat(wishLists.stream().flatMap(wl -> wl.getProducts().stream()).anyMatch(p -> p.getName().contains("pen")));
 	}
 
+	private WishList getAnotherWishList() {
+		WishList wishList = new WishList();
+		
+		wishList.setName("Monthly");
+		
+		return wishList;
+	}
+	
 	private WishList getExtraWishList() {
 		WishList wishList = new WishList();
 		

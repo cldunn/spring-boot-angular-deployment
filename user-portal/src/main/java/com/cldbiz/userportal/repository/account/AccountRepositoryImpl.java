@@ -4,17 +4,15 @@ import java.util.List;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.QAccount;
+import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.domain.QCustomer;
 import com.cldbiz.userportal.domain.QInvoice;
-import com.cldbiz.userportal.domain.QProduct;
 import com.cldbiz.userportal.domain.QPurchaseOrder;
-import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.AccountDto;
+import com.cldbiz.userportal.dto.ContactDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
-import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
-import com.cldbiz.userportal.dto.ContactDto;
 import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -23,6 +21,40 @@ import com.querydsl.core.types.dsl.PathBuilder;
 
 public class AccountRepositoryImpl extends AbstractRepositoryImpl<Account, AccountDto, Long> implements AccountRepositoryExt {
 
+	@Override
+	public Boolean existsByDto(AccountDto accountDto, Predicate... predicates) {
+		QAccount account = QAccount.account;
+		
+		DynBooleanBuilder<QAccount, AccountDto> builder = searchByCriteria(accountDto, predicates);
+		
+		return jpaQueryFactory.selectFrom(account).where(builder.asPredicate()).fetchCount() > 0 ? Boolean.TRUE :  Boolean.FALSE;
+	}
+	
+	@Override
+	public Long countByDto(AccountDto accountDto, Predicate... predicates) {
+		QAccount account = QAccount.account;
+		
+		DynBooleanBuilder<QAccount, AccountDto> builder = searchByCriteria(accountDto, predicates);
+		
+		return jpaQueryFactory.selectFrom(account).where(builder.asPredicate()).fetchCount();
+	}
+	
+	@Override
+	public List<Account> findByIds(List<Long> accountIds) {
+		QAccount account = QAccount.account;
+		QCustomer customer = QCustomer.customer;
+		QContact contact = QContact.contact;
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(account)
+				.innerJoin(account.contact, contact).fetchJoin()
+				.innerJoin(account.customer, customer).fetchJoin()
+				.where(account.id.in(accountIds))
+				.fetch();
+	}
+	
 	@Override
 	public List<Account> findAll() {
 		QAccount account = QAccount.account;
@@ -37,12 +69,14 @@ public class AccountRepositoryImpl extends AbstractRepositoryImpl<Account, Accou
 				.innerJoin(account.customer, customer).fetchJoin()
 				.fetch();
 	}
-
+	
 	@Override
-	public List<Account> findAllById(List<Long> accountIds) {
+	public List<Account> findByDto(AccountDto accountDto, Predicate... predicates) {
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
 		QContact contact = QContact.contact;
+		
+		DynBooleanBuilder<QAccount, AccountDto> builder = findByCriteria(accountDto, predicates);
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -50,177 +84,136 @@ public class AccountRepositoryImpl extends AbstractRepositoryImpl<Account, Accou
 		return jpaQueryFactory.selectFrom(account)
 				.innerJoin(account.contact, contact).fetchJoin()
 				.innerJoin(account.customer, customer).fetchJoin()
-				.where(account.id.in(accountIds))
+				.where(builder.asPredicate())
 				.fetch();
 	}
 
 	@Override
-	public List<Account> findByDto(AccountDto accountDto) {
+	public List<Account> findPageByDto(AccountDto accountDto, Predicate... predicates) {
 		QAccount account = QAccount.account;
 		QCustomer customer = QCustomer.customer;
 		QContact contact = QContact.contact;
 		
+		DynBooleanBuilder<QAccount, AccountDto> builder = findByCriteria(accountDto, predicates);
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(account)
+				.innerJoin(account.contact, contact).fetchJoin()
+				.innerJoin(account.customer, customer).fetchJoin()
+				.where(builder.asPredicate())
+				.orderBy(sortBy(accountDto))
+				.offset(accountDto.getStart().intValue())
+				.limit(accountDto.getLimit().intValue())
+				.fetch();
+	}
+
+	@Override
+	public List<Account> searchByDto(AccountDto accountDto, Predicate... predicates) {
+		QAccount account = QAccount.account;
+		QCustomer customer = QCustomer.customer;
+		QContact contact = QContact.contact;
+		
+		DynBooleanBuilder<QAccount, AccountDto> builder = searchByCriteria(accountDto, predicates);
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(account)
+				.innerJoin(account.contact, contact).fetchJoin()
+				.innerJoin(account.customer, customer).fetchJoin()
+				.where(builder.asPredicate())
+				.fetch();
+	}
+
+	@Override
+	public List<Account> searchPageByDto(AccountDto accountDto, Predicate... predicates) {
+		QAccount account = QAccount.account;
+		QCustomer customer = QCustomer.customer;
+		QContact contact = QContact.contact;
+		
+		DynBooleanBuilder<QAccount, AccountDto> builder = searchByCriteria(accountDto, predicates);
+		
+		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
+		// forces all columns for all tables in one select which is more efficient
+		// includes dependency's dependencies
+		return jpaQueryFactory.selectFrom(account)
+				.innerJoin(account.contact, contact).fetchJoin()
+				.innerJoin(account.customer, customer).fetchJoin()
+				.where(builder.asPredicate())
+				.orderBy(sortBy(accountDto))
+				.offset(accountDto.getStart().intValue())
+				.limit(accountDto.getLimit().intValue())
+				.fetch();
+	}
+	
+	protected DynBooleanBuilder<QAccount, AccountDto> findByCriteria(AccountDto accountDto, Predicate... predicates) {
+		QAccount account = QAccount.account;
+		
 		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
-		builder = builder.findPredicate(account, accountDto);
+		builder = builder.findPredicate(account, accountDto, predicates);
 
 		if (accountDto.getContactDto() != null) {
 			DynBooleanBuilder<QContact, ContactDto> byContactBuilder = new DynBooleanBuilder<QContact, ContactDto>();
-			Predicate byContactPredicate = byContactBuilder.findPredicate(account.contact, accountDto.getContactDto()).asPredicate();
+			Predicate byContactPredicate = byContactBuilder.findPredicate(account.contact, accountDto.getContactDto(), predicates).asPredicate();
 			builder.and(byContactPredicate);
 		}
 
 		if (accountDto.getCustomerDto() != null) {
 			DynBooleanBuilder<QCustomer, CustomerDto> byCustomerBuilder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-			Predicate byCustomerPredicate = byCustomerBuilder.findPredicate(account.customer, accountDto.getCustomerDto()).asPredicate();
+			Predicate byCustomerPredicate = byCustomerBuilder.findPredicate(account.customer, accountDto.getCustomerDto(), predicates).asPredicate();
 			builder.and(byCustomerPredicate);
 		}
 
-		/*  Marginal benefit because purchaseOrder has account, could just find purchaseOrders and filter accounts */
-		if (accountDto.getPurchaseOrderDto() != null) {
+		if (accountDto.asParam.getPurchaseOrderDto() != null) {
 			DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> byPurchaseOrderBuilder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
-			Predicate byPurchaseOrderPredicate = byPurchaseOrderBuilder.findPredicate(account.purchaseOrders.any(), accountDto.getPurchaseOrderDto()).asPredicate();
+			Predicate byPurchaseOrderPredicate = byPurchaseOrderBuilder.findPredicate(account.purchaseOrders.any(), accountDto.asParam.getPurchaseOrderDto(), predicates).asPredicate();
 			builder.and(byPurchaseOrderPredicate);
 		}
 
-		/* Marginal benefit because invoice has account, could just find invoices and filter accounts */
-		if (accountDto.getInvoiceDto() != null) {
+		if (accountDto.asParam.getInvoiceDto() != null) {
 			DynBooleanBuilder<QInvoice, InvoiceDto> byInvoiceBuilder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
-			Predicate byInvoicePredicate = byInvoiceBuilder.findPredicate(account.invoices.any(), accountDto.getInvoiceDto()).asPredicate();
+			Predicate byInvoicePredicate = byInvoiceBuilder.findPredicate(account.invoices.any(), accountDto.asParam.getInvoiceDto(), predicates).asPredicate();
 			builder.and(byInvoicePredicate);
 		}
 
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(account)
-				.innerJoin(account.contact, contact).fetchJoin()
-				.innerJoin(account.customer, customer).fetchJoin()
-				.where(builder.asPredicate())
-				.fetch();
-	}
-
-	@Override
-	public List<Account> findPageByDto(AccountDto accountDto) {
-		QAccount account = QAccount.account;
-		QCustomer customer = QCustomer.customer;
-		QContact contact = QContact.contact;
-		
-		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
-		builder = builder.findPredicate(account, accountDto);
-
-		if (accountDto.getCustomerDto() != null) {
-			DynBooleanBuilder<QCustomer, CustomerDto> byCustomerBuilder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-			Predicate byCustomerPredicate = byCustomerBuilder.findPredicate(account.customer, accountDto.getCustomerDto()).asPredicate();
-			builder.and(byCustomerPredicate);
-		}
-
-		if (accountDto.getContactDto() != null) {
-			DynBooleanBuilder<QContact, ContactDto> byContactBuilder = new DynBooleanBuilder<QContact, ContactDto>();
-			Predicate byContactPredicate = byContactBuilder.findPredicate(account.contact, accountDto.getContactDto()).asPredicate();
-			builder.and(byContactPredicate);
-		}
-
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(account)
-				.innerJoin(account.contact, contact).fetchJoin()
-				.innerJoin(account.customer, customer).fetchJoin()
-				.where(builder.asPredicate())
-				.orderBy(sortBy(accountDto))
-				.offset(accountDto.getStart().intValue())
-				.limit(accountDto.getLimit().intValue())
-				.fetch();
-	}
-
-	public Long countSearchByDto(AccountDto accountDto) {
-		QAccount account = QAccount.account;
-
-		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
-		builder = builder.searchPredicate(account, accountDto);
-
-		if (accountDto.getCustomerDto() != null) {
-			DynBooleanBuilder<QCustomer, CustomerDto> byCustomerBuilder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-			Predicate byCustomerPredicate = byCustomerBuilder.searchPredicate(account.customer, accountDto.getCustomerDto()).asPredicate();
-			builder.and(byCustomerPredicate);
-		}
-
-		if (accountDto.getContactDto() != null) {
-			DynBooleanBuilder<QContact, ContactDto> byContactBuilder = new DynBooleanBuilder<QContact, ContactDto>();
-			Predicate byContactPredicate = byContactBuilder.searchPredicate(account.contact, accountDto.getContactDto()).asPredicate();
-			builder.and(byContactPredicate);
-		}
-
-		return jpaQueryFactory.selectFrom(account)
-				.where(builder.asPredicate())
-				.fetchCount();
+		return builder;
 	}
 	
-	@Override
-	public List<Account> searchByDto(AccountDto accountDto) {
+	protected DynBooleanBuilder<QAccount, AccountDto> searchByCriteria(AccountDto accountDto, Predicate... predicates) {
 		QAccount account = QAccount.account;
-		QCustomer customer = QCustomer.customer;
-		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
-		builder = builder.searchPredicate(account, accountDto);
+		builder = builder.searchPredicate(account, accountDto, predicates);
 
 		if (accountDto.getCustomerDto() != null) {
 			DynBooleanBuilder<QCustomer, CustomerDto> byCustomerBuilder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-			Predicate byCustomerPredicate = byCustomerBuilder.searchPredicate(account.customer, accountDto.getCustomerDto()).asPredicate();
+			Predicate byCustomerPredicate = byCustomerBuilder.searchPredicate(account.customer, accountDto.getCustomerDto(), predicates).asPredicate();
 			builder.and(byCustomerPredicate);
 		}
 
 		if (accountDto.getContactDto() != null) {
 			DynBooleanBuilder<QContact, ContactDto> byContactBuilder = new DynBooleanBuilder<QContact, ContactDto>();
-			Predicate byContactPredicate = byContactBuilder.searchPredicate(account.contact, accountDto.getContactDto()).asPredicate();
+			Predicate byContactPredicate = byContactBuilder.searchPredicate(account.contact, accountDto.getContactDto(), predicates).asPredicate();
 			builder.and(byContactPredicate);
 		}
 
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(account)
-				.innerJoin(account.contact, contact).fetchJoin()
-				.innerJoin(account.customer, customer).fetchJoin()
-				.where(builder.asPredicate())
-				.fetch();
-	}
-
-	@Override
-	public List<Account> searchPageByDto(AccountDto accountDto) {
-		QAccount account = QAccount.account;
-		QCustomer customer = QCustomer.customer;
-		QContact contact = QContact.contact;
-		
-		DynBooleanBuilder<QAccount, AccountDto> builder = new DynBooleanBuilder<QAccount, AccountDto>();
-		builder = builder.searchPredicate(account, accountDto);
-
-		if (accountDto.getCustomerDto() != null) {
-			DynBooleanBuilder<QCustomer, CustomerDto> byCustomerBuilder = new DynBooleanBuilder<QCustomer, CustomerDto>();
-			Predicate byCustomerPredicate = byCustomerBuilder.searchPredicate(account.customer, accountDto.getCustomerDto()).asPredicate();
-			builder.and(byCustomerPredicate);
+		if (accountDto.asParam.getPurchaseOrderDto() != null) {
+			DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto> byPurchaseOrderBuilder = new DynBooleanBuilder<QPurchaseOrder, PurchaseOrderDto>();
+			Predicate byPurchaseOrderPredicate = byPurchaseOrderBuilder.searchPredicate(account.purchaseOrders.any(), accountDto.asParam.getPurchaseOrderDto(), predicates).asPredicate();
+			builder.and(byPurchaseOrderPredicate);
 		}
 
-		if (accountDto.getContactDto() != null) {
-			DynBooleanBuilder<QContact, ContactDto> byContactBuilder = new DynBooleanBuilder<QContact, ContactDto>();
-			Predicate byContactPredicate = byContactBuilder.searchPredicate(account.contact, accountDto.getContactDto()).asPredicate();
-			builder.and(byContactPredicate);
+		if (accountDto.asParam.getInvoiceDto() != null) {
+			DynBooleanBuilder<QInvoice, InvoiceDto> byInvoiceBuilder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
+			Predicate byInvoicePredicate = byInvoiceBuilder.searchPredicate(account.invoices.any(), accountDto.asParam.getInvoiceDto(), predicates).asPredicate();
+			builder.and(byInvoicePredicate);
 		}
-		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(account)
-				.innerJoin(account.contact, contact).fetchJoin()
-				.innerJoin(account.customer, customer).fetchJoin()
-				.where(builder.asPredicate())
-				.orderBy(sortBy(accountDto))
-				.offset(accountDto.getStart().intValue())
-				.limit(accountDto.getLimit().intValue())
-				.fetch();
+
+		return builder;
 	}
-	
+
 	public OrderSpecifier[] sortBy(AccountDto accountDto) {
 		PathBuilder pb = new PathBuilder<QAccount>(QAccount.class, "account");
 		return sortOrderOf(pb, accountDto);

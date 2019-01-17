@@ -18,11 +18,13 @@ import com.cldbiz.userportal.domain.Customer;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
 import com.cldbiz.userportal.domain.PurchaseOrder;
+import com.cldbiz.userportal.domain.WishList;
 import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.PurchaseOrderDto;
+import com.cldbiz.userportal.dto.WishListDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.contact.ContactRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
@@ -30,6 +32,7 @@ import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
 import com.cldbiz.userportal.repository.product.ProductRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
+import com.cldbiz.userportal.unit.repository.data.ContactData;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
 @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/productData.xml", "/purchaseOrderData.xml", "/lineItemData.xml"})
@@ -57,58 +60,68 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	PurchaseOrderRepository purchaseOrderRepository;
 
 	@Test
-	public void whenCount_thenReturnCount() {
-		long purchaseOrderCnt = purchaseOrderRepository.count();
+	public void whenExistsById_thenReturnTrue() {
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
+		PurchaseOrder purchaseOrder = purchaseOrders.get(0);
+		
+		Boolean exists = purchaseOrderRepository.existsById(purchaseOrder.getId());
 		purchaseOrderRepository.flush();
 		
-		assertThat(purchaseOrderCnt).isEqualTo(TOTAL_ROWS);
+		assertThat(exists).isTrue();
 	}
 
 	@Test
-	public void whenDelete_thenRemovePurchaseOrder() {
-		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
-		PurchaseOrder purchaseOrder = purchaseOrders.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		
-		purchaseOrderRepository.delete(purchaseOrder);
+	public void whenCountAll_thenReturnLong() {
+		Long purchaseOrderCount =  purchaseOrderRepository.countAll();
 		purchaseOrderRepository.flush();
 		
-		purchaseOrders = purchaseOrderRepository.findAll();
-		
-		assertThat(purchaseOrders.contains(purchaseOrder)).isFalse();
-
-		Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
-		assertThat(account.orElse(null)).isNotNull();
-
-		Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
-			Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
-			return lineItem.orElse(null) != null;
-		}).findFirst();
-		assertThat(deletedLineItem.orElse(null)).isNull();
+		assertThat(purchaseOrderCount).isEqualTo(TOTAL_ROWS.intValue());
 	}
 
 	@Test
-	public void whenDeleteAll_thenRemoveAllPurchaseOrders() {
-		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
-		
-		purchaseOrderRepository.deleteAll(purchaseOrders);
+	public void whenFindById_thenReturnPurchaseOrder() {
+		Optional<PurchaseOrder> samePurchaseOrder = purchaseOrderRepository.findById(3L);
 		purchaseOrderRepository.flush();
 		
-		long purchaseOrderCnt = purchaseOrderRepository.count();
-
-		assertThat(purchaseOrderCnt).isZero();
+		assertThat(samePurchaseOrder.orElse(null)).isNotNull();
 		
-		purchaseOrders.forEach(purchaseOrder -> {
-			Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
-			assertThat(account.orElse(null)).isNotNull();
-
-			Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
-				Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
-				return lineItem.orElse(null) != null;
-			}).findFirst();
-			assertThat(deletedLineItem.orElse(null)).isNull();
-		});
+		assertThat(samePurchaseOrder.get().getAccount()).isNotNull();
+		assertThat(samePurchaseOrder.get().getLineItems().isEmpty()).isFalse();
 	}
 
+	@Test
+	public void whenFindByIds_thenReturnPurchaseOrders() {
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
+		List<Long> purchaseOrderIds = purchaseOrders.stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+		
+		purchaseOrders = purchaseOrderRepository.findByIds(purchaseOrderIds);
+		purchaseOrderRepository.flush();
+		
+		assertThat(purchaseOrders.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(purchaseOrders.get(0).getAccount()).isNotNull();
+		
+		Optional<PurchaseOrder> purchaseOrder = purchaseOrders.stream().
+			    filter(p -> Boolean.FALSE.equals(p.getLineItems().isEmpty())).
+			    findFirst();
+		
+		assertThat(purchaseOrder.orElse(null)).isNotNull();
+	}
+
+	@Test
+	public void whenFindAll_thenReturnAllPurchaseOrders() {
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
+		purchaseOrderRepository.flush();
+		
+		assertThat(purchaseOrders.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(purchaseOrders.get(0).getAccount()).isNotNull();
+		
+		Optional<PurchaseOrder> purchaseOrder = purchaseOrders.stream().
+			    filter(p -> Boolean.FALSE.equals(p.getLineItems().isEmpty())).
+			    findFirst();
+		
+		assertThat(purchaseOrder.orElse(null)).isNotNull();
+	}
+	
 	@Test
 	public void whenDeleteById_thenRemovePurchaseOrder() {
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
@@ -132,7 +145,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenDeleteByIds_thenRemoveAllPurchaseOrders() {
+	public void whenDeleteByIds_thenRemovePurchaseOrders() {
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
 		
 		List<Long> purchaseOrderIds = purchaseOrders.stream().map(PurchaseOrder::getId).collect(Collectors.toList());
@@ -140,7 +153,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		purchaseOrderRepository.deleteByIds(purchaseOrderIds);
 		purchaseOrderRepository.flush();
 		
-		long purchaseOrderCnt = purchaseOrderRepository.count();
+		long purchaseOrderCnt = purchaseOrderRepository.countAll();
 
 		assertThat(purchaseOrderCnt).isZero();
 
@@ -157,67 +170,57 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenExistsById_thenReturnTrue() {
+	public void whenDeleteByEntity_thenRemovePurchaseOrder() {
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
-		PurchaseOrder purchaseOrder = purchaseOrders.get(0);
+		PurchaseOrder purchaseOrder = purchaseOrders.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
 		
-		Boolean exists = purchaseOrderRepository.existsById(purchaseOrder.getId());
+		purchaseOrderRepository.deleteByEntity(purchaseOrder);
 		purchaseOrderRepository.flush();
 		
-		assertThat(exists).isTrue();
+		purchaseOrders = purchaseOrderRepository.findAll();
+		
+		assertThat(purchaseOrders.contains(purchaseOrder)).isFalse();
+
+		Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
+		assertThat(account.orElse(null)).isNotNull();
+
+		Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
+			Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
+			return lineItem.orElse(null) != null;
+		}).findFirst();
+		assertThat(deletedLineItem.orElse(null)).isNull();
 	}
 
 	@Test
-	public void whenFindAll_thenReturnAllPurchaseOrders() {
+	public void whenDeleteByEntities_thenRemovePurchaseOrders() {
 		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
+		
+		purchaseOrderRepository.deleteByEntities(purchaseOrders);
 		purchaseOrderRepository.flush();
 		
-		assertThat(purchaseOrders.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(purchaseOrders.get(0).getAccount()).isNotNull();
+		long purchaseOrderCnt = purchaseOrderRepository.countAll();
+
+		assertThat(purchaseOrderCnt).isZero();
 		
-		Optional<PurchaseOrder> purchaseOrder = purchaseOrders.stream().
-			    filter(p -> Boolean.FALSE.equals(p.getLineItems().isEmpty())).
-			    findFirst();
-		
-		assertThat(purchaseOrder.orElse(null)).isNotNull();
-	}
-	
-	@Test
-	public void whenFindAllById_thenReturnAllPurchaseOrders() {
-		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
-		List<Long> purchaseOrderIds = purchaseOrders.stream().map(PurchaseOrder::getId).collect(Collectors.toList());
-		
-		purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
-		purchaseOrderRepository.flush();
-		
-		assertThat(purchaseOrders.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(purchaseOrders.get(0).getAccount()).isNotNull();
-		
-		Optional<PurchaseOrder> purchaseOrder = purchaseOrders.stream().
-			    filter(p -> Boolean.FALSE.equals(p.getLineItems().isEmpty())).
-			    findFirst();
-		
-		assertThat(purchaseOrder.orElse(null)).isNotNull();
+		purchaseOrders.forEach(purchaseOrder -> {
+			Optional<Account> account = accountRepository.findById(purchaseOrder.getAccount().getId());
+			assertThat(account.orElse(null)).isNotNull();
+
+			Optional<LineItem> deletedLineItem = purchaseOrder.getLineItems().stream().filter(li -> {
+				Optional<LineItem> lineItem = lineItemRepository.findById(li.getId());
+				return lineItem.orElse(null) != null;
+			}).findFirst();
+			assertThat(deletedLineItem.orElse(null)).isNull();
+		});
 	}
 
 	@Test
-	public void whenFindById_thenReturnPurchaseOrder() {
-		Optional<PurchaseOrder> samePurchaseOrder = purchaseOrderRepository.findById(3L);
-		purchaseOrderRepository.flush();
-		
-		assertThat(samePurchaseOrder.orElse(null)).isNotNull();
-		
-		assertThat(samePurchaseOrder.get().getAccount()).isNotNull();
-		assertThat(samePurchaseOrder.get().getLineItems().isEmpty()).isFalse();
-	}
-
-	@Test
-	public void whenSave_thenReturnSavedPurchaseOrder() {
+	public void whenSaveEntity_thenReturnSavedPurchaseOrder() {
 		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder();
 		
 		Account anotherAccount = getAnotherAccount();
 		
-		Contact anotherContact = ContactDynData.getAnotherContact();
+		Contact anotherContact = ContactData.getAnotherContact();
 		anotherAccount.setContact(anotherContact);
 		
 		Customer anotherCustomer = getAnotherCustomer();
@@ -234,12 +237,12 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		
 		anotherPurchaseOrder.setLineItems(someLineItems);
 		
-		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.save(anotherPurchaseOrder);
+		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.saveEntity(anotherPurchaseOrder);
 		purchaseOrderRepository.flush();
 		
 		assertThat(savedPurchaseOrder.equals(anotherPurchaseOrder)).isTrue();
 		
-		long purchaseOrderCnt = purchaseOrderRepository.count();
+		long purchaseOrderCnt = purchaseOrderRepository.countAll();
 		assertThat(purchaseOrderCnt).isEqualTo(TOTAL_ROWS + 1);
 		
 		Optional<PurchaseOrder> rtrvPurchaseOrder = purchaseOrderRepository.findById(savedPurchaseOrder.getId());
@@ -254,26 +257,13 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenModified_thenPurchaseOrderUpdated() {
-		Optional<PurchaseOrder> originalPurchaseOrder = purchaseOrderRepository.findById(3L);
-		originalPurchaseOrder.get().setOrderIdentifier("UPDATED - " + originalPurchaseOrder.get().getOrderIdentifier());
-		originalPurchaseOrder.get().getAccount().setAccountName("UPDATED - " + originalPurchaseOrder.get().getAccount().getAccountName());
-		originalPurchaseOrder.get().getLineItems().get(0).setQuantity(originalPurchaseOrder.get().getLineItems().get(0).getQuantity() + 1);
-		
-		Optional<PurchaseOrder> rtrvdPurchaseOrder = purchaseOrderRepository.findById(3L);
-		assertThat(originalPurchaseOrder.get().getOrderIdentifier().equals((rtrvdPurchaseOrder.get().getOrderIdentifier())));
-		assertThat(originalPurchaseOrder.get().getAccount().getAccountName().equals((rtrvdPurchaseOrder.get().getAccount().getAccountName())));
-		assertThat(originalPurchaseOrder.get().getLineItems().get(0).getQuantity().equals((rtrvdPurchaseOrder.get().getLineItems().get(0).getQuantity())));
-	}
-
-	@Test
-	public void whenSaveAll_thenReturnSavedPurchaseOrders() {
+	public void whenSaveEntities_thenReturnSavedPurchaseOrders() {
 		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder();
 		
 		// Manually resolve bi-directional references
 		Account anotherAccount = getAnotherAccount();
 		
-		Contact anotherContact = ContactDynData.getAnotherContact();
+		Contact anotherContact = ContactData.getAnotherContact();
 		anotherAccount.setContact(anotherContact);
 		
 		Customer anotherCustomer = getAnotherCustomer();
@@ -295,7 +285,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		// Manually resolve bi-directional references
 		Account extraAccount = getExtraAccount();
 
-		Contact extraContact = ContactDynData.getExtraContact();
+		Contact extraContact = ContactData.getExtraContact();
 		extraAccount.setContact(extraContact);
 		
 		Customer extraCustomer = getExtraCustomer();
@@ -316,7 +306,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		purchaseOrders.add(anotherPurchaseOrder);
 		purchaseOrders.add(extraPurchaseOrder);
 		
-		List<PurchaseOrder> savedPurchaseOrders = purchaseOrderRepository.saveAll(purchaseOrders);
+		List<PurchaseOrder> savedPurchaseOrders = purchaseOrderRepository.saveEntities(purchaseOrders);
 		purchaseOrderRepository.flush();
 		
 		assertThat(savedPurchaseOrders.size() == 2).isTrue();
@@ -324,7 +314,7 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		assertThat(purchaseOrders.stream().allMatch(t -> savedPurchaseOrders.contains(t))).isTrue();
 		assertThat(savedPurchaseOrders.stream().allMatch(t -> purchaseOrders.contains(t))).isTrue();
 		
-		long purchaseOrderCnt = purchaseOrderRepository.count();
+		long purchaseOrderCnt = purchaseOrderRepository.countAll();
 		assertThat(purchaseOrderCnt).isEqualTo(TOTAL_ROWS + 2);
 		
 		Optional<PurchaseOrder> rtrvAnotherPurchaseOrder = purchaseOrderRepository.findById(anotherPurchaseOrder.getId());
@@ -346,46 +336,47 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		assertThat(moreLineItems.stream().allMatch(t -> rtrvExtraPurchaseOrder.get().getLineItems().contains(t))).isTrue();
 	}
 	
+
 	@Test
-	public void whenSaveAndFlush_thenReturnSavedPurchaseOrder() {
-		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder();
+	public void whenModified_thenPurchaseOrderUpdated() {
+		Optional<PurchaseOrder> originalPurchaseOrder = purchaseOrderRepository.findById(3L);
+		originalPurchaseOrder.get().setOrderIdentifier("UPDATED - " + originalPurchaseOrder.get().getOrderIdentifier());
+		originalPurchaseOrder.get().getAccount().setAccountName("UPDATED - " + originalPurchaseOrder.get().getAccount().getAccountName());
+		originalPurchaseOrder.get().getLineItems().get(0).setQuantity(originalPurchaseOrder.get().getLineItems().get(0).getQuantity() + 1);
 		
-		Account anotherAccount = getAnotherAccount();
-		
-		Contact anotherContact = ContactDynData.getAnotherContact();
-		anotherAccount.setContact(anotherContact);
-		
-		Customer anotherCustomer = getAnotherCustomer();
-		anotherCustomer.setAccount(anotherAccount);
-		anotherAccount.setCustomer(anotherCustomer);
-
-		anotherPurchaseOrder.setAccount(anotherAccount);
-		anotherAccount.getPurchaseOrders().add(anotherPurchaseOrder);
-		
-		List<LineItem> someLineItems = getSomeLineItems();
-		
-		Product anotherProduct = getAnotherProduct();
-		someLineItems.forEach(l -> l.setProduct(anotherProduct));
-		
-		anotherPurchaseOrder.setLineItems(someLineItems);
-		
-		PurchaseOrder savedPurchaseOrder = purchaseOrderRepository.saveAndFlush(anotherPurchaseOrder);
-		
-		assertThat(savedPurchaseOrder.equals(anotherPurchaseOrder)).isTrue();
-		
-		long purchaseOrderCnt = purchaseOrderRepository.count();
-		assertThat(purchaseOrderCnt).isEqualTo(TOTAL_ROWS + 1);
-		
-		Optional<PurchaseOrder> rtrvPurchaseOrder = purchaseOrderRepository.findById(savedPurchaseOrder.getId());
-		assertThat(rtrvPurchaseOrder.orElse(null)).isNotNull();
-		assertThat(rtrvPurchaseOrder.get().equals(anotherPurchaseOrder)).isTrue();
-		assertThat(rtrvPurchaseOrder.get().equals(savedPurchaseOrder)).isTrue();
-		assertThat(rtrvPurchaseOrder.get().getAccount().equals(anotherAccount)).isTrue();
-
-		assertThat(Boolean.FALSE.equals(rtrvPurchaseOrder.get().getLineItems().isEmpty()));
-		assertThat(rtrvPurchaseOrder.get().getLineItems().stream().allMatch(t -> someLineItems.contains(t))).isTrue();
-		assertThat(someLineItems.stream().allMatch(t -> rtrvPurchaseOrder.get().getLineItems().contains(t))).isTrue();
+		Optional<PurchaseOrder> rtrvdPurchaseOrder = purchaseOrderRepository.findById(3L);
+		assertThat(originalPurchaseOrder.get().getOrderIdentifier().equals((rtrvdPurchaseOrder.get().getOrderIdentifier())));
+		assertThat(originalPurchaseOrder.get().getAccount().getAccountName().equals((rtrvdPurchaseOrder.get().getAccount().getAccountName())));
+		assertThat(originalPurchaseOrder.get().getLineItems().get(0).getQuantity().equals((rtrvdPurchaseOrder.get().getLineItems().get(0).getQuantity())));
 	}
+
+	@Test
+	public void whenExistsByDto_thenReturnTrue() {
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setOrderIdentifier("NET30-418");
+		
+		Boolean exists = purchaseOrderRepository.existsByDto(purchaseOrderDto);
+		purchaseOrderRepository.flush();
+		
+		assertThat(Boolean.TRUE).isEqualTo(exists);
+	}
+	
+	@Test
+	public void whenCountByDto_thenReturnCount() {
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setInvoiced(true);
+		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Target");
+		
+		purchaseOrderDto.setAccountDto(accountDto);
+		
+		long purchaseOrderCnt =  purchaseOrderRepository.countByDto(purchaseOrderDto);
+		purchaseOrderRepository.flush();
+		
+		assertThat(purchaseOrderCnt).isGreaterThanOrEqualTo(2L);
+	}
+	
 
 	@Test
 	public void whenFindByDto_thenReturnPurchaseOrders() {
@@ -451,25 +442,6 @@ public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 		assertThat(purchaseOrder.get().getAccount().getAccountName().equals(purchaseOrderDto.getAccountDto().getAccountName())).isTrue();
 	}
 
-	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
-		
-		AccountDto accountDto = new AccountDto();
-		accountDto.setAccountName("Target");
-		purchaseOrderDto.setAccountDto(accountDto);
-		
-		LineItemDto lineItemDto = new LineItemDto();
-		lineItemDto.setProductDto(new ProductDto());
-		lineItemDto.getProductDto().setName("Pen");
-
-		Long purchaseOrderCount = purchaseOrderRepository.countSearchByDto(purchaseOrderDto);
-		purchaseOrderRepository.flush();
-		
-		assertThat(purchaseOrderCount).isGreaterThan(0L);
-	}
-
-	
 	@Test
 	public void whenSearchByDto_thenReturnPurchaseOrders() {
 		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();

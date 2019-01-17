@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
 import com.cldbiz.userportal.domain.PurchaseOrder;
+import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
+import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
 import com.cldbiz.userportal.repository.product.ProductRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
@@ -39,44 +41,53 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	PurchaseOrderRepository purchaseOrderRepository;
 	
 	@Test
-	public void whenCount_thenReturnCount() {
-		long lineItemCnt = lineItemRepository.count();
+	public void whenExistsById_thenReturnTrue() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		LineItem lineItem = lineItems.get(0);
+		
+		Boolean exists = lineItemRepository.existsById(lineItem.getId());
+		lineItemRepository.flush();
+		
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	public void whenCountAll_thenReturnLong() {
+		long lineItemCnt = lineItemRepository.countAll();
 		lineItemRepository.flush();
 		
 		assertThat(lineItemCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
-	public void whenDelete_thenRemoveLineItem() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
-		LineItem lineItem = lineItems.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		
-		lineItemRepository.delete(lineItem);
+	public void whenFindById_thenReturnLineItem() {
+		Optional<LineItem> sameLineItem = lineItemRepository.findById(3L);
 		lineItemRepository.flush();
 		
-		lineItems = lineItemRepository.findAll();
-		
-		assertThat(lineItems.contains(lineItem)).isFalse();
-
-		Optional<Product> product = productRepository.findById(lineItem.getProduct().getId());
-		assertThat(product.orElse(null)).isNotNull();
+		assertThat(sameLineItem.orElse(null)).isNotNull();
+		assertThat(sameLineItem.get().getProduct()).isNotNull();
 	}
 
 	@Test
-	public void whenDeleteAll_thenRemoveAllLineItems() {
+	public void whenFindByIds_thenReturnLineItems() {
 		List<LineItem> lineItems = lineItemRepository.findAll();
+		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
 		
-		lineItemRepository.deleteAll(lineItems);
+		lineItems = lineItemRepository.findByIds(lineItemIds);
 		lineItemRepository.flush();
 		
-		long lineItemCnt = lineItemRepository.count();
+		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(lineItems.get(0).getProduct()).isNotNull();
+	}
 
-		assertThat(lineItemCnt).isZero();
+	@Test
+	public void whenFindAll_thenReturnAllLineItems() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		lineItemRepository.flush();
 		
-		lineItems.forEach(lineItem -> {
-			Optional<Product> product = productRepository.findById(lineItem.getProduct().getId());
-			assertThat(product.orElse(null)).isNotNull();
-		});
+		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(lineItems.get(0).getProduct()).isNotNull();
+		
 	}
 
 	@Test
@@ -96,7 +107,7 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenDeleteByIds_thenRemoveAllLineItems() {
+	public void whenDeleteByIds_thenRemoveLineItems() {
 		List<LineItem> lineItems = lineItemRepository.findAll();
 
 		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
@@ -104,7 +115,7 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		lineItemRepository.deleteByIds(lineItemIds);
 		lineItemRepository.flush();
 		
-		long lineItemCnt = lineItemRepository.count();
+		long lineItemCnt = lineItemRepository.countAll();
 
 		assertThat(lineItemCnt).isZero();
 
@@ -115,18 +126,40 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenModified_thenLineItemUpdated() {
-		Optional<LineItem> originalLineItem = lineItemRepository.findById(3L);
-		originalLineItem.get().setQuantity(originalLineItem.get().getQuantity() + 1L);
-		originalLineItem.get().getProduct().setName("UPDATED - " + originalLineItem.get().getProduct().getName());
+	public void whenDeleteByEntity_thenRemoveLineItem() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		LineItem lineItem = lineItems.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
 		
-		Optional<LineItem> rtrvdLineItem = lineItemRepository.findById(3L);
-		assertThat(originalLineItem.get().getQuantity().equals((rtrvdLineItem.get().getQuantity())));
-		assertThat(originalLineItem.get().getProduct().getName().equals((rtrvdLineItem.get().getProduct().getName())));
+		lineItemRepository.deleteByEntity(lineItem);
+		lineItemRepository.flush();
+		
+		lineItems = lineItemRepository.findAll();
+		
+		assertThat(lineItems.contains(lineItem)).isFalse();
+
+		Optional<Product> product = productRepository.findById(lineItem.getProduct().getId());
+		assertThat(product.orElse(null)).isNotNull();
 	}
 
 	@Test
-	public void whenSave_thenReturnSavedLineItem() {
+	public void whenDeleteByEntities_thenRemoveLineItems() {
+		List<LineItem> lineItems = lineItemRepository.findAll();
+		
+		lineItemRepository.deleteByEntities(lineItems);
+		lineItemRepository.flush();
+		
+		long lineItemCnt = lineItemRepository.countAll();
+
+		assertThat(lineItemCnt).isZero();
+		
+		lineItems.forEach(lineItem -> {
+			Optional<Product> product = productRepository.findById(lineItem.getProduct().getId());
+			assertThat(product.orElse(null)).isNotNull();
+		});
+	}
+
+	@Test
+	public void whenSaveEntity_thenReturnSavedLineItem() {
 		LineItem anotherLineItem = getAnotherLineItem();
 		
 		Product anotherProduct = getAnotherProduct(); 
@@ -137,12 +170,12 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		anotherPurchaseOrder.getLineItems().add(anotherLineItem);
 
 		// Since purchaseOrder.lineItems is uni-directional, save(lineItem) is for update
-		LineItem savedLineItem = lineItemRepository.save(anotherLineItem);
+		LineItem savedLineItem = lineItemRepository.saveEntity(anotherLineItem);
 		lineItemRepository.flush();
 		
 		assertThat(savedLineItem.equals(anotherLineItem)).isTrue();
 		
-		long lineItemCnt = lineItemRepository.count();
+		long lineItemCnt = lineItemRepository.countAll();
 		assertThat(lineItemCnt).isEqualTo(TOTAL_ROWS + 1);
 		
 		Optional<LineItem> rtrvLineItem = lineItemRepository.findById(savedLineItem.getId());
@@ -154,7 +187,7 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSaveAll_thenReturnSavedLineItems() {
+	public void whenSaveEntities_thenReturnSavedLineItems() {
 		LineItem anotherLineItem = getAnotherLineItem();
 
 		Product anotherProduct = getAnotherProduct(); 
@@ -178,7 +211,7 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		lineItems.add(extraLineItem);
 		
 		// Since purchaseOrder.lineItems is uni-directional, save(lineItem) is for update
-		List<LineItem> savedLineItems = lineItemRepository.saveAll(lineItems);
+		List<LineItem> savedLineItems = lineItemRepository.saveEntities(lineItems);
 		lineItemRepository.flush();
 		
 		assertThat(savedLineItems.size() == 2).isTrue();
@@ -186,7 +219,7 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		assertThat(lineItems.stream().allMatch(t -> savedLineItems.contains(t))).isTrue();
 		assertThat(savedLineItems.stream().allMatch(t -> lineItems.contains(t))).isTrue();
 		
-		long lineItemCnt = lineItemRepository.count();
+		long lineItemCnt = lineItemRepository.countAll();
 		assertThat(lineItemCnt).isEqualTo(TOTAL_ROWS + 2);
 		
 		Optional<LineItem> rtrvAnotherLineItem = lineItemRepository.findById(anotherLineItem.getId());
@@ -201,74 +234,44 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSaveAndFlush_thenReturnSavedLineItem() {
-		LineItem anotherLineItem = getAnotherLineItem();
+	public void whenModified_thenLineItemUpdated() {
+		Optional<LineItem> originalLineItem = lineItemRepository.findById(3L);
+		originalLineItem.get().setQuantity(originalLineItem.get().getQuantity() + 1L);
+		originalLineItem.get().getProduct().setName("UPDATED - " + originalLineItem.get().getProduct().getName());
 		
-		Product anotherProduct = getAnotherProduct(); 
-		anotherLineItem.setProduct(anotherProduct);
-		
-		// Since purchaseOrder.lineItems is uni-directional, assigning lineitem to purchaseOrder is how to insert
-		PurchaseOrder anotherPurchaseOrder = getAnotherPurchaseOrder(); 
-		anotherPurchaseOrder.getLineItems().add(anotherLineItem);
-
-		// Since purchaseOrder.lineItems is uni-directional, save(lineItem) is for update
-		LineItem savedLineItem = lineItemRepository.saveAndFlush(anotherLineItem);
-		
-		assertThat(savedLineItem.equals(anotherLineItem)).isTrue();
-		
-		long lineItemCnt = lineItemRepository.count();
-		assertThat(lineItemCnt).isEqualTo(TOTAL_ROWS + 1);
-		
-		Optional<LineItem> rtrvLineItem = lineItemRepository.findById(savedLineItem.getId());
-		assertThat(rtrvLineItem.orElse(null)).isNotNull();
-		assertThat(rtrvLineItem.get().equals(anotherLineItem)).isTrue();
-		assertThat(rtrvLineItem.get().equals(savedLineItem)).isTrue();
-		assertThat(rtrvLineItem.get().getProduct().equals(anotherProduct)).isTrue();
+		Optional<LineItem> rtrvdLineItem = lineItemRepository.findById(3L);
+		assertThat(originalLineItem.get().getQuantity().equals((rtrvdLineItem.get().getQuantity())));
+		assertThat(originalLineItem.get().getProduct().getName().equals((rtrvdLineItem.get().getProduct().getName())));
 	}
 
 	@Test
-	public void whenExistsById_thenReturnTrue() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
-		LineItem lineItem = lineItems.get(0);
+	public void whenExistsByDto_thenReturnTrue() {
+		LineItemDto lineItemDto = new LineItemDto();
+
+		Product product = getAnotherProduct();
+		ProductDto productDto = new ProductDto(product);
+		lineItemDto.setProductDto(productDto);
 		
-		Boolean exists = lineItemRepository.existsById(lineItem.getId());
+		Boolean exists = lineItemRepository.existsByDto(lineItemDto);
 		lineItemRepository.flush();
 		
-		assertThat(exists).isTrue();
+		assertThat(Boolean.TRUE).isEqualTo(exists);
 	}
-
+	
 	@Test
-	public void whenFindAll_thenReturnAllLineItems() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
+	public void whenCountByDto_thenReturnCount() {
+		LineItemDto lineItemDto = new LineItemDto();
+
+		Product product = getAnotherProduct();
+		ProductDto productDto = new ProductDto(product);
+		lineItemDto.setProductDto(productDto);
+		
+		long lineItemCnt =  lineItemRepository.countByDto(lineItemDto);
 		lineItemRepository.flush();
 		
-		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(lineItems.get(0).getProduct()).isNotNull();
-		
+		assertThat(lineItemCnt).isGreaterThanOrEqualTo(1L);
 	}
-
-	@Test
-	public void whenFindAllById_thenReturnAllLineItems() {
-		List<LineItem> lineItems = lineItemRepository.findAll();
-		List<Long> lineItemIds = lineItems.stream().map(LineItem::getId).collect(Collectors.toList());
-		
-		lineItems = lineItemRepository.findAllById(lineItemIds);
-		lineItemRepository.flush();
-		
-		assertThat(lineItems.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(lineItems.get(0).getProduct()).isNotNull();
-	}
-
-	@Test
-	public void whenFindById_thenReturnLineItem() {
-		Optional<LineItem> sameLineItem = lineItemRepository.findById(3L);
-		lineItemRepository.flush();
-		
-		assertThat(sameLineItem.orElse(null)).isNotNull();
-		assertThat(sameLineItem.get().getProduct()).isNotNull();
-	}
-
-
+	
 	@Test
 	public void whenFindByDto_thenReturnLineItems() {
 		LineItemDto lineItemDto = new LineItemDto();
@@ -308,20 +311,6 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		LineItemDto lineItemDto = new LineItemDto();
-		
-		ProductDto productDto = new ProductDto();
-		productDto.setName("printer");
-		lineItemDto.setProductDto(productDto);
-		
-		Long lineItemCount = lineItemRepository.countSearchByDto(lineItemDto);
-		lineItemRepository.flush();
-		
-		assertThat(lineItemCount).isGreaterThan(0L);
-	}
-
-	@Test
 	public void whenSearchByDto_thenReturnLineItems() {
 		LineItemDto lineItemDto = new LineItemDto();
 		
@@ -352,7 +341,6 @@ public class LineItemRepositoryTest extends BaseRepositoryTest {
 		assertThat(lineItems).isNotEmpty();
 		assertThat(lineItems.size()).isLessThanOrEqualTo(2);
 		assertThat(lineItems.get(0).getProduct()).isNotNull();
-
 	}
 
 	private LineItem getAnotherLineItem() {

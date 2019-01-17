@@ -2,37 +2,42 @@ package com.cldbiz.userportal.unit.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cldbiz.userportal.domain.Account;
+import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.domain.Customer;
 import com.cldbiz.userportal.domain.Invoice;
 import com.cldbiz.userportal.domain.PurchaseOrder;
-import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.dto.AccountDto;
-import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.ContactDto;
+import com.cldbiz.userportal.dto.CustomerDto;
+import com.cldbiz.userportal.dto.InvoiceDto;
+import com.cldbiz.userportal.dto.PurchaseOrderDto;
 import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.contact.ContactRepository;
 import com.cldbiz.userportal.repository.customer.CustomerRepository;
 import com.cldbiz.userportal.repository.invoice.InvoiceRepository;
 import com.cldbiz.userportal.repository.purchaseOrder.PurchaseOrderRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
+import com.cldbiz.userportal.unit.repository.data.AccountData;
+import com.cldbiz.userportal.unit.repository.data.ContactData;
+import com.cldbiz.userportal.unit.repository.data.CustomerData;
+import com.cldbiz.userportal.unit.repository.data.InvoiceData;
+import com.cldbiz.userportal.unit.repository.data.PurchaseOrderData;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml", "/purchaseOrderData.xml"})
 public class AccountRepositoryTest extends BaseRepositoryTest {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AccountRepositoryTest.class);
 	
 	private static final Long TOTAL_ROWS = 3L;
 	
@@ -52,130 +57,16 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	PurchaseOrderRepository purchaseOrderRepository;
 
 	@Test
-	public void whenCount_thenReturnCount() {
-		long accountCnt = accountRepository.count();
-		accountRepository.flush();
-		
-		assertThat(accountCnt).isEqualTo(TOTAL_ROWS);
-	}
-
-	@Test
-	public void whenDelete_thenRemoveAccount() {
-		List<Account> accounts = accountRepository.findAll();
-		Account account = accounts.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
-		
-		accountRepository.delete(account);
-		accountRepository.flush();
-		
-		accounts = accountRepository.findAll();
-		
-		assertThat(accounts.contains(account)).isFalse();
-
-		Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
-		assertThat(contact.orElse(null)).isNull();
-
-		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
-		assertThat(customer.orElse(null)).isNull();
-		
-		List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
-		List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
-		assertThat(invoices.isEmpty());
-		
-		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
-		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
-		assertThat(purchaseOrders.isEmpty());
-	}
-	
-	@Test
-	public void whenDeleteAll_thenRemoveAllAccounts() {
-		List<Account> accounts = accountRepository.findAll();
-		
-		accountRepository.deleteAll(accounts);
-		accountRepository.flush();
-		
-		long accountCnt = accountRepository.count();
-
-		assertThat(accountCnt).isZero();
-		
-		accounts.forEach(account -> {
-			Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
-			assertThat(contact.orElse(null)).isNull();
-
-			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
-			assertThat(customer.orElse(null)).isNull();
-			
-			List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
-			List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
-			assertThat(invoices.isEmpty());
-			
-			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
-			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
-			assertThat(purchaseOrders.isEmpty());
-		});
-	}
-	
-	@Test
-	public void whenDeleteById_thenRemoveAccount() {
-		List<Account> accounts = accountRepository.findAll();
-		Account account = accounts.get(0);
-		
-		accountRepository.deleteById(account.getId());
-		accountRepository.flush();
-		
-		accounts = accountRepository.findAll();
-
-		assertThat(accounts.contains(account)).isFalse();
-		
-		Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
-		assertThat(contact.orElse(null)).isNull();
-
-		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
-		assertThat(customer.orElse(null)).isNull();
-
-		List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
-		List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
-		assertThat(invoices.isEmpty());
-		
-		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
-		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
-		assertThat(purchaseOrders.isEmpty());
-	}
-
-	@Test
-	public void whenDeleteByIds_thenRemoveAllAccounts() {
-		List<Account> accounts = accountRepository.findAll();
-		
-		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
-		
-		accountRepository.deleteByIds(accountIds);
-		accountRepository.flush();
-		
-		long accountCnt = accountRepository.count();
-
-		assertThat(accountCnt).isZero();
-
-		accounts.forEach(account -> {
-			Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
-			assertThat(contact.orElse(null)).isNull();
-
-			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
-			assertThat(customer.orElse(null)).isNull();
-			
-			List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
-			List<Invoice> invoices = invoiceRepository.findAllById(invoiceIds);
-			assertThat(invoices.isEmpty());
-			
-			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
-			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAllById(purchaseOrderIds);
-			assertThat(purchaseOrders.isEmpty());
-		});
-	}
-
-	@Test
 	public void whenExistsById_thenReturnTrue() {
+		log.info("whenExistsById_thenReturnTrue");
+		
 		List<Account> accounts = accountRepository.findAll();
 		Account account = accounts.get(0);
 		
+		// clear cache to test performance
+		accountRepository.flush();
+		
+		// invoke existsById here
 		Boolean exists = accountRepository.existsById(account.getId());
 		accountRepository.flush();
 		
@@ -183,62 +74,25 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenFindAll_thenReturnAllAccounts() {
-		List<Account> accounts = accountRepository.findAll();
+	public void whenCountAll_thenReturnCount() {
+		log.info("whenCountAll_thenReturnCount");
+		
+		// invoke countAll here
+		long accountCnt = accountRepository.countAll();
 		accountRepository.flush();
 		
-		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(accounts.get(0).getContact()).isNotNull();
-		assertThat(accounts.get(0).getCustomer()).isNotNull();
-		
-		/* check at least one test account has invoices */
-		Optional<Account> invoicedAccount = accounts.stream().
-			    filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty())).
-			    findFirst();
-		
-		assertThat(invoicedAccount.orElse(null)).isNotNull();
-		
-		/* check at least one test account has purchaseOrders */
-		Optional<Account> purcheOrderdAccount = accounts.stream().
-			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
-			    findFirst();
-		
-		assertThat(purcheOrderdAccount.orElse(null)).isNotNull();
-	}
-
-	@Test
-	public void whenFindAllById_thenReturnAllAccounts() {
-		List<Account> accounts = accountRepository.findAll();
-		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
-		
-		accounts = accountRepository.findAllById(accountIds);
-		
-		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(accounts.get(0).getContact()).isNotNull();
-		assertThat(accounts.get(0).getCustomer()).isNotNull();
-		
-		/* check at least one test account has invoices */
-		Optional<Account> invoicedAccount = accounts.stream().
-			    filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty())).
-			    findFirst();
-		
-		assertThat(invoicedAccount.orElse(null)).isNotNull();
-		
-		/* check at least one test account has purchaseOrders */
-		Optional<Account> purcheOrderdAccount = accounts.stream().
-			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
-			    findFirst();
-		
-		assertThat(purcheOrderdAccount.orElse(null)).isNotNull();
+		assertThat(accountCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
 	public void whenFindById_thenReturnAccount() {
+		log.info("whenFindById_thenReturnAccount");
+		
+		// invoke findById here
 		Optional<Account> sameAccount = accountRepository.findById(3L);
 		accountRepository.flush();
 		
 		assertThat(sameAccount.orElse(null)).isNotNull();
-		
 		assertThat(sameAccount.get().getContact()).isNotNull();
 		assertThat(sameAccount.get().getCustomer()).isNotNull();
 		assertThat(sameAccount.get().getInvoices().isEmpty()).isFalse();
@@ -246,58 +100,412 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSave_thenReturnSavedAccount() {
-		Account anotherAccount = getAnotherAccount();
+	public void whenFindByIds_thenReturnAccounts() {
+		log.info("whenFindByIds_thenReturnAccounts");
 		
-		Contact anotherContact = ContactDynData.getAnotherContact();
+		List<Account> accounts = accountRepository.findAll();
+		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
+		
+		// clear cache to test performance
+		accountRepository.flush();
+		
+		// invoke findByIds here
+		accounts = accountRepository.findByIds(accountIds);
+		accountRepository.flush();
+		
+		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(accounts.get(0).getContact()).isNotNull();
+		assertThat(accounts.get(0).getCustomer()).isNotNull();
+		
+		/* check at least one test account has invoices */
+		Optional<Account> invoicedAccount = accounts.stream().
+			    filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty())).
+			    findFirst();
+		
+		assertThat(invoicedAccount.orElse(null)).isNotNull();
+		
+		/* check at least one test account has purchaseOrders */
+		Optional<Account> purcheOrderdAccount = accounts.stream().
+			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
+			    findFirst();
+		
+		assertThat(purcheOrderdAccount.orElse(null)).isNotNull();
+	}
+
+	@Test
+	public void whenFindAll_thenReturnAllAccounts() {
+		log.info("whenFindAll_thenReturnAllAccounts");
+		
+		// invoke findAll here
+		List<Account> accounts = accountRepository.findAll();
+		accountRepository.flush();
+		
+		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
+		assertThat(accounts.get(0).getContact()).isNotNull();
+		assertThat(accounts.get(0).getCustomer()).isNotNull();
+		
+		/* check at least one test account has invoices */
+		Optional<Account> invoicedAccount = accounts.stream().
+			    filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty())).
+			    findFirst();
+		
+		assertThat(invoicedAccount.orElse(null)).isNotNull();
+		
+		/* check at least one test account has purchaseOrders */
+		Optional<Account> purcheOrderdAccount = accounts.stream().
+			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
+			    findFirst();
+		
+		assertThat(purcheOrderdAccount.orElse(null)).isNotNull();
+	}
+
+	@Test
+	public void whenDeleteById_thenRemoveAccount() {
+		log.info("whenDeleteById_thenRemoveAccount");
+		
+		Account account = accountRepository.findById(1L).get();
+		
+		// clear cache to test performance
+		accountRepository.flush();
+
+		// invoke deleteById here
+		accountRepository.deleteById(account.getId());
+		accountRepository.flush();
+		
+		List<Account> accounts = accountRepository.findAll();
+
+		assertThat(accounts.contains(account)).isFalse();
+		
+		/* check delete cascaded for account contact*/
+		Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+		assertThat(contact.orElse(null)).isNull();
+
+		/* check delete cascaded for account customer*/
+		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+		assertThat(customer.orElse(null)).isNull();
+
+		/* check delete cascaded for account invoices */
+		List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+		List<Invoice> invoices = invoiceRepository.findByIds(invoiceIds);
+		assertThat(invoices.isEmpty());
+		
+		/* check delete cascaded for account purchase orders */
+		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findByIds(purchaseOrderIds);
+		assertThat(purchaseOrders.isEmpty());
+	}
+
+	@Test
+	public void whenDeleteByIds_thenRemoveAllAccounts() {
+		log.info("whenDeleteByIds_thenRemoveAllAccounts");
+		
+		List<Account> accounts = accountRepository.findAll();
+		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
+		
+		// clear cache to test performance
+		accountRepository.flush();
+
+		// invoke deleteByIds here
+		accountRepository.deleteByIds(accountIds);
+		accountRepository.flush();
+		
+		long accountCnt = accountRepository.countAll();
+
+		assertThat(accountCnt).isZero();
+
+		accounts.forEach(account -> {
+			/* check delete cascaded for each account contact*/
+			Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+			assertThat(contact.orElse(null)).isNull();
+
+			/* check delete cascaded for each account customer */
+			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+			assertThat(customer.orElse(null)).isNull();
+			
+			/* check delete cascaded for each account's invoices */
+			List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+			List<Invoice> invoices = invoiceRepository.findByIds(invoiceIds);
+			assertThat(invoices.isEmpty());
+			
+			/* check delete cascaded for each account's purchase orders */
+			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findByIds(purchaseOrderIds);
+			assertThat(purchaseOrders.isEmpty());
+		});
+	}
+
+	@Test
+	public void whenDeleteByEntity_thenRemoveAccount() {
+		log.info("whenDeleteByEntity_thenRemoveAccount");
+		
+		List<Account> accounts = accountRepository.findAll();
+		Account account = accounts.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
+
+		// clear cache to test performance
+		accountRepository.flush();
+
+		// invoke deleteByEntity here
+		accountRepository.deleteByEntity(account);
+		accountRepository.flush();
+		
+		accounts = accountRepository.findAll();
+		
+		assertThat(accounts.contains(account)).isFalse();
+
+		/* check delete cascaded for account contact*/
+		Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+		assertThat(contact.orElse(null)).isNull();
+
+		/* check delete cascaded for account customer */
+		Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+		assertThat(customer.orElse(null)).isNull();
+		
+		/* check delete cascaded for account's invoices */
+		List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+		List<Invoice> invoices = invoiceRepository.findByIds(invoiceIds);
+		assertThat(invoices.isEmpty());
+		
+		/* check delete cascaded for account's purchase orders */
+		List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+		List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findByIds(purchaseOrderIds);
+		assertThat(purchaseOrders.isEmpty());
+	}
+	
+	@Test
+	public void whenDeleteByEntities_thenRemoveAccounts() {
+		log.info("whenDeleteByEntities_thenRemoveAccounts");
+		
+		List<Account> accounts = accountRepository.findAll();
+		
+		// clear cache to test performance
+		accountRepository.flush();
+
+		// invoke deleteByEntities here
+		accountRepository.deleteByEntities(accounts);
+		accountRepository.flush();
+		
+		long accountCnt = accountRepository.countAll();
+
+		assertThat(accountCnt).isZero();
+		
+		accounts.forEach(account -> {
+			/* check delete cascaded for each account contact */
+			Optional<Contact> contact = contactRepository.findById(account.getContact().getId());
+			assertThat(contact.orElse(null)).isNull();
+
+			/* check delete cascaded for each account customer */
+			Optional<Customer> customer = customerRepository.findById(account.getCustomer().getId());
+			assertThat(customer.orElse(null)).isNull();
+			
+			/* check delete cascaded for each account's invoices */
+			List<Long> invoiceIds = account.getInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+			List<Invoice> invoices = invoiceRepository.findByIds(invoiceIds);
+			assertThat(invoices.isEmpty());
+			
+			/* check delete cascaded for each account's purchase order */
+			List<Long> purchaseOrderIds = account.getPurchaseOrders().stream().map(PurchaseOrder::getId).collect(Collectors.toList());
+			List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findByIds(purchaseOrderIds);
+			assertThat(purchaseOrders.isEmpty());
+		});
+	}
+	
+	@Test
+	public void whenSaveByEntity_thenReturnSavedAccount() {
+		log.info("whenSaveByEntity_thenReturnSavedAccount");
+		
+		// create new account
+		Account anotherAccount = AccountData.getAnotherAccount();
+		
+		// Manually establish contact relationship
+		Contact anotherContact = ContactData.getAnotherContact();
 		anotherAccount.setContact(anotherContact);
 		
-		Customer anotherCustomer = getAnotherCustomer();
+		// Manually establish bi-directional customer relationship
+		Customer anotherCustomer = CustomerData.getAnotherCustomer();
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
-		List<Invoice> someInvoices = getSomeInvoices();
+		// Manually establish bi-directional invoice relationships
+		List<Invoice> someInvoices = InvoiceData.getSomeInvoices();
 		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
-		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
+		// Manually establish bi-directional purchase order relationships
+		List<PurchaseOrder> somePurchaseOrders = PurchaseOrderData.getSomePurchaseOrders();
 		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
 		
-		Account savedAccount = accountRepository.save(anotherAccount);
+		// invoke saveByEntity here
+		Account savedAccount = accountRepository.saveEntity(anotherAccount);
 		accountRepository.flush();
 		
+		// confirmed persisted account returned
 		assertThat(savedAccount.equals(anotherAccount)).isTrue();
 		
-		long accountCnt = accountRepository.count();
+		// confirmed account persisted
+		long accountCnt = accountRepository.countAll();
 		assertThat(accountCnt).isEqualTo(TOTAL_ROWS + 1);
 		
+		// retrieve saved account from store
 		Optional<Account> rtrvAccount = accountRepository.findById(savedAccount.getId());
 		assertThat(rtrvAccount.orElse(null)).isNotNull();
+		
+		/* use lombock equals to check account retrieved */
 		assertThat(rtrvAccount.get().equals(anotherAccount)).isTrue();
+
+		/* use lombock equals to check account returned by saveEntity */
 		assertThat(rtrvAccount.get().equals(savedAccount)).isTrue();
+		
+		/* use lombock equals to check contact saved */
 		assertThat(rtrvAccount.get().getContact().equals(anotherContact)).isTrue();
+
+		/* use lombock equals to check customer saved */
 		assertThat(rtrvAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
 
+		/* use stream allMatch to check invoices were saved */
 		assertThat(Boolean.FALSE.equals(rtrvAccount.get().getInvoices().isEmpty()));
 		assertThat(rtrvAccount.get().getInvoices().stream().allMatch(t -> someInvoices.contains(t))).isTrue();
 		assertThat(someInvoices.stream().allMatch(t -> rtrvAccount.get().getInvoices().contains(t))).isTrue();
 
+		/* use stream allMatch to check purchase orders were saved */
 		assertThat(Boolean.FALSE.equals(rtrvAccount.get().getPurchaseOrders().isEmpty()));
 		assertThat(rtrvAccount.get().getPurchaseOrders().stream().allMatch(t -> somePurchaseOrders.contains(t))).isTrue();
 		assertThat(somePurchaseOrders.stream().allMatch(t -> rtrvAccount.get().getPurchaseOrders().contains(t))).isTrue();
 	}
-	
+
+	@Test
+	public void whenSaveEntities_thenReturnSavedAccounts() {
+		log.info("whenSaveEntities_thenReturnSavedAccounts");
+		
+		// create 1st new account
+		Account anotherAccount = AccountData.getAnotherAccount();
+		
+		// Manually establish contact relationship
+		Contact anotherContact = ContactData.getAnotherContact();
+		anotherAccount.setContact(anotherContact);
+		
+		// Manually establish bi-directional customer relationship
+		Customer anotherCustomer = CustomerData.getAnotherCustomer();
+		anotherCustomer.setAccount(anotherAccount);
+		anotherAccount.setCustomer(anotherCustomer);
+		
+		// Manually establish bi-directional invoice relationships
+		List<Invoice> someInvoices = InvoiceData.getSomeInvoices();
+		someInvoices.forEach(i -> i.setAccount(anotherAccount));
+		anotherAccount.setInvoices(someInvoices);
+		
+		// Manually establish bi-directional purchase order relationships
+		List<PurchaseOrder> somePurchaseOrders = PurchaseOrderData.getSomePurchaseOrders();
+		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
+		anotherAccount.setPurchaseOrders(somePurchaseOrders);
+		
+		// create 2nd new account
+		Account extraAccount = AccountData.getExtraAccount();
+		
+		// Manually establish contact relationship
+		Contact extraContact = ContactData.getExtraContact();
+		extraAccount.setContact(extraContact);
+		
+		// Manually establish bi-directional customer relationship
+		Customer extraCustomer = CustomerData.getExtraCustomer();
+		extraCustomer.setAccount(extraAccount);
+		extraAccount.setCustomer(extraCustomer);
+		
+		// Manually establish bi-directional invoice relationships
+		List<Invoice> moreInvoices = InvoiceData.getMoreInvoices();
+		moreInvoices.forEach(i -> i.setAccount(extraAccount));
+		extraAccount.setInvoices(moreInvoices);
+		
+		// Manually establish bi-directional purchase order relationships
+		List<PurchaseOrder> morePurchaseOrders = PurchaseOrderData.getMorePurchaseOrders();
+		morePurchaseOrders.forEach(po -> po.setAccount(extraAccount));
+		extraAccount.setPurchaseOrders(morePurchaseOrders);
+		
+		// create array of new accounts
+		List<Account> accounts = new ArrayList<Account>();
+		accounts.add(anotherAccount);
+		accounts.add(extraAccount);
+		
+		// invoke saveByEntities here
+		List<Account> savedAccounts = accountRepository.saveEntities(accounts);
+		accountRepository.flush();
+		
+		assertThat(savedAccounts.size() == 2).isTrue();
+		
+		// check new accounts returns from saveEntities
+		assertThat(accounts.stream().allMatch(t -> savedAccounts.contains(t))).isTrue();
+		assertThat(savedAccounts.stream().allMatch(t -> accounts.contains(t))).isTrue();
+		
+		
+		// check new accounts added
+		long accountCnt = accountRepository.countAll();
+		assertThat(accountCnt).isEqualTo(TOTAL_ROWS + 2);
+		
+		/* check new 1st account received id */
+		Optional<Account> rtrvAnotherAccount = accountRepository.findById(anotherAccount.getId());
+		assertThat(rtrvAnotherAccount.orElse(null)).isNotNull();
+		
+		/* use lombock equals to check 1st account saved */
+		assertThat(rtrvAnotherAccount.get().equals(anotherAccount)).isTrue();
+		
+		/* use lombock equals to check 1st account's contact saved */
+		assertThat(rtrvAnotherAccount.get().getContact().equals(anotherContact)).isTrue();
+
+		/* use lombock equals to check 1st account's customer saved */
+		assertThat(rtrvAnotherAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
+		
+		/* use stream allMatch to check 1st account's invoices saved */
+		assertThat(Boolean.FALSE.equals(rtrvAnotherAccount.get().getInvoices().isEmpty()));
+		assertThat(rtrvAnotherAccount.get().getInvoices().stream().allMatch(t -> someInvoices.contains(t))).isTrue();
+		assertThat(someInvoices.stream().allMatch(t -> rtrvAnotherAccount.get().getInvoices().contains(t))).isTrue();
+
+		/* use stream allMatch to check 1st account's purchase orders saved */
+		assertThat(Boolean.FALSE.equals(rtrvAnotherAccount.get().getPurchaseOrders().isEmpty()));
+		assertThat(rtrvAnotherAccount.get().getPurchaseOrders().stream().allMatch(t -> somePurchaseOrders.contains(t))).isTrue();
+		assertThat(somePurchaseOrders.stream().allMatch(t -> rtrvAnotherAccount.get().getPurchaseOrders().contains(t))).isTrue();
+		
+		/* check new 2nd account received id */
+		Optional<Account> rtrvExtaAccount = accountRepository.findById(extraAccount.getId());
+		assertThat(rtrvExtaAccount.orElse(null)).isNotNull();
+		
+		/* use lombock equals to check 2nd account saved */
+		assertThat(rtrvExtaAccount.get().equals(extraAccount)).isTrue();
+		
+		/* use lombock equals to check 2nd account's contact saved */
+		assertThat(rtrvExtaAccount.get().getContact().equals(extraContact)).isTrue();
+		
+		/* use lombock equals to check 2nd account's customer saved */
+		assertThat(rtrvExtaAccount.get().getCustomer().equals(extraCustomer)).isTrue();
+		
+		/* use stream allMatch to check 2nd account's invoices saved */
+		assertThat(Boolean.FALSE.equals(rtrvExtaAccount.get().getInvoices().isEmpty()));
+		assertThat(rtrvExtaAccount.get().getInvoices().stream().allMatch(t -> moreInvoices.contains(t))).isTrue();
+		assertThat(moreInvoices.stream().allMatch(t -> rtrvExtaAccount.get().getInvoices().contains(t))).isTrue();
+
+		/* use stream allMatch to check 2nd account's purchase orders saved */
+		assertThat(Boolean.FALSE.equals(rtrvExtaAccount.get().getPurchaseOrders().isEmpty()));
+		assertThat(rtrvExtaAccount.get().getPurchaseOrders().stream().allMatch(t -> morePurchaseOrders.contains(t))).isTrue();
+		assertThat(morePurchaseOrders.stream().allMatch(t -> rtrvExtaAccount.get().getPurchaseOrders().contains(t))).isTrue();
+	}
+
 	@Test
 	public void whenModified_thenAccountUpdated() {
+		log.info("whenModified_thenAccountUpdated");
+		
+		// retrieve account
 		Optional<Account> originalAccount = accountRepository.findById(3L);
+		
+		// update account and related entities
 		originalAccount.get().setBillingAddress("UPDATED - " + originalAccount.get().getBillingAddress());
 		originalAccount.get().getContact().setName("UPDATED - " + originalAccount.get().getContact().getName());
 		originalAccount.get().getCustomer().setFirstName("UPDATED - " + originalAccount.get().getCustomer().getFirstName());
 		originalAccount.get().getInvoices().get(0).setInvoiceNbr("UPDATED - " + originalAccount.get().getInvoices().get(0).getInvoiceNbr());
 		originalAccount.get().getPurchaseOrders().get(0).setOrderIdentifier("UPDATED - " + originalAccount.get().getPurchaseOrders().get(0).getOrderIdentifier());
 		
+		// retrieve account again 
 		Optional<Account> rtrvdAccount = accountRepository.findById(3L);
+		
+		// check account and related entities updated without save
 		assertThat(originalAccount.get().getBillingAddress().equals((rtrvdAccount.get().getBillingAddress())));
 		assertThat(originalAccount.get().getContact().getName().equals((rtrvdAccount.get().getContact().getName())));
 		assertThat(originalAccount.get().getCustomer().getFirstName().equals((rtrvdAccount.get().getCustomer().getFirstName())));
@@ -306,138 +514,10 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	}
 
 	@Test
-	public void whenSaveAll_thenReturnSavedAccounts() {
-		Account anotherAccount = getAnotherAccount();
+	public void whenExistsByDto_thenReturnTrue() {
+		log.info("whenExistsByDto_thenReturnTrue");
 		
-		Contact anotherContact = ContactDynData.getAnotherContact();
-		anotherAccount.setContact(anotherContact);
-		
-		// Manually resolve bi-directional references
-		Customer anotherCustomer = getAnotherCustomer();
-		anotherCustomer.setAccount(anotherAccount);
-		anotherAccount.setCustomer(anotherCustomer);
-		
-		// Manually resolve bi-directional references
-		List<Invoice> someInvoices = getSomeInvoices();
-		someInvoices.forEach(i -> i.setAccount(anotherAccount));
-		anotherAccount.setInvoices(someInvoices);
-		
-		// Manually resolve bi-directional references
-		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
-		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
-		anotherAccount.setPurchaseOrders(somePurchaseOrders);
-		
-		Account extraAccount = getExtraAccount();
-		
-		Contact extraContact = ContactDynData.getExtraContact();
-		extraAccount.setContact(extraContact);
-		
-		// Manually resolve bi-directional references
-		Customer extraCustomer = getExtraCustomer();
-		extraCustomer.setAccount(extraAccount);
-		extraAccount.setCustomer(extraCustomer);
-		
-		// Manually resolve bi-directional references
-		List<Invoice> moreInvoices = getMoreInvoices();
-		moreInvoices.forEach(i -> i.setAccount(extraAccount));
-		extraAccount.setInvoices(moreInvoices);
-		
-		// Manually resolve bi-directional references
-		List<PurchaseOrder> morePurchaseOrders = getMorePurchaseOrders();
-		morePurchaseOrders.forEach(po -> po.setAccount(extraAccount));
-		extraAccount.setPurchaseOrders(morePurchaseOrders);
-		
-		List<Account> accounts = new ArrayList<Account>();
-		accounts.add(anotherAccount);
-		accounts.add(extraAccount);
-		
-		List<Account> savedAccounts = accountRepository.saveAll(accounts);
-		accountRepository.flush();
-		
-		assertThat(savedAccounts.size() == 2).isTrue();
-		
-		assertThat(accounts.stream().allMatch(t -> savedAccounts.contains(t))).isTrue();
-		assertThat(savedAccounts.stream().allMatch(t -> accounts.contains(t))).isTrue();
-		
-		long accountCnt = accountRepository.count();
-		assertThat(accountCnt).isEqualTo(TOTAL_ROWS + 2);
-		
-		Optional<Account> rtrvAnotherAccount = accountRepository.findById(anotherAccount.getId());
-		assertThat(rtrvAnotherAccount.orElse(null)).isNotNull();
-		assertThat(rtrvAnotherAccount.get().equals(anotherAccount)).isTrue();
-		assertThat(rtrvAnotherAccount.get().getContact().equals(anotherContact)).isTrue();
-		assertThat(rtrvAnotherAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
-		
-		assertThat(Boolean.FALSE.equals(rtrvAnotherAccount.get().getInvoices().isEmpty()));
-		assertThat(rtrvAnotherAccount.get().getInvoices().stream().allMatch(t -> someInvoices.contains(t))).isTrue();
-		assertThat(someInvoices.stream().allMatch(t -> rtrvAnotherAccount.get().getInvoices().contains(t))).isTrue();
-
-		assertThat(Boolean.FALSE.equals(rtrvAnotherAccount.get().getPurchaseOrders().isEmpty()));
-		assertThat(rtrvAnotherAccount.get().getPurchaseOrders().stream().allMatch(t -> somePurchaseOrders.contains(t))).isTrue();
-		assertThat(somePurchaseOrders.stream().allMatch(t -> rtrvAnotherAccount.get().getPurchaseOrders().contains(t))).isTrue();
-		
-		Optional<Account> rtrvExtaAccount = accountRepository.findById(extraAccount.getId());
-		assertThat(rtrvExtaAccount.orElse(null)).isNotNull();
-		assertThat(rtrvExtaAccount.get().equals(extraAccount)).isTrue();
-		assertThat(rtrvExtaAccount.get().getContact().equals(extraContact)).isTrue();
-		assertThat(rtrvExtaAccount.get().getCustomer().equals(extraCustomer)).isTrue();
-		
-		assertThat(Boolean.FALSE.equals(rtrvExtaAccount.get().getInvoices().isEmpty()));
-		assertThat(rtrvExtaAccount.get().getInvoices().stream().allMatch(t -> moreInvoices.contains(t))).isTrue();
-		assertThat(moreInvoices.stream().allMatch(t -> rtrvExtaAccount.get().getInvoices().contains(t))).isTrue();
-
-		assertThat(Boolean.FALSE.equals(rtrvExtaAccount.get().getPurchaseOrders().isEmpty()));
-		assertThat(rtrvExtaAccount.get().getPurchaseOrders().stream().allMatch(t -> morePurchaseOrders.contains(t))).isTrue();
-		assertThat(morePurchaseOrders.stream().allMatch(t -> rtrvExtaAccount.get().getPurchaseOrders().contains(t))).isTrue();
-	}
-	
-	@Test
-	public void whenSaveAndFlush_thenReturnSavedAccount() {
-		Account anotherAccount = getAnotherAccount();
-		
-		Contact anotherContact = ContactDynData.getAnotherContact();
-		anotherAccount.setContact(anotherContact);
-		
-		// Manually resolve bi-directional references
-		Customer anotherCustomer = getAnotherCustomer();
-		anotherCustomer.setAccount(anotherAccount);
-		anotherAccount.setCustomer(anotherCustomer);
-		
-		// Manually resolve bi-directional references
-		List<Invoice> someInvoices = getSomeInvoices();
-		someInvoices.forEach(i -> i.setAccount(anotherAccount));
-		anotherAccount.setInvoices(someInvoices);
-		
-		// Manually resolve bi-directional references
-		List<PurchaseOrder> somePurchaseOrders = getSomePurchaseOrders();
-		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
-		anotherAccount.setPurchaseOrders(somePurchaseOrders);
-		
-		Account savedAccount = accountRepository.saveAndFlush(anotherAccount);
-		
-		assertThat(savedAccount.equals(anotherAccount)).isTrue();
-		
-		long accountCnt = accountRepository.count();
-		assertThat(accountCnt).isEqualTo(TOTAL_ROWS + 1);
-		
-		Optional<Account> rtrvAccount = accountRepository.findById(savedAccount.getId());
-		assertThat(rtrvAccount.orElse(null)).isNotNull();
-		assertThat(rtrvAccount.get().equals(anotherAccount)).isTrue();
-		assertThat(rtrvAccount.get().equals(savedAccount)).isTrue();
-		assertThat(rtrvAccount.get().getContact().equals(anotherContact)).isTrue();
-		assertThat(rtrvAccount.get().getCustomer().equals(anotherCustomer)).isTrue();
-
-		assertThat(Boolean.FALSE.equals(rtrvAccount.get().getInvoices().isEmpty()));
-		assertThat(rtrvAccount.get().getInvoices().stream().allMatch(t -> someInvoices.contains(t))).isTrue();
-		assertThat(someInvoices.stream().allMatch(t -> rtrvAccount.get().getInvoices().contains(t))).isTrue();
-
-		assertThat(Boolean.FALSE.equals(rtrvAccount.get().getPurchaseOrders().isEmpty()));
-		assertThat(rtrvAccount.get().getPurchaseOrders().stream().allMatch(t -> somePurchaseOrders.contains(t))).isTrue();
-		assertThat(somePurchaseOrders.stream().allMatch(t -> rtrvAccount.get().getPurchaseOrders().contains(t))).isTrue();
-	}
-
-	@Test
-	public void whenFindByDto_thenReturnAccounts() {
+		// create account dto with qualifiers in releated entities
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior Dry Cleaners");
 		
@@ -449,36 +529,120 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		customerDto.setWorkEmail("alex.crowe.yahoo.com");
 		accountDto.setCustomerDto(customerDto);
 		
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setStatus("PENDING");
+		accountDto.asParam.setInvoiceDto(invoiceDto);
+		
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setStatus("SHIPPED");
+		accountDto.asParam.setPurchaseOrderDto(purchaseOrderDto);
+
+		// invoke existsByDto here
+		Boolean exists = accountRepository.existsByDto(accountDto);
+		accountRepository.flush();
+		
+		assertThat(Boolean.TRUE).isEqualTo(exists);
+	}
+	
+	@Test
+	public void whenCountByDto_thenReturnCount() {
+		log.info("whenCountByDto_thenReturnCount");
+		
+		// create account dto with qualifiers in releated entities
+		AccountDto accountDto = new AccountDto();
+		accountDto.setBillingAddress("Dallas");
+		
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setStatus("PENDING");
+		accountDto.asParam.setInvoiceDto(invoiceDto);
+
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setStatus("SHIPPED");
+		accountDto.asParam.setPurchaseOrderDto(purchaseOrderDto);
+
+		// invoke countByDto here
+		long accountCnt =  accountRepository.countByDto(accountDto);
+		accountRepository.flush();
+		
+		assertThat(accountCnt).isGreaterThanOrEqualTo(2L);
+	}
+	
+	@Test
+	public void whenFindByDto_thenReturnAccounts() {
+		log.info("whenFindByDto_thenReturnAccounts");
+		
+		// create account dto with qualifiers in releated entities
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountName("Superior Dry Cleaners");
+		
+		ContactDto contactDto = new ContactDto();
+		contactDto.setName("Tom Anderson");
+		accountDto.setContactDto(contactDto);
+		
+		CustomerDto customerDto = new CustomerDto();
+		customerDto.setWorkEmail("alex.crowe.yahoo.com");
+		accountDto.setCustomerDto(customerDto);
+		
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setStatus("PENDING");
+		accountDto.asParam.setInvoiceDto(invoiceDto);
+
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setStatus("SHIPPED");
+		accountDto.asParam.setPurchaseOrderDto(purchaseOrderDto);
+
+		// invoke findByDto here
 		List<Account> accounts = accountRepository.findByDto(accountDto);
 		accountRepository.flush();
 		
 		assertThat(accounts).isNotEmpty();
 		
+		// get an account having all related entities
 		Optional<Account> account = accounts.stream()
 			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
 			.filter(a -> Boolean.FALSE.equals(a.getInvoices().isEmpty()))
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
-			.findFirst();
+			.findAny();
 		
+		// test that account exists and has matching qualifiers 
 		assertThat(account.orElse(null)).isNotNull();
 		assertThat(account.get().getAccountName().equals(accountDto.getAccountName())).isTrue();
-		assertThat(account.get().getContact().getName().equals(accountDto.getContactDto().getName())).isTrue();
+		assertThat(account.get().getContact().getName().equals(contactDto.getName())).isTrue();
 		assertThat(account.get().getCustomer().getWorkEmail().equals(accountDto.getCustomerDto().getWorkEmail())).isTrue();
+		assertThat(account.get().getInvoices().get(0).getStatus().equals(invoiceDto.getStatus())).isTrue();
+		assertThat(account.get().getPurchaseOrders().get(0).getStatus().equals(purchaseOrderDto.getStatus())).isTrue();
 	}
 
 	@Test
 	public void whenFindPageByDto_thenReturnAccounts() {
+		log.info("whenFindPageByDto_thenReturnAccounts");
+		
+		// create account dto with qualifiers
 		AccountDto accountDto = new AccountDto();
 		accountDto.setActive(true);
+		
+		// limit to 2 accounts max 
 		accountDto.setStart(0);
 		accountDto.setLimit(2);
 		
+		// qualify related invoices
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setStatus("PENDING");
+		accountDto.asParam.setInvoiceDto(invoiceDto);
+
+		// qualify related purchase orders
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setStatus("SHIPPED");
+		accountDto.asParam.setPurchaseOrderDto(purchaseOrderDto);
+
+		// invoke findPageByDto here
 		List<Account> accounts = accountRepository.findPageByDto(accountDto);
 		accountRepository.flush();
 		
-		assertThat(accounts.size()).isEqualTo(2);
+		assertThat(accounts.size()).isLessThanOrEqualTo(2);
 		
+		// get an account having all related entities
 		Optional<Account> account = accounts.stream()
 			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
@@ -486,39 +650,49 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
 			.findFirst();
 		
+		// test that account exists and has matching qualifiers 
 		assertThat(account.orElse(null)).isNotNull();
+		assertThat(account.get().getActive().equals(accountDto.getActive())).isTrue();
+		assertThat(account.get().getInvoices().get(0).getStatus().equals(invoiceDto.getStatus())).isTrue();
+		assertThat(account.get().getPurchaseOrders().get(0).getStatus().equals(purchaseOrderDto.getStatus())).isTrue();
+
 	}
 
 	@Test
-	public void whenCountSearchByDto_thenReturnCount() {
-		AccountDto accountDto = new AccountDto();
-		
-		accountDto.setActive(true);
-		
-		Long accountCount = accountRepository.countSearchByDto(accountDto);
-		accountRepository.flush();
-		
-		assertThat(accountCount).isGreaterThan(0L);
-	}
-	
-	@Test
 	public void whenSearchByDto_thenReturnAccounts() {
+		log.info("whenSearchByDto_thenReturnAccounts");
+		
+		// create account dto with qualifiers
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior");
 		
+		// qualify related contact
 		ContactDto contactDto = new ContactDto();
 		contactDto.setName("Anderson");
 		accountDto.setContactDto(contactDto);
 		
+		// qualify related customer
 		CustomerDto customerDto = new CustomerDto();
 		customerDto.setWorkEmail("yahoo.com");
 		accountDto.setCustomerDto(customerDto);
 		
+		// qualify related invoices
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setStatus("PENDING");
+		accountDto.asParam.setInvoiceDto(invoiceDto);
+
+		// qualify related purchase orders
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setStatus("SHIPPED");
+		accountDto.asParam.setPurchaseOrderDto(purchaseOrderDto);
+
+		// invoke searchByDto here
 		List<Account> accounts = accountRepository.searchByDto(accountDto);
 		accountRepository.flush();
 		
 		assertThat(accounts).isNotEmpty();
 		
+		// get an account having all related entities
 		Optional<Account> account = accounts.stream()
 			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
@@ -526,21 +700,54 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 			.filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty()))
 			.findFirst();
 		
+		// test that account exists and has matching qualifiers 
 		assertThat(account.orElse(null)).isNotNull();
+		assertThat(account.get().getAccountName().contains(accountDto.getAccountName())).isTrue();
+		assertThat(account.get().getContact().getName().contains(contactDto.getName())).isTrue();
+		assertThat(account.get().getCustomer().getWorkEmail().contains(customerDto.getWorkEmail())).isTrue();
+		assertThat(account.get().getInvoices().get(0).getStatus().contains(invoiceDto.getStatus())).isTrue();
+		assertThat(account.get().getPurchaseOrders().get(0).getStatus().contains(purchaseOrderDto.getStatus())).isTrue();
 	}
 
 	@Test
 	public void whenSearchPageByDto_thenReturnAccounts() {
+		log.info("whenSearchPageByDto_thenReturnAccounts");
+		
+		// create account dto with qualifiers
 		AccountDto accountDto = new AccountDto();
 		accountDto.setBillingAddress("Dallas");
+		
+		// limit to 2 accounts max 
 		accountDto.setStart(0);
 		accountDto.setLimit(2);
 		
+		// qualify related contact
+		ContactDto contactDto = new ContactDto();
+		contactDto.setName("Anderson");
+		accountDto.setContactDto(contactDto);
+		
+		// qualify related customer
+		CustomerDto customerDto = new CustomerDto();
+		customerDto.setWorkEmail("yahoo.com");
+		accountDto.setCustomerDto(customerDto);
+		
+		// qualify related invoices
+		InvoiceDto invoiceDto = new InvoiceDto();
+		invoiceDto.setStatus("PENDING");
+		accountDto.asParam.setInvoiceDto(invoiceDto);
+
+		// qualify related purchase orders
+		PurchaseOrderDto purchaseOrderDto = new PurchaseOrderDto();
+		purchaseOrderDto.setStatus("SHIPPED");
+		accountDto.asParam.setPurchaseOrderDto(purchaseOrderDto);
+
+		// invoke searchPageByDto here
 		List<Account> accounts = accountRepository.searchPageByDto(accountDto);
 		accountRepository.flush();
 		
-		assertThat(accounts.size()).isEqualTo(2);
+		assertThat(accounts.size()).isLessThanOrEqualTo(2);
 		
+		// get an account having all related entities
 		Optional<Account> account = accounts.stream()
 			.filter(a -> a.getContact() != null)
 			.filter(a -> a.getCustomer() != null)
@@ -549,130 +756,11 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 			.findFirst();
 		
 		assertThat(account.orElse(null)).isNotNull();
+		assertThat(account.get().getBillingAddress().contains(accountDto.getBillingAddress())).isTrue();
+		assertThat(account.get().getContact().getName().contains(contactDto.getName())).isTrue();
+		assertThat(account.get().getCustomer().getWorkEmail().contains(customerDto.getWorkEmail())).isTrue();
+		assertThat(account.get().getInvoices().get(0).getStatus().contains(invoiceDto.getStatus())).isTrue();
+		assertThat(account.get().getPurchaseOrders().get(0).getStatus().contains(purchaseOrderDto.getStatus())).isTrue();
 	}
 
-	private Account getAnotherAccount() {
-		Account anotherAccount = new Account();
-		anotherAccount.setAccountName("John Doe");
-		anotherAccount.setCreditCard("2345678934564567");
-		anotherAccount.setBillingAddress("258 Pelican Dr. Carrollton TX 23455");
-		anotherAccount.setShippingAddress("258 Pelican Dr. Carrollton TX 23455");
-		anotherAccount.setActive(true);
-		
-		 return anotherAccount;
-	
-	}
-
-	private Account getExtraAccount() {
-		Account extraAccount = new Account();
-		extraAccount.setAccountName("Jane Doe");
-		extraAccount.setCreditCard("7777888899991111");
-		extraAccount.setBillingAddress("777 Absolute Dr. Carrollton TX 23455");
-		extraAccount.setShippingAddress("777 Absolute Dr. Carrollton TX 23455");
-		extraAccount.setActive(true);
-		
-		 return extraAccount;
-	}
-	
-	private Customer getAnotherCustomer() {
-		Customer anotherCustomer = new Customer();
-		anotherCustomer.setFirstName("Amy");
-		anotherCustomer.setLastName("Winecroft");
-		anotherCustomer.setWorkEmail("amy.winecroft@yahoo.com");
-		anotherCustomer.setWorkPhone("(555) 777-7654");
-		anotherCustomer.setCanContact(true);
-		
-		return anotherCustomer;
-	}
-
-	private Customer getExtraCustomer() {
-		Customer extraCustomer = new Customer();
-		extraCustomer.setFirstName("Barnaby");
-		extraCustomer.setLastName("Jones");
-		extraCustomer.setWorkEmail("barnaby.jones@yahoo.com");
-		extraCustomer.setWorkPhone("(555) 222-3333");
-		extraCustomer.setCanContact(true);
-		
-		return extraCustomer;
-	}
-	
-	private List<Invoice> getSomeInvoices() {
-		List<Invoice> invoices = new ArrayList<Invoice>();
-		
-		Invoice anotherInvoice = new Invoice();
-		anotherInvoice.setInvoiceNbr("27");
-		anotherInvoice.setDueDate(LocalDate.now());
-		anotherInvoice.setStatus("PENDING");
-		
-		Invoice extraInvoice = new Invoice();
-		extraInvoice.setInvoiceNbr("28");
-		extraInvoice.setDueDate(LocalDate.now());
-		extraInvoice.setStatus("PENDING");
-		
-		invoices.add(anotherInvoice);
-		invoices.add(extraInvoice);
-		
-		return invoices;
-	}
-
-	private List<Invoice> getMoreInvoices() {
-		List<Invoice> invoices = new ArrayList<Invoice>();
-		
-		Invoice anotherInvoice = new Invoice();
-		anotherInvoice.setInvoiceNbr("420");
-		anotherInvoice.setDueDate(LocalDate.now());
-		anotherInvoice.setStatus("PAST DUE");
-		
-		Invoice extraInvoice = new Invoice();
-		extraInvoice.setInvoiceNbr("421");
-		extraInvoice.setDueDate(LocalDate.now());
-		extraInvoice.setStatus("COMPLETED");
-		
-		invoices.add(anotherInvoice);
-		invoices.add(extraInvoice);
-		
-		return invoices;
-	}
-
-	private List<PurchaseOrder> getSomePurchaseOrders() {
-		List<PurchaseOrder> puchaseOrders = new ArrayList<PurchaseOrder>();
-		
-		PurchaseOrder anotherPurchaseOrder = new PurchaseOrder();
-		anotherPurchaseOrder.setOrderIdentifier("EOM-27");
-		anotherPurchaseOrder.setPurchaseDttm(LocalDateTime.now());
-		anotherPurchaseOrder.setInvoiced(true);
-		anotherPurchaseOrder.setStatus("RECIEVED");
-		
-		PurchaseOrder extraPurchaseOrder = new PurchaseOrder();
-		extraPurchaseOrder.setOrderIdentifier("PIA-28");
-		extraPurchaseOrder.setPurchaseDttm(LocalDateTime.now());
-		extraPurchaseOrder.setInvoiced(false);
-		extraPurchaseOrder.setStatus("SHIPPED");
-		
-		puchaseOrders.add(anotherPurchaseOrder);
-		puchaseOrders.add(extraPurchaseOrder);
-		
-		return puchaseOrders;
-	}
-
-	private List<PurchaseOrder> getMorePurchaseOrders() {
-		List<PurchaseOrder> puchaseOrders = new ArrayList<PurchaseOrder>();
-		
-		PurchaseOrder anotherPurchaseOrder = new PurchaseOrder();
-		anotherPurchaseOrder.setOrderIdentifier("NET30-270");
-		anotherPurchaseOrder.setPurchaseDttm(LocalDateTime.now());
-		anotherPurchaseOrder.setInvoiced(true);
-		anotherPurchaseOrder.setStatus("RECIEVED");
-		
-		PurchaseOrder extraPurchaseOrder = new PurchaseOrder();
-		extraPurchaseOrder.setOrderIdentifier("NET30-228");
-		extraPurchaseOrder.setPurchaseDttm(LocalDateTime.now());
-		extraPurchaseOrder.setInvoiced(false);
-		extraPurchaseOrder.setStatus("SHIPPED");
-		
-		puchaseOrders.add(anotherPurchaseOrder);
-		puchaseOrders.add(extraPurchaseOrder);
-		
-		return puchaseOrders;
-	}
 }

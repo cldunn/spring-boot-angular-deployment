@@ -1,5 +1,6 @@
 package com.cldbiz.userportal.dto;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,14 +43,17 @@ public @Data class AccountDto extends AbstractDto {
 
 	private CustomerDto customerDto;
 	
-	private PurchaseOrderDto purchaseOrderDto;
+	private List<InvoiceDto> invoiceDtos = new ArrayList<InvoiceDto>();
+	
+	private List<PurchaseOrderDto> purchaseOrderDtos = new ArrayList<PurchaseOrderDto>();
+	
+	public @Data class  AccountToMany {
+		InvoiceDto invoiceDto;
+		PurchaseOrderDto purchaseOrderDto;
+	}
+	
+	public AccountToMany asParam = new AccountToMany();
 
-	private List<PurchaseOrderDto> purchaseOrderDtos;
-	
-	private InvoiceDto invoiceDto;
-	
-	private List<InvoiceDto> invoiceDtos;
-	
 	public AccountDto() {
 		super();
 		
