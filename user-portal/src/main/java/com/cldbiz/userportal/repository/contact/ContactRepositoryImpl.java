@@ -3,12 +3,8 @@ package com.cldbiz.userportal.repository.contact;
 import java.util.List;
 
 import com.cldbiz.userportal.domain.Contact;
-import com.cldbiz.userportal.domain.QCategory;
 import com.cldbiz.userportal.domain.QContact;
-import com.cldbiz.userportal.domain.QProduct;
-import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.ContactDto;
-import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -24,7 +20,7 @@ public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, Conta
 	public Boolean existsByDto(ContactDto contactDto, Predicate... predicates) {
 		QContact contact = QContact.contact;
 		
-		DynBooleanBuilder<QContact, ContactDto> builder = searchByCriteria(contactDto);
+		DynBooleanBuilder<QContact, ContactDto> builder = searchByCriteria(contactDto, predicates);
 		
 		return jpaQueryFactory.selectFrom(contact).where(builder.asPredicate()).fetchCount() > 0 ? Boolean.TRUE : Boolean.FALSE;
 	}
@@ -33,7 +29,7 @@ public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, Conta
 	public Long countByDto(ContactDto contactDto, Predicate... predicates) {
 		QContact contact = QContact.contact;
 		
-		DynBooleanBuilder<QContact, ContactDto> builder = searchByCriteria(contactDto);
+		DynBooleanBuilder<QContact, ContactDto> builder = searchByCriteria(contactDto, predicates);
 		
 		return jpaQueryFactory.selectFrom(contact).where(builder.asPredicate()).fetchCount();
 	}
@@ -60,11 +56,6 @@ public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, Conta
 		
 		DynBooleanBuilder<QContact, ContactDto> builder = findByCriteria(contactDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QContact, ContactDto> builder = new DynBooleanBuilder<QContact, ContactDto>();
-		Predicate predicate = builder.findPredicate(contact, contactDto).asPredicate();
-		*/
-		
 		return jpaQueryFactory.selectFrom(contact).where(builder.asPredicate()).fetch();
 	}
 
@@ -73,11 +64,6 @@ public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, Conta
 		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QContact, ContactDto> builder = findByCriteria(contactDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QContact, ContactDto> builder = new DynBooleanBuilder<QContact, ContactDto>();
-		Predicate predicate = builder.findPredicate(contact, contactDto).asPredicate();
-		*/
 		
 		return jpaQueryFactory.selectFrom(contact)
 				.where(builder.asPredicate())
@@ -94,11 +80,6 @@ public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, Conta
 		
 		DynBooleanBuilder<QContact, ContactDto> builder = searchByCriteria(contactDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QContact, ContactDto> builder = new DynBooleanBuilder<QContact, ContactDto>();
-		Predicate predicate = builder.searchPredicate(contact, contactDto).asPredicate();
-		*/
-		
 		return jpaQueryFactory.selectFrom(contact).where(builder.asPredicate()).fetch();
 	}
 
@@ -107,11 +88,6 @@ public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, Conta
 		QContact contact = QContact.contact;
 		
 		DynBooleanBuilder<QContact, ContactDto> builder = searchByCriteria(contactDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QContact, ContactDto> builder = new DynBooleanBuilder<QContact, ContactDto>();
-		Predicate predicate = builder.searchPredicate(contact, contactDto).asPredicate();
-		*/
 		
 		return jpaQueryFactory.selectFrom(contact)
 				.where(builder.asPredicate())

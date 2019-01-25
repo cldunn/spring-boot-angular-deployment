@@ -39,6 +39,7 @@ public @Data class PurchaseOrder extends AbstractDomain {
 	@Column
 	private String status;
 	
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
 	@EqualsAndHashCode.Exclude
 	@ManyToOne(cascade={CascadeType.PERSIST}, optional=false)
 	@JoinColumn(name="ACCOUNT_ID", foreignKey=@ForeignKey(name = "FK_PURCHASE_ORDER_ACCOUNT"))

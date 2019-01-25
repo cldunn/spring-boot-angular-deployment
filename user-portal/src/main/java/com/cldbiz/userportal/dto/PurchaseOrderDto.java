@@ -9,6 +9,7 @@ import javax.validation.constraints.Max;
 import org.springframework.data.domain.Sort;
 
 import com.cldbiz.userportal.domain.PurchaseOrder;
+import com.cldbiz.userportal.dto.AccountDto.AccountToMany;
 
 import lombok.Data;
 
@@ -26,10 +27,14 @@ public @Data class PurchaseOrderDto extends AbstractDto {
 	
 	private AccountDto accountDto;
 	
-	private LineItemDto lineItemDto;
-	
 	private List<LineItemDto> lineItemDtos;
 	
+	public @Data class  PurchaseOrderToMany {
+		private LineItemDto lineItemDto;
+	}
+	
+	public PurchaseOrderToMany asParam = new PurchaseOrderToMany();
+
 	public PurchaseOrderDto() {
 		super();
 		

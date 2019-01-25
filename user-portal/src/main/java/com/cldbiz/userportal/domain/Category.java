@@ -1,11 +1,14 @@
 package com.cldbiz.userportal.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -21,15 +24,17 @@ import lombok.EqualsAndHashCode;
 @Table(name = "CATEGORY")
 @EqualsAndHashCode(callSuper=true)
 public @Data class Category extends AbstractDomain {
-	
 	@Column
 	private String name;
 	
-	@ManyToMany(cascade = { CascadeType.PERSIST })
-    @JoinTable(name = "CATEGORY_PRODUCT", 
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
+	// @ManyToMany relationships need to be modeled as a Set for efficiency
+	@EqualsAndHashCode.Exclude 
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@JoinTable(name = "CATEGORY_PRODUCT", 
          joinColumns = {@JoinColumn(name = "CATEGORY_ID", foreignKey=@ForeignKey(name = "FK_PRODUCT_CATEGORY"))}, 
          inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID", foreignKey=@ForeignKey(name = "FK_CATEGORY_PRODUCT"))})
-	private List<Product> products = new ArrayList<Product>();
+	private Set<Product> products = new HashSet<Product>();
 	
 	public Category() {
 		super();
@@ -40,8 +45,8 @@ public @Data class Category extends AbstractDomain {
 		
 		this.setName(categoryDto.getName());
 	}
-	
-    public void addProduct(Product product) {
+
+	public void addProduct(Product product) {
     	products.add(product);
     	product.getCategories().add(this);
     }
@@ -50,5 +55,4 @@ public @Data class Category extends AbstractDomain {
     	products.remove(product);
     	product.getCategories().remove(this);
     }
-
 }

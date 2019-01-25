@@ -1,9 +1,33 @@
 package com.cldbiz.userportal.unit.repository.data;
 
-import com.cldbiz.userportal.domain.Account;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cldbiz.userportal.domain.Account;
+import com.cldbiz.userportal.repository.account.AccountRepository;
+
+@Component
 public class AccountData {
 	
+	private static AccountRepository accountRepository;
+	
+	@Autowired
+	public AccountData(AccountRepository accountRepository) {
+		this.accountRepository = accountRepository;
+	}
+
+	public static Account getAnotherExistingAccount() {
+		Optional<Account> account = accountRepository.findById(1L);
+		return account.orElse(null);
+	}
+
+	public static Account getExtraExistingAccount() {
+		Optional<Account> account = accountRepository.findById(2L);
+		return account.orElse(null);
+	}
+
 	public static Account getAnotherAccount() {
 		Account anotherAccount = new Account();
 		anotherAccount.setAccountName("John Doe");

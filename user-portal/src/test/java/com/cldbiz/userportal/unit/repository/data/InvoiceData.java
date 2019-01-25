@@ -8,7 +8,27 @@ import com.cldbiz.userportal.domain.Invoice;
 
 public class InvoiceData {
 	
-	public static  List<Invoice> getSomeInvoices() {
+	public static Invoice getAnotherInvoice() {
+		Invoice invoice = new Invoice();
+		
+		invoice.setInvoiceNbr("777");
+		invoice.setDueDate(LocalDate.now());
+		invoice.setStatus("PAST DUE");
+		
+		return invoice;
+	}
+	
+	public static Invoice getExtraInvoice() {
+		Invoice invoice = new Invoice();
+		
+		invoice.setInvoiceNbr("26");
+		invoice.setDueDate(LocalDate.now());
+		invoice.setStatus("NEW");
+
+		return invoice;
+	}
+
+	public static List<Invoice> getSomeInvoices() {
 		List<Invoice> invoices = new ArrayList<Invoice>();
 		
 		Invoice anotherInvoice = new Invoice();

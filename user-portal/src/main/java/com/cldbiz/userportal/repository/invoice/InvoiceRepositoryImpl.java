@@ -37,25 +37,6 @@ public class InvoiceRepositoryImpl extends AbstractRepositoryImpl<Invoice, Invoi
 		return jpaQueryFactory.selectFrom(invoice).where(builder.asPredicate()).fetchCount();
 	}
 
-	/*
-	@Override
-	public Invoice findById(Long invoiceId) {
-		QInvoice invoice = QInvoice.invoice;
-		QAccount account = QAccount.account;
-		QCustomer customer = QCustomer.customer;
-		QContact contact = QContact.contact;
-		
-		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
-		// forces all columns for all tables in one select which is more efficient
-		// includes dependency's dependencies
-		return jpaQueryFactory.selectFrom(invoice)
-				.innerJoin(invoice.account, account).fetchJoin()
-				.innerJoin(account.customer, customer).fetchJoin()
-				.innerJoin(account.contact, contact).fetchJoin()
-				.where(invoice.id.in(invoiceId))
-				.fetch();
-	*/
-
 	@Override
 	public List<Invoice> findByIds(List<Long> invoiceIds) {
 		QInvoice invoice = QInvoice.invoice;
@@ -100,17 +81,6 @@ public class InvoiceRepositoryImpl extends AbstractRepositoryImpl<Invoice, Invoi
 		
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = findByCriteria(invoiceDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
-		builder = builder.findPredicate(invoice, invoiceDto);
-
-		if (invoiceDto.getAccountDto() != null) {
-			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
-			Predicate byAccountPredicate = byAccountBuilder.findPredicate(invoice.account, invoiceDto.getAccountDto()).asPredicate();
-			builder.and(byAccountPredicate);
-		}
-		*/
-		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
@@ -130,17 +100,6 @@ public class InvoiceRepositoryImpl extends AbstractRepositoryImpl<Invoice, Invoi
 		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = findByCriteria(invoiceDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
-		builder = builder.findPredicate(invoice, invoiceDto);
-
-		if (invoiceDto.getAccountDto() != null) {
-			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
-			Predicate byAccountPredicate = byAccountBuilder.findPredicate(invoice.account, invoiceDto.getAccountDto()).asPredicate();
-			builder.and(byAccountPredicate);
-		}
-		*/
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -165,17 +124,6 @@ public class InvoiceRepositoryImpl extends AbstractRepositoryImpl<Invoice, Invoi
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = searchByCriteria(invoiceDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
-		builder = builder.searchPredicate(invoice, invoiceDto);
-
-		if (invoiceDto.getAccountDto() != null) {
-			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
-			Predicate byAccountPredicate = byAccountBuilder.searchPredicate(invoice.account, invoiceDto.getAccountDto()).asPredicate();
-			builder.and(byAccountPredicate);
-		}
-		*/
-		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
@@ -195,17 +143,6 @@ public class InvoiceRepositoryImpl extends AbstractRepositoryImpl<Invoice, Invoi
 		QContact contact = QContact.contact;
 
 		DynBooleanBuilder<QInvoice, InvoiceDto> builder = searchByCriteria(invoiceDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QInvoice, InvoiceDto> builder = new DynBooleanBuilder<QInvoice, InvoiceDto>();
-		builder = builder.searchPredicate(invoice, invoiceDto);
-
-		if (invoiceDto.getAccountDto() != null) {
-			DynBooleanBuilder<QAccount, AccountDto> byAccountBuilder = new DynBooleanBuilder<QAccount, AccountDto>();
-			Predicate byAccountPredicate = byAccountBuilder.searchPredicate(invoice.account, invoiceDto.getAccountDto()).asPredicate();
-			builder.and(byAccountPredicate);
-		}
-		*/
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient

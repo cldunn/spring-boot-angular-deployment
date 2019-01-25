@@ -70,17 +70,6 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 		
 		DynBooleanBuilder<QProduct, ProductDto> builder = findByCriteria(productDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
-		Predicate predicate = builder.findPredicate(product, productDto).asPredicate();
-
-		if (productDto.getCategoryDto() != null) {
-			DynBooleanBuilder<QCategory, CategoryDto> byCategoryBuilder = new DynBooleanBuilder<QCategory, CategoryDto>();
-			Predicate byCategoryPredicate = byCategoryBuilder.findPredicate(product.categories.any(), productDto.getCategoryDto()).asPredicate();
-			builder.and(byCategoryPredicate);
-		}
-		*/
-		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
@@ -94,11 +83,6 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 		QProduct product = QProduct.product;
 		
 		DynBooleanBuilder<QProduct, ProductDto> builder = findByCriteria(productDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
-		Predicate predicate = builder.findPredicate(product, productDto).asPredicate();
-		*/
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -117,11 +101,6 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 		
 		DynBooleanBuilder<QProduct, ProductDto> builder = searchByCriteria(productDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
-		Predicate predicate = builder.searchPredicate(product, productDto).asPredicate();
-		*/
-		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
 		// includes dependency's dependencies
@@ -135,11 +114,6 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 		QProduct product = QProduct.product;
 		
 		DynBooleanBuilder<QProduct, ProductDto> builder = searchByCriteria(productDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QProduct, ProductDto> builder = new DynBooleanBuilder<QProduct, ProductDto>();
-		Predicate predicate = builder.searchPredicate(product, productDto).asPredicate();
-		*/
 		
 		// join the entity to all "OnetoOne/ManyToOne" relationships via and innerJoin/fetchJoin
 		// forces all columns for all tables in one select which is more efficient
@@ -176,7 +150,7 @@ public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, Produ
 
 		if (productDto.getCategoryDto() != null) {
 			DynBooleanBuilder<QCategory, CategoryDto> byCategoryBuilder = new DynBooleanBuilder<QCategory, CategoryDto>();
-			Predicate byCategoryPredicate = byCategoryBuilder.findPredicate(product.categories.any(), productDto.getCategoryDto(), predicates).asPredicate();
+			Predicate byCategoryPredicate = byCategoryBuilder.searchPredicate(product.categories.any(), productDto.getCategoryDto(), predicates).asPredicate();
 			builder.and(byCategoryPredicate);
 		}
 

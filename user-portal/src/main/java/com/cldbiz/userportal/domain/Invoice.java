@@ -31,6 +31,8 @@ public @Data class Invoice extends AbstractDomain {
 	@Column
 	private String status;
 
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
+	@EqualsAndHashCode.Exclude 
 	@ManyToOne(optional=false)
 	@JoinColumn(name="ACCOUNT_ID", foreignKey=@ForeignKey(name = "FK_INVOICE_ACCOUNT"))
 	private Account account;

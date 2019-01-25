@@ -62,7 +62,7 @@ public @Data class Customer extends AbstractDomain {
 	@Column
 	private Boolean canContact;
     
-	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
 	@EqualsAndHashCode.Exclude
 	@OneToOne(cascade= {CascadeType.ALL}, optional=false, orphanRemoval=true)
 	@JoinColumn(name="ACCOUNT_ID", foreignKey=@ForeignKey(name = "FK_CUSTOMER_ACCOUNT"))

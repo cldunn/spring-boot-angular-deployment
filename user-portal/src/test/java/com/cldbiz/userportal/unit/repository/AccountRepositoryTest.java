@@ -70,6 +70,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Boolean exists = accountRepository.existsById(account.getId());
 		accountRepository.flush();
 		
+		// check for existence
 		assertThat(exists).isTrue();
 	}
 
@@ -81,6 +82,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		long accountCnt = accountRepository.countAll();
 		accountRepository.flush();
 		
+		// check count
 		assertThat(accountCnt).isEqualTo(TOTAL_ROWS);
 	}
 
@@ -92,6 +94,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Optional<Account> sameAccount = accountRepository.findById(3L);
 		accountRepository.flush();
 		
+		// check for account and related entities  
 		assertThat(sameAccount.orElse(null)).isNotNull();
 		assertThat(sameAccount.get().getContact()).isNotNull();
 		assertThat(sameAccount.get().getCustomer()).isNotNull();
@@ -103,6 +106,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenFindByIds_thenReturnAccounts() {
 		log.info("whenFindByIds_thenReturnAccounts");
 		
+		// get all account ids
 		List<Account> accounts = accountRepository.findAll();
 		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
 		
@@ -113,7 +117,10 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accounts = accountRepository.findByIds(accountIds);
 		accountRepository.flush();
 		
+		// check all accounts were found
 		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
+		
+		// check contact/customer exist
 		assertThat(accounts.get(0).getContact()).isNotNull();
 		assertThat(accounts.get(0).getCustomer()).isNotNull();
 		
@@ -127,7 +134,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		/* check at least one test account has purchaseOrders */
 		Optional<Account> purcheOrderdAccount = accounts.stream().
 			    filter(a -> Boolean.FALSE.equals(a.getPurchaseOrders().isEmpty())).
-			    findFirst();
+			    findAny();
 		
 		assertThat(purcheOrderdAccount.orElse(null)).isNotNull();
 	}
@@ -141,6 +148,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountRepository.flush();
 		
 		assertThat(accounts.size()).isEqualTo(TOTAL_ROWS.intValue());
+		
+		// check contact/customer exist
 		assertThat(accounts.get(0).getContact()).isNotNull();
 		assertThat(accounts.get(0).getCustomer()).isNotNull();
 		
@@ -172,8 +181,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountRepository.deleteById(account.getId());
 		accountRepository.flush();
 		
+		// check account deleted
 		List<Account> accounts = accountRepository.findAll();
-
 		assertThat(accounts.contains(account)).isFalse();
 		
 		/* check delete cascaded for account contact*/
@@ -199,6 +208,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenDeleteByIds_thenRemoveAllAccounts() {
 		log.info("whenDeleteByIds_thenRemoveAllAccounts");
 		
+		// get all account ids
 		List<Account> accounts = accountRepository.findAll();
 		List<Long> accountIds = accounts.stream().map(Account::getId).collect(Collectors.toList());
 		
@@ -209,8 +219,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountRepository.deleteByIds(accountIds);
 		accountRepository.flush();
 		
+		// check all accounts deleted
 		long accountCnt = accountRepository.countAll();
-
 		assertThat(accountCnt).isZero();
 
 		accounts.forEach(account -> {
@@ -238,8 +248,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenDeleteByEntity_thenRemoveAccount() {
 		log.info("whenDeleteByEntity_thenRemoveAccount");
 		
-		List<Account> accounts = accountRepository.findAll();
-		Account account = accounts.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
+		Account account = accountRepository.findById(3L).get();
 
 		// clear cache to test performance
 		accountRepository.flush();
@@ -248,8 +257,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountRepository.deleteByEntity(account);
 		accountRepository.flush();
 		
-		accounts = accountRepository.findAll();
-		
+		// check account deleted
+		List<Account> accounts = accountRepository.findAll();
 		assertThat(accounts.contains(account)).isFalse();
 
 		/* check delete cascaded for account contact*/
@@ -284,8 +293,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		accountRepository.deleteByEntities(accounts);
 		accountRepository.flush();
 		
+		// check all accunts deleted
 		long accountCnt = accountRepository.countAll();
-
 		assertThat(accountCnt).isZero();
 		
 		accounts.forEach(account -> {
@@ -316,21 +325,21 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		// create new account
 		Account anotherAccount = AccountData.getAnotherAccount();
 		
-		// Manually establish contact relationship
+		// add new contact to account
 		Contact anotherContact = ContactData.getAnotherContact();
 		anotherAccount.setContact(anotherContact);
 		
-		// Manually establish bi-directional customer relationship
+		// add new customer to account
 		Customer anotherCustomer = CustomerData.getAnotherCustomer();
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
-		// Manually establish bi-directional invoice relationships
+		// add new invoices to account 
 		List<Invoice> someInvoices = InvoiceData.getSomeInvoices();
 		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
-		// Manually establish bi-directional purchase order relationships
+		// add new purchase orders to account
 		List<PurchaseOrder> somePurchaseOrders = PurchaseOrderData.getSomePurchaseOrders();
 		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
@@ -380,21 +389,21 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		// create 1st new account
 		Account anotherAccount = AccountData.getAnotherAccount();
 		
-		// Manually establish contact relationship
+		// add new contact to 1st account
 		Contact anotherContact = ContactData.getAnotherContact();
 		anotherAccount.setContact(anotherContact);
 		
-		// Manually establish bi-directional customer relationship
+		// add new customer to 1st account
 		Customer anotherCustomer = CustomerData.getAnotherCustomer();
 		anotherCustomer.setAccount(anotherAccount);
 		anotherAccount.setCustomer(anotherCustomer);
 		
-		// Manually establish bi-directional invoice relationships
+		// add new invoices to 1st account
 		List<Invoice> someInvoices = InvoiceData.getSomeInvoices();
 		someInvoices.forEach(i -> i.setAccount(anotherAccount));
 		anotherAccount.setInvoices(someInvoices);
 		
-		// Manually establish bi-directional purchase order relationships
+		// add new purchase orders to 1st account
 		List<PurchaseOrder> somePurchaseOrders = PurchaseOrderData.getSomePurchaseOrders();
 		somePurchaseOrders.forEach(po -> po.setAccount(anotherAccount));
 		anotherAccount.setPurchaseOrders(somePurchaseOrders);
@@ -402,21 +411,21 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		// create 2nd new account
 		Account extraAccount = AccountData.getExtraAccount();
 		
-		// Manually establish contact relationship
+		// add new contact to 2nd account
 		Contact extraContact = ContactData.getExtraContact();
 		extraAccount.setContact(extraContact);
 		
-		// Manually establish bi-directional customer relationship
+		// add new customer to 2nd account
 		Customer extraCustomer = CustomerData.getExtraCustomer();
 		extraCustomer.setAccount(extraAccount);
 		extraAccount.setCustomer(extraCustomer);
 		
-		// Manually establish bi-directional invoice relationships
+		// add new invoices to 2nd account
 		List<Invoice> moreInvoices = InvoiceData.getMoreInvoices();
 		moreInvoices.forEach(i -> i.setAccount(extraAccount));
 		extraAccount.setInvoices(moreInvoices);
 		
-		// Manually establish bi-directional purchase order relationships
+		// add new purchase orders to 2nd account
 		List<PurchaseOrder> morePurchaseOrders = PurchaseOrderData.getMorePurchaseOrders();
 		morePurchaseOrders.forEach(po -> po.setAccount(extraAccount));
 		extraAccount.setPurchaseOrders(morePurchaseOrders);
@@ -432,16 +441,15 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		
 		assertThat(savedAccounts.size() == 2).isTrue();
 		
-		// check new accounts returns from saveEntities
+		// check new accounts returned from saveEntities
 		assertThat(accounts.stream().allMatch(t -> savedAccounts.contains(t))).isTrue();
 		assertThat(savedAccounts.stream().allMatch(t -> accounts.contains(t))).isTrue();
-		
 		
 		// check new accounts added
 		long accountCnt = accountRepository.countAll();
 		assertThat(accountCnt).isEqualTo(TOTAL_ROWS + 2);
 		
-		/* check new 1st account received id */
+		// retrieve saved account from store
 		Optional<Account> rtrvAnotherAccount = accountRepository.findById(anotherAccount.getId());
 		assertThat(rtrvAnotherAccount.orElse(null)).isNotNull();
 		
@@ -517,7 +525,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenExistsByDto_thenReturnTrue() {
 		log.info("whenExistsByDto_thenReturnTrue");
 		
-		// create account dto with qualifiers in releated entities
+		// create account dto for search criteria
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior Dry Cleaners");
 		
@@ -541,6 +549,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		Boolean exists = accountRepository.existsByDto(accountDto);
 		accountRepository.flush();
 		
+		// check existence
 		assertThat(Boolean.TRUE).isEqualTo(exists);
 	}
 	
@@ -548,7 +557,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenCountByDto_thenReturnCount() {
 		log.info("whenCountByDto_thenReturnCount");
 		
-		// create account dto with qualifiers in releated entities
+		// create account dto for search criteria
 		AccountDto accountDto = new AccountDto();
 		accountDto.setBillingAddress("Dallas");
 		
@@ -564,6 +573,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 		long accountCnt =  accountRepository.countByDto(accountDto);
 		accountRepository.flush();
 		
+		// check count
 		assertThat(accountCnt).isGreaterThanOrEqualTo(2L);
 	}
 	
@@ -571,7 +581,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenFindByDto_thenReturnAccounts() {
 		log.info("whenFindByDto_thenReturnAccounts");
 		
-		// create account dto with qualifiers in releated entities
+		// create account dto for search criteria
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior Dry Cleaners");
 		
@@ -618,11 +628,11 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenFindPageByDto_thenReturnAccounts() {
 		log.info("whenFindPageByDto_thenReturnAccounts");
 		
-		// create account dto with qualifiers
+		// create account dto for search criteria
 		AccountDto accountDto = new AccountDto();
 		accountDto.setActive(true);
 		
-		// limit to 2 accounts max 
+		// limit to first two accounts 
 		accountDto.setStart(0);
 		accountDto.setLimit(2);
 		
@@ -662,7 +672,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenSearchByDto_thenReturnAccounts() {
 		log.info("whenSearchByDto_thenReturnAccounts");
 		
-		// create account dto with qualifiers
+		// create account dto for search criteria
 		AccountDto accountDto = new AccountDto();
 		accountDto.setAccountName("Superior");
 		
@@ -713,7 +723,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	public void whenSearchPageByDto_thenReturnAccounts() {
 		log.info("whenSearchPageByDto_thenReturnAccounts");
 		
-		// create account dto with qualifiers
+		// create account dto for search
 		AccountDto accountDto = new AccountDto();
 		accountDto.setBillingAddress("Dallas");
 		

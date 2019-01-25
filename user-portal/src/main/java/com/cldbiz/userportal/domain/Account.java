@@ -45,24 +45,22 @@ public @Data class Account extends AbstractDomain {
 	@Column(nullable=false)
 	private Boolean active;
 	
-	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
-	@EqualsAndHashCode.Exclude 
 	@OneToOne(cascade={CascadeType.PERSIST, CascadeType.REMOVE}, optional=false)
 	@JoinColumn(name="CONTACT_ID", foreignKey=@ForeignKey(name = "FK_ACCOUNT_CONTACT"))
 	private Contact contact;
 
-	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
 	@EqualsAndHashCode.Exclude
 	@OneToOne(mappedBy="account", cascade={CascadeType.PERSIST, CascadeType.REMOVE}, optional=false, orphanRemoval=true)
 	private Customer customer;
 
-	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
 	@EqualsAndHashCode.Exclude
 	// do not CascadeType.ALL on OneToMany / ManyToMany, results in eager fetch
 	@OneToMany(mappedBy="account", cascade={CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval=true)
 	private List<PurchaseOrder> purchaseOrders = new ArrayList<PurchaseOrder>();
 	
-	// exclude relationships from lombok caclulation of equals/hashcode, bidirectional relationships can lead to stack overflow
+	// exclude bidirectional relationships from lombok caclulation of equals/hashcode, leads to stack overflow
 	@EqualsAndHashCode.Exclude
 	// do not CascadeType.ALL on OneToMany / ManyToMany, results in eager fetch
 	@OneToMany(mappedBy="account", cascade={CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval=true)
@@ -80,6 +78,4 @@ public @Data class Account extends AbstractDomain {
 		this.setBillingAddress(accountDto.getBillingAddress());
 		this.setShippingAddress(accountDto.getShippingAddress());
 	}
-	
-
 }
