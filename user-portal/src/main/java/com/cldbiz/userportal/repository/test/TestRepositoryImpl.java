@@ -40,18 +40,6 @@ public class TestRepositoryImpl extends AbstractRepositoryImpl<Test, TestDto, Lo
 		return jpaQueryFactory.selectFrom(test).where(builder.asPredicate()).fetchCount();
 	}
 
-
-	/*
-	@Override
-	public Test findById(Long testId) {
-		QTest test = QTest.test;
-		
-		return jpaQueryFactory.selectFrom(test)
-				.where(test.id.eq(testId))
-				.fetch();
-	}
-	*/
-
 	@Override
 	public List<Test> findByIds(List<Long> testIds) {
 		QTest test = QTest.test;
@@ -75,11 +63,6 @@ public class TestRepositoryImpl extends AbstractRepositoryImpl<Test, TestDto, Lo
 		
 		DynBooleanBuilder<QTest, TestDto> builder = findByCriteria(testDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
-		Predicate predicate = builder.findPredicate(test, testDto).asPredicate();
-		*/
-		
 		return jpaQueryFactory.selectFrom(test).where(builder.asPredicate()).fetch();
 	}
 
@@ -89,10 +72,6 @@ public class TestRepositoryImpl extends AbstractRepositoryImpl<Test, TestDto, Lo
 		
 		DynBooleanBuilder<QTest, TestDto> builder = findByCriteria(testDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
-		Predicate predicate = builder.findPredicate(test, testDto).asPredicate();
-		*/
 		return jpaQueryFactory.selectFrom(test)
 				.where(builder.asPredicate())
 				.orderBy(sortBy(testDto))
@@ -107,11 +86,6 @@ public class TestRepositoryImpl extends AbstractRepositoryImpl<Test, TestDto, Lo
 		
 		DynBooleanBuilder<QTest, TestDto> builder = searchByCriteria(testDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
-		Predicate predicate = builder.searchPredicate(test, testDto).asPredicate();
-		*/
-		
 		return jpaQueryFactory.selectFrom(test).where(builder.asPredicate()).fetch();
 	}
 	
@@ -120,11 +94,6 @@ public class TestRepositoryImpl extends AbstractRepositoryImpl<Test, TestDto, Lo
 		QTest test = QTest.test;
 		
 		DynBooleanBuilder<QTest, TestDto> builder = searchByCriteria(testDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QTest, TestDto> builder = new DynBooleanBuilder<QTest, TestDto>();
-		Predicate predicate = builder.searchPredicate(test, testDto).asPredicate();
-		*/
 		
 		return jpaQueryFactory.selectFrom(test)
 				.where(builder.asPredicate())

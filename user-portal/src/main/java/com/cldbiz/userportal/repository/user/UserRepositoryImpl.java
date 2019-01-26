@@ -41,17 +41,6 @@ public class UserRepositoryImpl extends AbstractRepositoryImpl<User, UserDto, Lo
 	}
 
 
-	/*
-	@Override
-	public User findById(Long userId) {
-		QUser user = QUser.user;
-		
-		return jpaQueryFactory.selectFrom(user)
-				.where(user.id.eq(userId))
-				.fetch();
-	}
-	*/
-	
 	@Override
 	public List<User> findByIds(List<Long> userIds) {
 		QUser user = QUser.user;
@@ -74,11 +63,6 @@ public class UserRepositoryImpl extends AbstractRepositoryImpl<User, UserDto, Lo
 		
 		DynBooleanBuilder<QUser, UserDto> builder = findByCriteria(userDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
-		Predicate predicate = builder.findPredicate(user, userDto).asPredicate();
-		*/
-		
 		return jpaQueryFactory.selectFrom(user).where(builder.asPredicate()).fetch();
 	}
 
@@ -87,11 +71,6 @@ public class UserRepositoryImpl extends AbstractRepositoryImpl<User, UserDto, Lo
 		QUser user = QUser.user;
 		
 		DynBooleanBuilder<QUser, UserDto> builder = findByCriteria(userDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
-		Predicate predicate = builder.findPredicate(user, userDto).asPredicate();
-		*/
 		
 		return jpaQueryFactory.selectFrom(user).where(builder.asPredicate())
 				.orderBy(sortBy(userDto))
@@ -106,11 +85,6 @@ public class UserRepositoryImpl extends AbstractRepositoryImpl<User, UserDto, Lo
 		
 		DynBooleanBuilder<QUser, UserDto> builder = searchByCriteria(userDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
-		Predicate predicate = builder.searchPredicate(user, userDto).asPredicate();
-		*/
-		
 		return jpaQueryFactory.selectFrom(user).where(builder.asPredicate()).fetch();
 	}
 	
@@ -119,11 +93,6 @@ public class UserRepositoryImpl extends AbstractRepositoryImpl<User, UserDto, Lo
 		QUser user = QUser.user;
 		
 		DynBooleanBuilder<QUser, UserDto> builder = searchByCriteria(userDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QUser, UserDto> builder = new DynBooleanBuilder<QUser, UserDto>();
-		Predicate predicate = builder.searchPredicate(user, userDto).asPredicate();
-		*/
 		
 		return jpaQueryFactory.selectFrom(user).where(builder.asPredicate())
 				.orderBy(sortBy(userDto))

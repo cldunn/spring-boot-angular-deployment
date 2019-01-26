@@ -225,8 +225,6 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 	public void whenDeleteByEntity_thenRemoveProduct() {
 		log.info("whenDeleteByEntity_thenRemoveProduct");
 		
-		List<Product> products = productRepository.findAll();
-		// Product product = products.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
 		Product product = productRepository.findById(3L).get();
 		
 		/* find the line items using this product */
@@ -255,7 +253,7 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		productRepository.flush();
 		
 		// check product deleted
-		products = productRepository.findAll();
+		List<Product> products = productRepository.findAll();
 		assertThat(products.contains(product)).isFalse();
 
 		// check categories still exist
@@ -414,7 +412,7 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		// check 2nd new product matches retrieved product
 		assertThat(rtrvExtaProduct.get().equals(extraProduct)).isTrue();
 		
-		// check retrieved products categories match 2nd new product categories
+		// check retrieved product categories match 2nd new product categories
 		assertThat(Boolean.FALSE.equals(rtrvExtaProduct.get().getCategories().isEmpty()));
 		assertThat(rtrvExtaProduct.get().getCategories().stream().allMatch(t -> moreCategories.contains(t)));
 		assertThat(moreCategories.stream().allMatch(t -> rtrvExtaProduct.get().getCategories().contains(t)));
@@ -436,7 +434,7 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		// retrieve product again 
 		Optional<Product> rtrvdProduct = productRepository.findById(3L);
 		
-		// check account and related entities updated without save
+		// check product and related entities updated without save
 		assertThat(originalProduct.get().getDescription().equals((rtrvdProduct.get().getDescription())));
 		assertThat(originalProduct.get().getCategories().stream().allMatch(t -> rtrvdProduct.get().getCategories().contains(t)));
 		assertThat(rtrvdProduct.get().getCategories().stream().allMatch(t -> originalProduct.get().getCategories().contains(t)));

@@ -68,17 +68,6 @@ public class CategoryRepositoryImpl extends AbstractRepositoryImpl<Category, Cat
 		
 		DynBooleanBuilder<QCategory, CategoryDto> builder = findByCriteria(categoryDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QCategory, CategoryDto> builder = new DynBooleanBuilder<QCategory, CategoryDto>();
-		builder = builder.findPredicate(category, categoryDto);
-
-		if (categoryDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.findPredicate(category.products.any(), categoryDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
-		
 		return jpaQueryFactory.selectFrom(category)
 				.where(builder.asPredicate())
 				.fetch();
@@ -90,16 +79,6 @@ public class CategoryRepositoryImpl extends AbstractRepositoryImpl<Category, Cat
 		
 		DynBooleanBuilder<QCategory, CategoryDto> builder = findByCriteria(categoryDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QCategory, CategoryDto> builder = new DynBooleanBuilder<QCategory, CategoryDto>();
-		builder = builder.findPredicate(category, categoryDto);
-
-		if (categoryDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.findPredicate(category.products.any(), categoryDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
 		return jpaQueryFactory.selectFrom(category)
 				.where(builder.asPredicate())
 				.orderBy(sortBy(categoryDto))
@@ -115,16 +94,6 @@ public class CategoryRepositoryImpl extends AbstractRepositoryImpl<Category, Cat
 		
 		DynBooleanBuilder<QCategory, CategoryDto> builder = searchByCriteria(categoryDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QCategory, CategoryDto> builder = new DynBooleanBuilder<QCategory, CategoryDto>();
-		builder = builder.searchPredicate(category, categoryDto);
-
-		if (categoryDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.searchPredicate(category.products.any(), categoryDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
 		return jpaQueryFactory.selectFrom(category)
 				.where(builder.asPredicate())
 				.fetch();
@@ -136,16 +105,6 @@ public class CategoryRepositoryImpl extends AbstractRepositoryImpl<Category, Cat
 		
 		DynBooleanBuilder<QCategory, CategoryDto> builder = searchByCriteria(categoryDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QCategory, CategoryDto> builder = new DynBooleanBuilder<QCategory, CategoryDto>();
-		builder = builder.searchPredicate(category, categoryDto);
-
-		if (categoryDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.searchPredicate(category.products.any(), categoryDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
 		return jpaQueryFactory.selectFrom(category)
 				.where(builder.asPredicate())
 				.orderBy(sortBy(categoryDto))

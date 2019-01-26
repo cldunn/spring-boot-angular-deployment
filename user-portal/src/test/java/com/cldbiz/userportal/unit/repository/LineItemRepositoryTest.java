@@ -33,8 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml"})
 public class LineItemRepositoryTest extends BaseRepositoryTest {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoryTest.class);
-	
+
 	private static final Long TOTAL_ROWS = 4L;
 	
 	@Autowired

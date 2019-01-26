@@ -19,6 +19,22 @@ public class CategoryData {
 		this.categoryRepository = categoryRepository;
 	}
 
+	public static Category getAnotherCategory() {
+		Category category = new Category();
+		
+		category.setName("Binders");
+		
+		return category;
+	}
+	
+	public static Category getExtraCategory() {
+		Category category = new Category();
+		
+		category.setName("Note Books");
+		
+		return category;
+	}
+
 	public static Set<Category> getSomeExistingCategories() {
 		Set<Category> someCategories = new HashSet<Category>();
 		Category category = categoryRepository.findById(1L).get();

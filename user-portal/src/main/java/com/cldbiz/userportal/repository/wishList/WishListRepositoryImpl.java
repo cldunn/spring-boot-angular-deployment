@@ -56,17 +56,6 @@ public class WishListRepositoryImpl extends AbstractRepositoryImpl<WishList, Wis
 		
 		DynBooleanBuilder<QWishList, WishListDto> builder = findByCriteria(wishListDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QWishList, WishListDto> builder = new DynBooleanBuilder<QWishList, WishListDto>();
-		builder = builder.findPredicate(wishList, wishListDto);
-
-		if (wishListDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.findPredicate(wishList.products.any(), wishListDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
-		
 		return jpaQueryFactory.selectFrom(wishList)
 				.where(builder.asPredicate())
 				.fetch();
@@ -77,17 +66,6 @@ public class WishListRepositoryImpl extends AbstractRepositoryImpl<WishList, Wis
 		QWishList wishList = QWishList.wishList;
 		
 		DynBooleanBuilder<QWishList, WishListDto> builder = findByCriteria(wishListDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QWishList, WishListDto> builder = new DynBooleanBuilder<QWishList, WishListDto>();
-		builder = builder.findPredicate(wishList, wishListDto);
-
-		if (wishListDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.findPredicate(wishList.products.any(), wishListDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
 		
 		return jpaQueryFactory.selectFrom(wishList)
 				.where(builder.asPredicate())
@@ -103,17 +81,6 @@ public class WishListRepositoryImpl extends AbstractRepositoryImpl<WishList, Wis
 		
 		DynBooleanBuilder<QWishList, WishListDto> builder = searchByCriteria(wishListDto, predicates);
 		
-		/*
-		DynBooleanBuilder<QWishList, WishListDto> builder = new DynBooleanBuilder<QWishList, WishListDto>();
-		builder = builder.searchPredicate(wishList, wishListDto);
-
-		if (wishListDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.searchPredicate(wishList.products.any(), wishListDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
-		
 		return jpaQueryFactory.selectFrom(wishList)
 				.where(builder.asPredicate())
 				.fetch();
@@ -124,17 +91,6 @@ public class WishListRepositoryImpl extends AbstractRepositoryImpl<WishList, Wis
 		QWishList wishList = QWishList.wishList;
 		
 		DynBooleanBuilder<QWishList, WishListDto> builder = searchByCriteria(wishListDto, predicates);
-		
-		/*
-		DynBooleanBuilder<QWishList, WishListDto> builder = new DynBooleanBuilder<QWishList, WishListDto>();
-		builder = builder.searchPredicate(wishList, wishListDto);
-
-		if (wishListDto.getProductDto() != null) {
-			DynBooleanBuilder<QProduct, ProductDto> byProductBuilder = new DynBooleanBuilder<QProduct, ProductDto>();
-			Predicate byProductPredicate = byProductBuilder.searchPredicate(wishList.products.any(), wishListDto.getProductDto()).asPredicate();
-			builder.and(byProductPredicate);
-		}
-		*/
 		
 		return jpaQueryFactory.selectFrom(wishList)
 				.where(builder.asPredicate())

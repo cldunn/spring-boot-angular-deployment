@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -24,12 +25,16 @@ import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.repository.category.CategoryRepository;
 import com.cldbiz.userportal.repository.product.ProductRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
+import com.cldbiz.userportal.unit.repository.data.CategoryData;
+import com.cldbiz.userportal.unit.repository.data.ProductData;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @DatabaseSetup(value= {"/productData.xml", "/categoryData.xml", "/categoryProductData.xml"})
 public class CategoryRepositoryTest extends BaseRepositoryTest {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryRepositoryTest.class);
-	
+
 	private static final Long TOTAL_ROWS = 3L;
 	
 	@Autowired
@@ -40,292 +45,424 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 	
 	@Test
 	public void whenExistsById_thenReturnTrue() {
+		log.info("whenExistsById_thenReturnTrue");
+		
 		List<Category> categorys = categoryRepository.findAll();
 		Category category = categorys.get(0);
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke existsById here
 		Boolean exists = categoryRepository.existsById(category.getId());
 		categoryRepository.flush();
 		
-		assertThat(exists).isTrue();
+		// check for existence
+		assertThat(exists);
 	}
 
 	@Test
 	public void whenCountAll_thenReturnLong() {
+		log.info("whenCountAll_thenReturnCount");
+		
+		// invoke countAll here
 		long categoryCnt = categoryRepository.countAll();
 		categoryRepository.flush();
 		
+		// check count
 		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS);
 	}
 
 	@Test
 	public void whenFindById_thenReturnCategory() {
+		log.info("whenFindById_thenReturnCategory");
+		
+		// invoke findById here
 		Optional<Category> sameCategory = categoryRepository.findById(3L);
 		categoryRepository.flush();
 		
+		// check for category and related entities  
 		assertThat(sameCategory.orElse(null)).isNotNull();
 		assertThat(sameCategory.get().getProducts().isEmpty()).isFalse();
 	}
 
 	@Test
-	public void whenFindByIds_thenReturnAllCategorys() {
-		List<Category> categorys = categoryRepository.findAll();
-		List<Long> categoryIds = categorys.stream().map(Category::getId).collect(Collectors.toList());
+	public void whenFindByIds_thenReturnAllCategories() {
+		log.info("whenFindByIds_thenReturnAllCategories");
 		
-		categorys = categoryRepository.findByIds(categoryIds);
+		// get all category ids
+		List<Category> categories = categoryRepository.findAll();
+		List<Long> categoryIds = categories.stream().map(Category::getId).collect(Collectors.toList());
+		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke findByIds here
+		categories = categoryRepository.findByIds(categoryIds);
 		categoryRepository.flush();
 		
-		assertThat(categorys.size()).isEqualTo(TOTAL_ROWS.intValue());
-		assertThat(categorys.get(0).getProducts().isEmpty()).isFalse();
+		// check all categories were found
+		assertThat(categories.size()).isEqualTo(TOTAL_ROWS.intValue());
+		
+		// check that some categories have products
+		List<Category> categoriesWithProducts = categories.stream().filter(c -> !c.getProducts().isEmpty()).collect(Collectors.toList());
+		assertThat(categoriesWithProducts.isEmpty()).isFalse();
 	}
 
 	@Test
 	public void whenFindAll_thenReturnAllCategories() {
+		log.info("whenFindAll_thenReturnAllCategories");
+		
+		// invoke findAll here
 		List<Category> categories = categoryRepository.findAll();
 		categoryRepository.flush();
 		
+		// check all categories returned
 		assertThat(categories.size()).isEqualTo(TOTAL_ROWS.intValue());
 		
-		Optional<Category> category = categories.stream()
-			.filter(c -> c.getProducts().size() > 0)
-			.findFirst();
-		assertThat(category.orElse(null)).isNotNull();
+		// check that some categories have products
+		List<Category> categoriesWithProducts = categories.stream().filter(c -> !c.getProducts().isEmpty()).collect(Collectors.toList());
+		assertThat(categoriesWithProducts.isEmpty()).isFalse();
 	}
 
 	@Test
 	public void whenDeleteById_thenRemoveCategory() {
-		List<Category> categorys = categoryRepository.findAll();
-
-		Category category = categorys.get(0);
+		log.info("whenDeleteById_thenRemoveCategory");
+		
+		Category category = categoryRepository.findById(1L).get();
 		category.getProducts().size();
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke deleteById here
 		categoryRepository.deleteById(category.getId());
 		categoryRepository.flush();
 		
-		categorys = categoryRepository.findAll();
-
-		assertThat(categorys.contains(category)).isFalse();
+		// check category deleted
+		List<Category> categories = categoryRepository.findAll();
+		assertThat(categories.contains(category)).isFalse();
 		
-		List<Product> deletedProducts = category.getProducts().stream()
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
-
-		assertThat(deletedProducts.size()).isEqualTo(category.getProducts().size());
+		// check products still exist but not related
+		category.getProducts().forEach(product -> {
+			assertThat(productRepository.existsById(product.getId()));
+			assertThat(product.getCategories().contains(category)).isFalse();
+		});
 	}
 
 	@Test
 	public void whenDeleteByIds_thenRemoveCategories() {
+		log.info("whenDeleteByIds_thenRemoveCategories");
+		
+		// get all categories
 		List<Category> categories = categoryRepository.findAll();
 		categories.forEach(c -> c.getProducts().size());
 		
+		// get all category ids
 		List<Long> categoryIds = categories.stream().map(Category::getId).collect(Collectors.toList());
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke deleteByIds here
 		categoryRepository.deleteByIds(categoryIds);
 		categoryRepository.flush();
 		
+		// check all categories deleted
 		long categoryCnt = categoryRepository.countAll();
-
 		assertThat(categoryCnt).isZero();
 
-		List<Product> deletedProducts = categories.stream()
-				.flatMap(c -> c.getProducts().stream())
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
+		// get products from any category
+		Set<Product> relatedProducts = categories.stream()
+				.flatMap(c -> c.getProducts().stream()).map(p -> p)
+				.collect(Collectors.toSet());
 
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		// check products still exist but not related
+		relatedProducts.forEach(product -> {
+			assertThat(productRepository.existsById(product.getId()));
+			assertThat(product.getCategories().isEmpty());
+		});
 	}
 
 	@Test
 	public void whenDeleteByEntity_thenRemoveCategory() {
-		List<Category> categories = categoryRepository.findAll();
-		Category category = categories.stream().filter(a -> a.getId().equals(3L)).findFirst().get();
+		log.info("whenDeleteByEntity_thenRemoveCategory");
+		
+		// get category and its products
+		Category category = categoryRepository.findById(3L).get(); 
 		category.getProducts().size();
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke deleteByEntity here
 		categoryRepository.deleteByEntity(category);
 		categoryRepository.flush();
 		
-		categories = categoryRepository.findAll();
-		
+		// check category deleted
+		List<Category> categories = categoryRepository.findAll();
 		assertThat(categories.contains(category)).isFalse();
 
-		List<Product> deletedProducts = category.getProducts().stream()
-				.filter(p -> productRepository.findById(p.getId()) != null )
-				.collect(Collectors.toList());
-
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		// check products still exist but not related
+		category.getProducts().forEach(product -> {
+			assertThat(productRepository.existsById(product.getId()));
+			assertThat(product.getCategories().contains(category)).isFalse();
+		});
 	}
 
 	@Test
 	public void whenDeleteByEntities_thenRemoveCategories() {
+		log.info("whenDeleteByEntities_thenRemoveCategories");
+		
+		// get all categories
 		List<Category> categories = categoryRepository.findAll();
 		categories.forEach(c -> c.getProducts().size());
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke deleteByEntities here
 		categoryRepository.deleteByEntities(categories);
 		categoryRepository.flush();
 		
+		// check all categories deleted
 		long categoryCnt = categoryRepository.countAll();
-
 		assertThat(categoryCnt).isZero();
 		
-		List<Product> deletedProducts = categories.stream()
-			.flatMap(c -> c.getProducts().stream())
-			.filter(p -> productRepository.findById(p.getId()) != null )
-			.collect(Collectors.toList());
+		// get all products from any category
+		Set<Product> relatedProducts = categories.stream()
+				.flatMap(c -> c.getProducts().stream())
+				.filter(p -> productRepository.existsById(p.getId()))
+				.collect(Collectors.toSet());
 
-		assertThat(deletedProducts.isEmpty()).isFalse();
+		// check products still exist but not related
+		relatedProducts.forEach(product -> {
+			assertThat(productRepository.existsById(product.getId()));
+			assertThat(product.getCategories().isEmpty());
+		});
 	}
 
 	@Test
 	public void whenSaveEntity_thenReturnSavedCategory() {
-		Category anotherCategory = getAnotherCategory();
-		Product anotherProduct = getAnotherProduct(); 
+		log.info("whenSaveEntity_thenReturnSavedCategory");
 		
+		//create a new category
+		Category anotherCategory = CategoryData.getAnotherCategory();
+		
+		// Add existing product to new category
+		Product anotherProduct = ProductData.getAnotherExistingProduct(); 
 		anotherCategory.getProducts().add(anotherProduct);
 		anotherProduct.getCategories().add(anotherCategory);
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke saveEntity here
 		Category savedCategory = categoryRepository.saveEntity(anotherCategory);
 		categoryRepository.flush();
 		
-		assertThat(savedCategory.equals(anotherCategory)).isTrue();
+		// confirm persisted category returned
+		assertThat(savedCategory.equals(anotherCategory));
 		
+		// confirmed category persisted
 		long categoryCnt = categoryRepository.countAll();
 		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS + 1);
 		
+		// retrieve saved category from store
 		Optional<Category> rtrvCategory = categoryRepository.findById(savedCategory.getId());
 		assertThat(rtrvCategory.orElse(null)).isNotNull();
-		assertThat(rtrvCategory.get().equals(anotherCategory)).isTrue();
-		assertThat(rtrvCategory.get().equals(savedCategory)).isTrue();
 		
-		assertThat(savedCategory.getProducts().contains(anotherProduct));
+		// check retrieved category matches saved category
+		assertThat(rtrvCategory.get().equals(anotherCategory));
+		assertThat(rtrvCategory.get().equals(savedCategory));
 		
-		Optional<Product> savedProduct = savedCategory.getProducts().stream().filter(p -> p.getId().equals(anotherProduct.getId())).findFirst();
-		assertThat(savedProduct.get().getCategories().contains(anotherCategory));
+		// check persisted category products match saved category products
+		assertThat(Boolean.FALSE.equals(rtrvCategory.get().getProducts().isEmpty()));
+		assertThat(rtrvCategory.get().getProducts().stream().allMatch(p -> anotherCategory.getProducts().contains(p)));
+		assertThat(anotherCategory.getProducts().stream().allMatch(p -> rtrvCategory.get().getProducts().contains(p)));
 	}
 
 	@Test
 	public void whenSaveEntities_thenReturnSavedCategories() {
-		Category anotherCategory = getAnotherCategory();
-		Product anotherProduct = getAnotherProduct(); 
-
+		log.info("whenSaveEntities_thenReturnSavedCategories");
+	
+		// create 1st new category
+		Category anotherCategory = CategoryData.getAnotherCategory();
+		
+		// add product to 1st category
+		Product anotherProduct = ProductData.getAnotherExistingProduct(); 
 		anotherCategory.getProducts().add(anotherProduct);
 		anotherProduct.getCategories().add(anotherCategory);
 		
-		Category extraCategory = getExtraCategory();
-		Product extraProduct = getExtraProduct(); 
-
+		// create 2nd new category
+		Category extraCategory = CategoryData.getExtraCategory();
+		
+		// add product to 2nd category
+		Product extraProduct = ProductData.getExtraExistingProduct(); 
 		extraCategory.getProducts().add(extraProduct);
 		extraProduct.getCategories().add(extraCategory);
 
+		// create list of new categories
 		List<Category> categories = new ArrayList<Category>();
 		categories.add(anotherCategory);
 		categories.add(extraCategory);
 		
+		// clear cache to test performance
+		categoryRepository.flush();
+
+		// invoke saveEntities here
 		List<Category> savedCategorys = categoryRepository.saveEntities(categories);
 		categoryRepository.flush();
 		
-		assertThat(savedCategorys.size() == 2).isTrue();
+		// confirm new categories returned
+		assertThat(savedCategorys.size() == 2);
 		
-		assertThat(categories.stream().allMatch(t -> savedCategorys.contains(t))).isTrue();
-		assertThat(savedCategorys.stream().allMatch(t -> categories.contains(t))).isTrue();
+		// check returned categories match new categories
+		assertThat(categories.stream().allMatch(t -> savedCategorys.contains(t)));
+		assertThat(savedCategorys.stream().allMatch(t -> categories.contains(t)));
 		
+		// confirm new categories persisted
 		long categoryCnt = categoryRepository.countAll();
 		assertThat(categoryCnt).isEqualTo(TOTAL_ROWS + 2);
 		
+		// retrieve 1st new category
 		Optional<Category> rtrvAnotherCategory = categoryRepository.findById(anotherCategory.getId());
 		assertThat(rtrvAnotherCategory.orElse(null)).isNotNull();
-		assertThat(rtrvAnotherCategory.get().equals(anotherCategory)).isTrue();
+		
+		// check retrieved category equals 1st category and contains its product
+		assertThat(rtrvAnotherCategory.get().equals(anotherCategory));
 		assertThat(rtrvAnotherCategory.get().getProducts().contains(anotherProduct));
 		
+		// retrieve 2nd new category
 		Optional<Category> rtrvExtaCategory = categoryRepository.findById(extraCategory.getId());
 		assertThat(rtrvExtaCategory.orElse(null)).isNotNull();
-		assertThat(rtrvExtaCategory.get().equals(extraCategory)).isTrue();
+		
+		// check retrieved category equals 2nd category and contains its product
+		assertThat(rtrvExtaCategory.get().equals(extraCategory));
 		assertThat(rtrvExtaCategory.get().getProducts().contains(extraProduct));
 	}
 
 	@Test
 	public void whenModified_thenCategoryUpdated() {
+		log.info("whenModified_thenCategoryUpdated");
+		
+		// retrieve category
 		Optional<Category> originalCategory = categoryRepository.findById(3L);
+		
+		// update category and related entities
 		originalCategory.get().setName("UPDATED - " + originalCategory.get().getName());
 		originalCategory.get().getProducts().forEach(p -> p.setName("UPDATED - " + p.getName()));
 		
+		// retrieve category again 
 		Optional<Category> rtrvdCategory = categoryRepository.findById(3L);
+		
+		// check category and related entities updated without save
 		assertThat(originalCategory.get().getName().equals((rtrvdCategory.get().getName())));
-		rtrvdCategory.get().getProducts().forEach(p -> assertThat(originalCategory.get().getProducts().contains(p)));
+		assertThat(originalCategory.get().getProducts().stream().allMatch(t -> rtrvdCategory.get().getProducts().contains(t)));
+		assertThat(rtrvdCategory.get().getProducts().stream().allMatch(t -> originalCategory.get().getProducts().contains(t)));
 	}
 
 	@Test
 	public void whenExistsByDto_thenReturnTrue() {
+		log.info("whenExistsByDto_thenReturnTrue");
+		
+		// create category dto for search criteria
 		CategoryDto categoryDto = new CategoryDto();
 		categoryDto.setName("Writing");
 		
 		ProductDto productDto = new ProductDto();
 		productDto.setName("pen");
-		
 		categoryDto.setProductDto(productDto);
 
+		// invoke existsByDto here
 		Boolean exists = categoryRepository.existsByDto(categoryDto);
 		categoryRepository.flush();
 		
+		// check existence
 		assertThat(Boolean.TRUE).isEqualTo(exists);
 	}
 	
 	@Test
 	public void whenCountByDto_thenReturnCount() {
+		log.info("whenCountByDto_thenReturnCount");
+		
+		// create category dto for search criteria
 		CategoryDto categoryDto = new CategoryDto();
 		
 		ProductDto productDto = new ProductDto();
 		productDto.setName("printer");
-		
 		categoryDto.setProductDto(productDto);
 		
+		// invoke countByDto here
 		long categoryCnt =  categoryRepository.countByDto(categoryDto);
 		categoryRepository.flush();
 		
+		// check count
 		assertThat(categoryCnt).isGreaterThanOrEqualTo(2L);
 	}
 
 	@Test
 	public void whenFindByDto_thenReturnCategories() {
+		log.info("whenFindByDto_thenReturnCategories");
+		
+		// create category dto for search criteria
 		CategoryDto categoryDto = new CategoryDto();
 		categoryDto.setName("Writing");
 		
-		Product product = getAnotherProduct();
+		Product product = ProductData.getAnotherExistingProduct();
 		ProductDto productDto = new ProductDto(product);
 		categoryDto.setProductDto(productDto);
 		
-		List<Category> categorys = categoryRepository.findByDto(categoryDto);
+		// invoke findByDto here
+		List<Category> categories = categoryRepository.findByDto(categoryDto);
 		categoryRepository.flush();
 		
-		assertThat(categorys).isNotEmpty();
+		// check categories found
+		assertThat(categories).isNotEmpty();
 		
-		Optional<Category> category = categorys.stream().findFirst();
-		
-		assertThat(category.orElse(null)).isNotNull();
-		assertThat(category.get().getName().equals("Writing")).isTrue();
-		assertThat(category.get().getProducts().isEmpty()).isFalse();
+		// check results match criteria
+		categories.forEach(catgory -> {
+			assertThat(catgory.getName().equals(categoryDto.getName()));
+			assertThat(catgory.getProducts().contains(product));
+		});
 	}
 
 	@Test
 	public void whenFindPageByDto_thenReturnCategories() {
+		log.info("whenFindPageByDto_thenReturnCategories");
+		
+		// create category dto for search criteria
 		CategoryDto categoryDto = new CategoryDto();
 		categoryDto.setName("Writing");
 		
-		Product product = getAnotherProduct();
+		Product product = ProductData.getAnotherExistingProduct();
 		ProductDto productDto = new ProductDto(product);
 		categoryDto.setProductDto(productDto);
 		
+		// limit to first two categories
 		categoryDto.setStart(0);
 		categoryDto.setLimit(2);
 		
+		// invoke findPageByDto here
 		List<Category> categories = categoryRepository.findPageByDto(categoryDto);
 		categoryRepository.flush();
 		
+		// assert no more than 2 records found
 		assertThat(categories).isNotEmpty();
 		assertThat(categories.size()).isLessThanOrEqualTo(2);
-		assertThat(categories.get(0).getProducts().isEmpty()).isFalse();
+		
+		// check results match criteria
+		categories.forEach(catgory -> {
+			assertThat(catgory.getName().equals(categoryDto.getName()));
+			assertThat(catgory.getProducts().contains(product));
+		});
 	}
 
 	@Test
-	public void whenSearchByDto_thenReturnCategorys() {
+	public void whenSearchByDto_thenReturnCategories() {
+		log.info("whenSearchByDto_thenReturnCategories");
+		
+		// create category dto for search criteria
 		CategoryDto categoryDto = new CategoryDto();
 		categoryDto.setName("Writing");
 		
@@ -333,55 +470,48 @@ public class CategoryRepositoryTest extends BaseRepositoryTest {
 		productDto.setName("Stationary");
 		categoryDto.setProductDto(productDto);
 		
+		// invoke searchByDto here
 		List<Category> categories = categoryRepository.searchByDto(categoryDto);
 		categoryRepository.flush();
 		
+		// check categories found
 		assertThat(categories).isNotEmpty();
-		assertThat(categories.get(0).getProducts().stream().map(p -> p.getName()).collect(Collectors.toList()).contains("Stationary"));
+		
+		// check results match criteria
+		categories.forEach(category -> {
+			assertThat(category.getName().equals(categoryDto.getName()));
+			assertThat(category.getProducts().stream().map(c -> c.getName())
+				.collect(Collectors.toList()).contains(productDto.getName()));
+		});
 	}
 
 	@Test
-	public void whenSearchPageByDto_thenReturnCategorys() {
+	public void whenSearchPageByDto_thenReturnCategories() {
+		log.info("whenSearchPageByDto_thenReturnCategories");
+
+		// create category dto for search criteria
 		CategoryDto categoryDto = new CategoryDto();
-		categoryDto.setStart(0);
-		categoryDto.setLimit(2);
 		
 		ProductDto productDto = new ProductDto();
 		productDto.setName("Stationary");
 		categoryDto.setProductDto(productDto);
 
+		// limit to first two categories
+		categoryDto.setStart(0);
+		categoryDto.setLimit(2);
+		
+		// invoke searchPageByDto here
 		List<Category> categories = categoryRepository.searchPageByDto(categoryDto);
 		categoryRepository.flush();
 		
+		// assert no more than 2 records found
 		assertThat(categories).isNotEmpty();
 		assertThat(categories.size()).isLessThanOrEqualTo(2);
-		assertThat(categories.get(0).getProducts().isEmpty()).isFalse();
-	}
-
-	private Category getAnotherCategory() {
-		Category category = new Category();
 		
-		category.setName("Binders");
-		
-		return category;
+		// check results match criteria
+		categories.forEach(category -> {
+			assertThat(category.getProducts().stream().map(c -> c.getName())
+				.collect(Collectors.toList()).contains(productDto.getName()));
+		});
 	}
-	
-	private Category getExtraCategory() {
-		Category category = new Category();
-		
-		category.setName("Note Books");
-		
-		return category;
-	}
-
-	private Product getAnotherProduct() {
-		Optional<Product> product = productRepository.findById(1L);
-		return product.orElse(null);
-	}
-
-	private Product getExtraProduct() {
-		Optional<Product> product = productRepository.findById(2L);
-		return product.orElse(null);
-	}
-
 }
