@@ -22,7 +22,7 @@ import com.cldbiz.userportal.repository.user.UserRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup("/userData.xml")
+// @DatabaseSetup("/userData.xml")
 public class UserRepositoryTest extends BaseRepositoryTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryTest.class);
 
@@ -38,9 +38,9 @@ public class UserRepositoryTest extends BaseRepositoryTest {
 	@Test
 	public void whenFindByDto_thenReturnUser() {
 		UserDto userDto = new UserDto();
-		userDto.setFirstName("Sabine");
-		userDto.setLastName("Dunn");
-		userDto.setEmail("sabinedunntx@yahoo.com");
+		userDto.setFirstName("Sam");
+		userDto.setLastName("Houston");
+		userDto.setEmail("samhoustontx@yahoo.com");
 		
 		List<User> users = userRepository.findByDto(userDto);
 		assertThat(users).isNotEmpty();

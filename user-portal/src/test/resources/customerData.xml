@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<dataset>
-	<CUSTOMER ID="1" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" COMPANY="Superior Dry Cleaners" FIRST_NAME="Alex" LAST_NAME="Crowe" WORK_EMAIL="alex.crowe.yahoo.com" WORK_PHONE="(555) 111-1111" CAN_CONTACT="1" ACCOUNT_ID="1" />
-	<CUSTOMER ID="2" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" FIRST_NAME="Sally" LAST_NAME="Field" WORK_EMAIL="sally.field@gmail.com" WORK_PHONE="(555) 222-2222" CAN_CONTACT="0" ACCOUNT_ID="2"/>
-	<CUSTOMER ID="3" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" COMPANY="Target" DEPARTMENT="Billing Dept." JOB_TITLE="Comptroller" FIRST_NAME="Steve" LAST_NAME="Evans" WORK_EMAIL="steve.evans@target.com" WORK_PHONE="(555) 333-3333" CAN_CONTACT="1" ACCOUNT_ID="3"/>
-</dataset>

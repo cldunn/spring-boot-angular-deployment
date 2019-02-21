@@ -29,7 +29,7 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup(value= {"/productData.xml", "/wishListData.xml", "/wishListProductData.xml"})
+// @DatabaseSetup(value= {"/productData.xml", "/wishListData.xml", "/wishListProductData.xml"})
 public class WishListRepositoryTest extends BaseRepositoryTest {
 
 	private static final Long TOTAL_ROWS = 3L;

@@ -6,6 +6,6 @@ import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.repository.BaseRepository;
 
 @Repository
-public interface AccountRepository extends BaseRepository<Account, Long>, AccountRepositoryExt {
+public interface AccountRepository extends BaseRepository<Account, Long>,  AccountRepositoryExt {
 	
 }

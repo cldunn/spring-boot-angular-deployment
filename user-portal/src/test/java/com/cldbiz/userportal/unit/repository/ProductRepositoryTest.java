@@ -19,12 +19,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cldbiz.userportal.domain.Category;
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.domain.Product;
+import com.cldbiz.userportal.domain.WishList;
 import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
+import com.cldbiz.userportal.dto.WishListDto;
 import com.cldbiz.userportal.repository.category.CategoryRepository;
 import com.cldbiz.userportal.repository.lineItem.LineItemRepository;
 import com.cldbiz.userportal.repository.product.ProductRepository;
+import com.cldbiz.userportal.repository.wishList.WishListRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.cldbiz.userportal.unit.repository.data.CategoryData;
 import com.cldbiz.userportal.unit.repository.data.ProductData;
@@ -33,10 +36,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml", "/categoryData.xml", "/categoryProductData.xml"})  
+// @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml", "/categoryData.xml", "/categoryProductData.xml"})  
 public class ProductRepositoryTest  extends BaseRepositoryTest {
 
-	private static final Long TOTAL_ROWS = 3L;
+	private static final Long TOTAL_ROWS = 9L;
 	@PersistenceContext
 	EntityManager entityManager;
 	
@@ -48,6 +51,9 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 
 	@Autowired
 	CategoryRepository categoryRepository;
+
+	@Autowired
+	WishListRepository wishListRepository;
 
 	@Test
 	public void whenExistsById_thenReturnTrue() {
@@ -155,6 +161,15 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		}
 		product.getCategories().clear();
 		
+		// remove product from wishlists
+		WishListDto wishListDto = new WishListDto();
+		wishListDto.setProductDto(productDto);
+		List<WishList> wishLists = wishListRepository.findByDto(wishListDto);
+
+		wishLists.forEach(wishList -> {
+			wishList.getProducts().remove(product);
+		});
+		
 		// clear cache to test performance
 		productRepository.flush();
 
@@ -203,6 +218,17 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 			product.getCategories().clear();
 		});
 		
+		// remove products from wishlists
+		WishListDto wishListDto = new WishListDto();
+		products.forEach(product -> {
+			wishListDto.setProductDto(new ProductDto(product));
+			List<WishList> wishLists = wishListRepository.findByDto(wishListDto);
+			
+			wishLists.forEach(wishList -> {
+				wishList.getProducts().remove(product);
+			});
+		});
+		
 		// clear cache to test performance
 		productRepository.flush();
 
@@ -245,6 +271,15 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		}
 		product.getCategories().clear();
 		
+		// remove product from wishlists
+		WishListDto wishListDto = new WishListDto();
+		wishListDto.setProductDto(productDto);
+		List<WishList> wishLists = wishListRepository.findByDto(wishListDto);
+
+		wishLists.forEach(wishList -> {
+			wishList.getProducts().remove(product);
+		});
+
 		// clear cache to test performance
 		productRepository.flush();
 
@@ -260,7 +295,6 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 		categories.forEach(category -> {
 			assertThat(categoryRepository.existsById(category.getId()));
 		});
-
 	}
 
 	@Test
@@ -292,6 +326,17 @@ public class ProductRepositoryTest  extends BaseRepositoryTest {
 			product.getCategories().clear();
 		});
 
+		// remove products from wishlists
+		WishListDto wishListDto = new WishListDto();
+		products.forEach(product -> {
+			wishListDto.setProductDto(new ProductDto(product));
+			List<WishList> wishLists = wishListRepository.findByDto(wishListDto);
+			
+			wishLists.forEach(wishList -> {
+				wishList.getProducts().remove(product);
+			});
+		});
+		
 		// clear cache to test performance
 		productRepository.flush();
 

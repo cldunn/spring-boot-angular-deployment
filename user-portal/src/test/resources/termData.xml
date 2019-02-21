@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<dataset>
-	<TERM ID="1" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" CODE="EOM" DESCRIPTION="End of month" />
-	<TERM ID="2" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" CODE="PIA" DESCRIPTION="Payment in advance" />
-	<TERM ID="3" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" CODE="Net 30" DESCRIPTION="Payment 30 days after invoice date" />
-</dataset>

@@ -10,8 +10,11 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Contact;
+import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.ContactDto;
+import com.cldbiz.userportal.repository.account.AccountRepository;
 import com.cldbiz.userportal.repository.contact.ContactRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.cldbiz.userportal.unit.repository.data.ContactData;
@@ -20,10 +23,13 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup("/contactData.xml")
+// @DatabaseSetup("/contactData.xml")
 public class ContactRepositoryTest extends BaseRepositoryTest {
-	private static final Long TOTAL_ROWS = 3L;
+	private static final Long TOTAL_ROWS = 7L;
 	
+	@Autowired
+	AccountRepository accountRepository;
+
 	@Autowired
 	ContactRepository contactRepository;
 	
@@ -32,6 +38,8 @@ public class ContactRepositoryTest extends BaseRepositoryTest {
 		log.info("whenExistsById_thenReturnTrue");
 		
 		List<Contact> contacts = contactRepository.findAll();
+		contactRepository.flush();
+		
 		Contact contact = contacts.get(0);
 		
 		// clear cache to test performance
@@ -102,6 +110,12 @@ public class ContactRepositoryTest extends BaseRepositoryTest {
 		List<Contact> contacts = contactRepository.findAll();
 		Contact contact = contacts.get(0);
 		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setContactDto(new ContactDto(contact));
+		List<Account> accounts = accountRepository.findByDto(accountDto);
+		
+		accounts.forEach(account -> account.setContact(null));
+		
 		// clear cache to test performance
 		contactRepository.flush();
 
@@ -120,6 +134,14 @@ public class ContactRepositoryTest extends BaseRepositoryTest {
 		
 		List<Contact> contacts = contactRepository.findAll();
 		List<Long> contactIds = contacts.stream().map(Contact::getId).collect(Collectors.toList());
+		
+		contacts.forEach(contact -> {
+			AccountDto accountDto = new AccountDto();
+			accountDto.setContactDto(new ContactDto(contact));
+			List<Account> accounts = accountRepository.findByDto(accountDto);
+			
+			accounts.forEach(account -> account.setContact(null));
+		});
 		
 		// clear cache to test performance
 		contactRepository.flush();
@@ -140,6 +162,12 @@ public class ContactRepositoryTest extends BaseRepositoryTest {
 		List<Contact> contacts = contactRepository.findAll();
 		Contact contact = contacts.get(0);
 		
+		AccountDto accountDto = new AccountDto();
+		accountDto.setContactDto(new ContactDto(contact));
+		List<Account> accounts = accountRepository.findByDto(accountDto);
+		
+		accounts.forEach(account -> account.setContact(null));
+
 		// clear cache to test performance
 		contactRepository.flush();
 
@@ -158,6 +186,14 @@ public class ContactRepositoryTest extends BaseRepositoryTest {
 		
 		List<Contact> contacts = contactRepository.findAll();
 		
+		contacts.forEach(contact -> {
+			AccountDto accountDto = new AccountDto();
+			accountDto.setContactDto(new ContactDto(contact));
+			List<Account> accounts = accountRepository.findByDto(accountDto);
+			
+			accounts.forEach(account -> account.setContact(null));
+		});
+
 		// clear cache to test performance
 		contactRepository.flush();
 

@@ -32,10 +32,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup(value= {"/productData.xml", "/categoryData.xml", "/categoryProductData.xml"})
+// @DatabaseSetup(value= {"/productData.xml", "/categoryData.xml", "/categoryProductData.xml"})
 public class CategoryRepositoryTest extends BaseRepositoryTest {
 
-	private static final Long TOTAL_ROWS = 3L;
+	private static final Long TOTAL_ROWS = 7L;
 	
 	@Autowired
 	ProductRepository productRepository;

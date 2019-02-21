@@ -45,7 +45,7 @@ public @Data class Account extends AbstractDomain {
 	@Column(nullable=false)
 	private Boolean active;
 	
-	@OneToOne(cascade={CascadeType.PERSIST, CascadeType.REMOVE}, optional=false)
+	@OneToOne(cascade={CascadeType.PERSIST, CascadeType.REMOVE}, optional=true)
 	@JoinColumn(name="CONTACT_ID", foreignKey=@ForeignKey(name = "FK_ACCOUNT_CONTACT"))
 	private Contact contact;
 

@@ -31,10 +31,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml"})
+// @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/purchaseOrderData.xml", "/productData.xml", "/lineItemData.xml"})
 public class LineItemRepositoryTest extends BaseRepositoryTest {
 
-	private static final Long TOTAL_ROWS = 4L;
+	private static final Long TOTAL_ROWS = 15L;
 	
 	@Autowired
 	LineItemRepository lineItemRepository;

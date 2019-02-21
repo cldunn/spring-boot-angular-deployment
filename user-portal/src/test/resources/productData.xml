@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<dataset>
-	<PRODUCT ID="1" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" UPC="14" SKU="701" NAME="Papermate Pen" PRICE="11.99" DESCRIPTION="Black ballpoint pen - 20 pack" />
-	<PRODUCT ID="2" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" UPC="867" SKU="807" NAME="Stationary" PRICE="7.89" DESCRIPTION="Tablet 8X11, 4 pack" />
-	<PRODUCT ID="3" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" UPC="34" SKU="921" NAME="HP Printer" PRICE="84.29" DESCRIPTION="Ink jet printer" />
-</dataset>

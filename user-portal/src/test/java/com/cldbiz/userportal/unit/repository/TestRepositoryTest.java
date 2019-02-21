@@ -20,7 +20,7 @@ import com.cldbiz.userportal.repository.test.TestRepository;
 import com.cldbiz.userportal.unit.BaseRepositoryTest;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 
-@DatabaseSetup("/testData.xml")
+// @DatabaseSetup("/testData.xml")
 public class TestRepositoryTest extends BaseRepositoryTest {
 	@Autowired
 	TestRepository testRepository;
@@ -43,9 +43,9 @@ public class TestRepositoryTest extends BaseRepositoryTest {
 		testDto.setVarBigDecimal(BigDecimal.valueOf(240.7800));
 		testDto.setVarBool(false);
 		testDto.setVarDate(LocalDate.parse("2016-08-03"));
-		testDto.setVarTime(LocalTime.parse("06:45:00"));
+		testDto.setVarTime(LocalTime.parse("06:45:05"));
+		testDto.setVarTime(LocalTime.parse("06:45:05"));
 		testDto.setVarDttm(LocalDateTime.parse("2018-10-01T07:15:00"));
-		
 		List<Test> tests = testRepository.findByDto(testDto);
 		assertThat(tests).isNotEmpty();
 	}

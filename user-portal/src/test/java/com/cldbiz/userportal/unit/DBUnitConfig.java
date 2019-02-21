@@ -2,28 +2,12 @@ package com.cldbiz.userportal.unit;
 
 import javax.sql.DataSource;
 
-import org.dbunit.dataset.datatype.DefaultDataTypeFactory;
-import org.dbunit.dataset.datatype.IDataTypeFactory;
-import org.dbunit.ext.db2.Db2DataTypeFactory;
-import org.dbunit.ext.h2.H2DataTypeFactory;
-import org.dbunit.ext.hsqldb.HsqldbDataTypeFactory;
-import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
-import org.dbunit.ext.mysql.MySqlDataTypeFactory;
-import org.dbunit.ext.oracle.Oracle10DataTypeFactory;
-import org.dbunit.ext.postgresql.PostgresqlDataTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
-import com.cldbiz.userportal.repository.BaseRepositoryImpl;
-import com.github.springtestdbunit.bean.DatabaseConfigBean;
-import com.github.springtestdbunit.bean.DatabaseDataSourceConnectionFactoryBean;
 
 @Configuration
 @ComponentScan(basePackages = "com.cldbiz")
@@ -37,10 +21,13 @@ public class DBUnitConfig {
 	@Autowired 
 	private DataSource dataSource;
 	
-	
+	/*
+
 	@Bean
 	public DatabaseConfigBean getDatabaseConfig() {
 		DatabaseConfigBean dbCfg = new DatabaseConfigBean();
+		
+		new InsertIdentityOperation(DatabaseOperation.INSERT);
 		
 		dbCfg.setTableType(new String[] {
 			"TABLE", "VIEW"
@@ -58,6 +45,7 @@ public class DBUnitConfig {
 		dbDsConnFactory.setDatabaseConfig(getDatabaseConfig());
 		dbDsConnFactory.setDataSource(dataSource);
 		
+		
 		return dbDsConnFactory;
 	}
 	
@@ -69,7 +57,7 @@ public class DBUnitConfig {
 				break;
         	case "org.hibernate.dialect.SQLServer2012Dialect":  	
         		dataTypeFactory = new MsSqlDataTypeFactory();
-                break;
+        		break;
         	case "org.hibernate.dialect.DB2Dialect":  	
         		dataTypeFactory = new Db2DataTypeFactory();
         		break;
@@ -94,7 +82,7 @@ public class DBUnitConfig {
 		return dataTypeFactory;
 	}
 	
-	/*
+	
 	protected static IDatabaseConnection iDatabaseConnection;
 	
 	@PostConstruct

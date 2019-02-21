@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.cldbiz.userportal.repository;
 
 import java.io.Serializable;
@@ -21,10 +36,14 @@ import org.springframework.data.jpa.repository.support.QuerydslJpaPredicateExecu
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.querydsl.EntityPathResolver;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import lombok.extern.slf4j.Slf4j;
 
 /*
  * Exposes JpaRepository - PagingAndSortingRepository - CrudRepository - QueryByExampleExecutor
@@ -50,11 +69,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  long count()
  Iterable<T> findAll()
  */
-
+@Slf4j
 public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
-	
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseRepositoryImpl.class);
-
     protected final Class<T> tClass;
     
 	@PersistenceContext
@@ -92,7 +108,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 	public Optional<T> findById(ID id) {
 		return repository.findById(id);
 	}
-
+	
 	// Deletes the entity with the given id.
     @Override
     public void deleteById(ID id) {
@@ -135,7 +151,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 	public void flush() {
 		repository.flush();
 	}
-
+	
 	@Override
 	public void doSql(String sqlStr, Object... parameters) {
 		entityManager.flush();

@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<dataset>
-	<CONTACT ID="1" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Tom Anderson" EMAIL="tom.anderson@gmail.com" PHONE="(555) 123-4567" />
-	<CONTACT ID="2" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Carol Jones" EMAIL="carol.jones@gmail.com" PHONE="(555) 654-4588" />
-	<CONTACT ID="3" VERSION="0" CREATED_BY="sysGen" CREATED_DATE="2018-10-01 17:15:12.450" NAME="Alex Thurman" EMAIL="alex.thurman@gmail.com" PHONE="(555) 742-1114" />
-</dataset>

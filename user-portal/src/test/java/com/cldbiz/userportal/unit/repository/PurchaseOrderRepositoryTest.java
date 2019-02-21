@@ -43,10 +43,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/productData.xml", "/purchaseOrderData.xml", "/lineItemData.xml"})
+// @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/productData.xml", "/purchaseOrderData.xml", "/lineItemData.xml"})
 public class PurchaseOrderRepositoryTest extends BaseRepositoryTest {
 
-	private static final Long TOTAL_ROWS = 3L;
+	private static final Long TOTAL_ROWS = 9L;
 	
 	@Autowired
 	ContactRepository contactRepository;

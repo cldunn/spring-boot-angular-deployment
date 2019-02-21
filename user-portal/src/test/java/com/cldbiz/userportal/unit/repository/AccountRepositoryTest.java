@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.Contact;
@@ -36,10 +37,10 @@ import com.github.springtestdbunit.annotation.DatabaseSetup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml", "/purchaseOrderData.xml"})
+// @DatabaseSetup(value= {"/contactData.xml", "/accountData.xml", "/customerData.xml", "/invoiceData.xml", "/purchaseOrderData.xml"})
 public class AccountRepositoryTest extends BaseRepositoryTest {
 	
-	private static final Long TOTAL_ROWS = 3L;
+	private static final Long TOTAL_ROWS = 7L;
 	
 	@Autowired
 	AccountRepository accountRepository;
@@ -56,6 +57,12 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 	@Autowired
 	PurchaseOrderRepository purchaseOrderRepository;
 
+	@Test
+	public void whenStart_thenPopulateDatabase() {
+		Boolean exists = accountRepository.existsById(101L);
+		assertThat(exists).isTrue();
+	}
+	
 	@Test
 	public void whenExistsById_thenReturnTrue() {
 		log.info("whenExistsById_thenReturnTrue");

@@ -4,7 +4,7 @@
 	<springProperty scope="context" name="loggingFile" source="logging.file" defaultValue="logs/spring-boot-angular-deployment.log"/>
 	<springProperty scope="context" name="rootLogLevel" source="root.log.level" defaultValue="ERROR"/>
 	<springProperty scope="context" name="appLogLevel" source="app.log.level" defaultValue="DEBUG"/>
-	<springProperty scope="context" name="logFileSize" source="log.file.size" defaultValue="1MB"/>
+	<springProperty scope="context" name="logFileSize" source="log.file.size" defaultValue="1048576"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>

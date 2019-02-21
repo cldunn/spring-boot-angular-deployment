@@ -36,6 +36,8 @@ public @Data class Product extends AbstractDomain {
 	private String name;
 	
 	@Column
+	// TODO: Change to BigDecimal
+	// NOTE: BigDecimal(0.00).setScale(2, BigDecimal.ROUND_HALF_EVEN)
 	private Double price;
 	
 	@Column(length=4096)

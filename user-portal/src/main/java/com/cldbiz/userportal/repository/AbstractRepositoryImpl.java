@@ -18,7 +18,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-/* TODO: Consider find/searchByDto with Predicate ... parameters, permits service to customize/extend */
 public abstract class AbstractRepositoryImpl<T, D, ID> implements AbstractRepository<T, D, ID>, InitializingBean {
 
 	@PersistenceContext
