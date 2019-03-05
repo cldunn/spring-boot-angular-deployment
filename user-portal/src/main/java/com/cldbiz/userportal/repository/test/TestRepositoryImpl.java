@@ -12,13 +12,13 @@ import com.cldbiz.userportal.domain.Test;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.TestDto;
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractDaoImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class TestRepositoryImpl extends AbstractRepositoryImpl<Test, TestDto, Long> implements TestRepositoryExt {
+public class TestRepositoryImpl extends AbstractDaoImpl<Test, TestDto, Long> implements TestRepositoryExt {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestRepositoryImpl.class);
 	

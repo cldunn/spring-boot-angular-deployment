@@ -15,13 +15,13 @@ import com.cldbiz.userportal.dto.CategoryDto;
 import com.cldbiz.userportal.dto.CustomerDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.dto.ProductDto;
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractDaoImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class ProductRepositoryImpl extends AbstractRepositoryImpl<Product, ProductDto, Long> implements ProductRepositoryExt {
+public class ProductRepositoryImpl extends AbstractDaoImpl<Product, ProductDto, Long> implements ProductRepositoryExt {
 
 	@Override
 	public Boolean existsByDto(ProductDto productDto, Predicate... predicates) {

@@ -9,6 +9,7 @@ import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.domain.Sort;
 
+import com.cldbiz.userportal.dao.BaseDaoImpl;
 import com.cldbiz.userportal.domain.Account;
 import com.cldbiz.userportal.domain.WishList;
 import com.cldbiz.userportal.dto.AbstractDto;
@@ -18,12 +19,12 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-public abstract class AbstractRepositoryImpl<T, D, ID> implements AbstractRepository<T, D, ID>, InitializingBean {
+public abstract class AbstractDaoImpl<T, D, ID> extends BaseDaoImpl implements AbstractDao<T, D, ID>, InitializingBean {
 
-	@PersistenceContext
-	protected EntityManager entityManager;
+	// @PersistenceContext
+	// protected EntityManager entityManager;
 	
-	protected JPAQueryFactory jpaQueryFactory;
+	// protected JPAQueryFactory jpaQueryFactory;
 
 	@Override
 	public abstract Boolean existsByDto(D dto, Predicate... predicates);
@@ -62,8 +63,8 @@ public abstract class AbstractRepositoryImpl<T, D, ID> implements AbstractReposi
 		return sortOrder.toArray(new OrderSpecifier[sortOrder.size()]);
 	}
 	
-	@Override
-	public void afterPropertiesSet() {
-		jpaQueryFactory = new JPAQueryFactory(entityManager);
-	}
+	// @Override
+	// public void afterPropertiesSet() {
+    //		jpaQueryFactory = new JPAQueryFactory(entityManager);
+	// }
 }

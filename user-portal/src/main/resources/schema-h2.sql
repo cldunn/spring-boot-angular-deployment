@@ -5,6 +5,8 @@
 
     drop table CATEGORY_PRODUCT if exists;
 
+    drop table COMMISSION if exists;
+
     drop table CONTACT if exists;
 
     drop table CUSTOMER if exists;
@@ -26,8 +28,7 @@
     drop table WISH_LIST_PRODUCT if exists;
 
     drop sequence if exists hibernate_sequence;
-
-    create sequence hibernate_sequence start with 10000 increment by 10;
+create sequence hibernate_sequence start with 10000 increment by 10;
 
     create table ACCOUNT (
        ID bigint not null,
@@ -60,6 +61,19 @@
        CATEGORY_ID bigint not null,
         PRODUCT_ID bigint not null,
         primary key (CATEGORY_ID, PRODUCT_ID)
+    );
+
+    create table COMMISSION (
+       ID bigint not null,
+        CREATED_BY varchar(255) not null,
+        CREATED_DATE timestamp not null,
+        MAINTAINED_BY varchar(255),
+        MAINTAINED_DATE timestamp,
+        VERSION bigint,
+        ORDER_IDENTIFIER varchar(255),
+        RATE decimal(19,2),
+        USER_EMAIL varchar(255),
+        primary key (ID)
     );
 
     create table CONTACT (

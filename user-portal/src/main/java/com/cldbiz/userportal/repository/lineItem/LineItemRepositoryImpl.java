@@ -14,13 +14,13 @@ import com.cldbiz.userportal.dto.AccountDto;
 import com.cldbiz.userportal.dto.InvoiceDto;
 import com.cldbiz.userportal.dto.LineItemDto;
 import com.cldbiz.userportal.dto.ProductDto;
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractDaoImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class LineItemRepositoryImpl extends AbstractRepositoryImpl<LineItem, LineItemDto, Long> implements LineItemRepositoryExt {
+public class LineItemRepositoryImpl extends AbstractDaoImpl<LineItem, LineItemDto, Long> implements LineItemRepositoryExt {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LineItemRepositoryImpl.class);
 	

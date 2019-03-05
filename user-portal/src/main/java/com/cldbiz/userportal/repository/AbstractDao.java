@@ -5,7 +5,7 @@ import java.util.List;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 
-public interface AbstractRepository<T, D, ID> {
+public interface AbstractDao<T, D, ID> {
 
 	public abstract Boolean existsByDto(D dto, Predicate... predicates);
 	

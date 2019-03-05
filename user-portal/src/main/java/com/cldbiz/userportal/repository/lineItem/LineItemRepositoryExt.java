@@ -2,8 +2,8 @@ package com.cldbiz.userportal.repository.lineItem;
 
 import com.cldbiz.userportal.domain.LineItem;
 import com.cldbiz.userportal.dto.LineItemDto;
-import com.cldbiz.userportal.repository.AbstractRepository;
+import com.cldbiz.userportal.repository.AbstractDao;
 
-public interface LineItemRepositoryExt extends AbstractRepository<LineItem, LineItemDto, Long> {
+public interface LineItemRepositoryExt extends AbstractDao<LineItem, LineItemDto, Long> {
 
 }

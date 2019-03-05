@@ -42,5 +42,5 @@ public interface BaseRepository<T, ID extends Serializable> extends Repository<T
 	// Flushes all pending changes to the database.
 	public void flush();
 
-	public void doSql(String sqlStr, Object... parameters);
+	// public void doSql(String sqlStr, Object... parameters);
 }

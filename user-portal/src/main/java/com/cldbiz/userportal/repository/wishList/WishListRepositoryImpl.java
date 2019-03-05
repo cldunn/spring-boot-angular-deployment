@@ -7,13 +7,13 @@ import com.cldbiz.userportal.domain.QWishList;
 import com.cldbiz.userportal.domain.WishList;
 import com.cldbiz.userportal.dto.ProductDto;
 import com.cldbiz.userportal.dto.WishListDto;
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractDaoImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.PathBuilder;
 
-public class WishListRepositoryImpl extends AbstractRepositoryImpl<WishList, WishListDto, Long> implements WishListRepositoryExt {
+public class WishListRepositoryImpl extends AbstractDaoImpl<WishList, WishListDto, Long> implements WishListRepositoryExt {
 	private WishListDto emptyWishListDto = new WishListDto();
 	
 	@Override

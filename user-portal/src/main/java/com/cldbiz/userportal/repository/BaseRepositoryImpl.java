@@ -23,24 +23,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.support.CrudMethodMetadata;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation;
-import org.springframework.data.jpa.repository.support.QuerydslJpaPredicateExecutor;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.data.querydsl.EntityPathResolver;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.stereotype.Repository;
 
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.extern.slf4j.Slf4j;
@@ -73,23 +59,23 @@ import lombok.extern.slf4j.Slf4j;
 public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
     protected final Class<T> tClass;
     
-	@PersistenceContext
-	protected EntityManager entityManager;
+	// @PersistenceContext
+	// protected EntityManager entityManager;
 	
-	protected JPAQueryFactory jpaQueryFactory;
+	// protected JPAQueryFactory jpaQueryFactory;
 	
 	protected SimpleJpaRepository<T, ID> repository;
 	
     public BaseRepositoryImpl(JpaEntityInformation<T, ID> entityMetadata, EntityManager entityManager) {
 	    super(entityMetadata, entityManager);
 		
-    	this.entityManager = entityManager;
+    	// this.entityManager = entityManager;
     	this.tClass = entityMetadata.getJavaType();
     	
     	JpaEntityInformation<T, ID> entityInfo = new JpaMetamodelEntityInformation<T, ID>(this.tClass, entityManager.getMetamodel());
 		repository = new SimpleJpaRepository<T, ID>(entityInfo, entityManager);
     	
-		jpaQueryFactory = new JPAQueryFactory(entityManager);
+		// jpaQueryFactory = new JPAQueryFactory(entityManager);
     }
 
     // Returns whether an entity with the given id exists.
@@ -152,6 +138,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		repository.flush();
 	}
 	
+	/*
 	@Override
 	public void doSql(String sqlStr, Object... parameters) {
 		entityManager.flush();
@@ -164,4 +151,5 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 
 		query.executeUpdate();
 	}
+	*/
 }

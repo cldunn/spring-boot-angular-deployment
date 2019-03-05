@@ -5,7 +5,7 @@ import java.util.List;
 import com.cldbiz.userportal.domain.Contact;
 import com.cldbiz.userportal.domain.QContact;
 import com.cldbiz.userportal.dto.ContactDto;
-import com.cldbiz.userportal.repository.AbstractRepositoryImpl;
+import com.cldbiz.userportal.repository.AbstractDaoImpl;
 import com.cldbiz.userportal.repository.DynBooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -14,7 +14,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ContactRepositoryImpl extends AbstractRepositoryImpl<Contact, ContactDto, Long> implements ContactRepositoryExt {
+public class ContactRepositoryImpl extends AbstractDaoImpl<Contact, ContactDto, Long> implements ContactRepositoryExt {
 
 	@Override
 	public Boolean existsByDto(ContactDto contactDto, Predicate... predicates) {
